@@ -1,18 +1,29 @@
 extends "res://addons/gd-plug/plug.gd"
 
+# Misc: useful tools?
+# https://github.com/gdquest-demos/godot-shaders <-- seems like a popular shader library
+# godot-orchestrator <-- seems insanely useful! but not sure how easy installation is gonna be
+
+
 func _plugging():
-    # Declare your plugins in here with plug(src, args)
-    # By default, only "addons/" directory will be installed
-    # Proudly made by me too!
-    # plug("imjp94/UIDesignTool")
-    # plug("imjp94/gd-YAFSM")
+		# Resource generation
+		plug("Arnklit/Waterways")
+		plug("Zylann/godot_tree_generator_plugin")
 
-    # Tools
-    # plug("fenix-hub/godot-engine.github-integration")
-    plug("EricEzaM/godot-color-palette")
-    # Unit test
-    # plug("bitwes/Gut")
+		# Behaviour trees, etc.
+		plug("limbonaut/limboai")
 
-    # By Zylann
-    # plug("Zylann/godot_scatter_plugin")
-    # plug("Zylann/godot_heightmap_plugin")
+		# Level builders
+		plug("blackears/cyclopsLevelBuilder")
+		# Or use tiled? https://www.mapeditor.org/ https://github.com/vnen/godot-tiled-importer
+
+		# Testing
+		plug("MikeSchulze/gdUnit4")
+
+		# Misc
+		plug("Ericdowney/SignalVisualizer")
+
+
+
+		# If we ever need multiplayer functionality
+		# plug("AndreMicheletti/godot-agones-sdk")

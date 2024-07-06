@@ -5,5 +5,3 @@
 [node name="ProjectLevelLoader" type="Node"]
 script = ExtResource("1_g5xnr")
 auto_load = false
-files = Array[String](["res://scenes/GameScene/Levels/Level1.tscn", "res://scenes/GameScene/Levels/Level1_old.tscn", "res://scenes/GameScene/Levels/Level2.tscn", "res://scenes/GameScene/Levels/Level3.tscn"])
-directory = "res://scenes/GameScene/Levels"

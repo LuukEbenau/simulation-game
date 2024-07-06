@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Sacation Simulation Game"
+config/version="0.1"
 run/main_scene="res://scenes/Menus/MainMenu/MainMenu.tscn"
 config/features=PackedStringArray("4.2")
 config/icon="res://icon.png"
@@ -31,9 +32,14 @@ window/size/viewport_height=720
 
 project/assembly_name="Game Template"
 
+[editor]
+
+version_control/plugin_name="GitPlugin"
+version_control/autoload_on_startup=true
+
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/maaacks_game_template/plugin.cfg")
+enabled=PackedStringArray("res://addons/gd-plug-ui/plugin.cfg", "res://addons/maaacks_game_template/plugin.cfg")
 
 [gui]
 
