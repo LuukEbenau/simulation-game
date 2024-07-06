@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://d2ycscfevkmfr"]
+
+[ext_resource type="Script" path="res://addons/maaacks_game_template/extras/scripts/LevelLoader.gd" id="1_g5xnr"]
+
+[node name="ProjectLevelLoader" type="Node"]
+script = ExtResource("1_g5xnr")
+auto_load = false
+files = Array[String](["res://scenes/GameScene/Levels/Level1.tscn", "res://scenes/GameScene/Levels/Level1_old.tscn", "res://scenes/GameScene/Levels/Level2.tscn", "res://scenes/GameScene/Levels/Level3.tscn"])
+directory = "res://scenes/GameScene/Levels"

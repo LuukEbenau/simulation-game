@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://djrvliidakqvm"]
+
+[ext_resource type="PackedScene" uid="uid://kr2gpaqmip54" path="res://assets/buildings/grass.blend" id="1_2fm4h"]
+[ext_resource type="PackedScene" uid="uid://bs0ilcslgtmej" path="res://assets/buildings/house.blend" id="2_ane5p"]
+[ext_resource type="PackedScene" uid="uid://dyxy1khb2gub7" path="res://assets/buildings/road.blend" id="3_nr4k3"]
+
+[node name="MeshLibrary" type="Node3D"]
+
+[node name="Grass" parent="." instance=ExtResource("1_2fm4h")]
+
+[node name="House2" parent="." instance=ExtResource("2_ane5p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
+
+[node name="road" parent="." instance=ExtResource("3_nr4k3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)

@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://d1qsv4j46j40e"]
+
+[ext_resource type="Script" path="res://scripts/units/servant.gd" id="1_lrejn"]
+[ext_resource type="PackedScene" uid="uid://byltkfnh41o3r" path="res://assets/units/servant.blend" id="2_1yp1g"]
+
+[node name="Servant" type="Node3D"]
+script = ExtResource("1_lrejn")
+
+[node name="servant" parent="." instance=ExtResource("2_1yp1g")]
