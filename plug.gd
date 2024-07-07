@@ -7,8 +7,7 @@ extends "res://addons/gd-plug/plug.gd"
 
 func _plugging():
 		# Resource generation
-		plug("Arnklit/Waterways")
-		plug("Zylann/godot_tree_generator_plugin")
+		#plug("Tshmofen/waterways-net")
 
 		# Behaviour trees, etc.
 		plug("limbonaut/limboai")
@@ -18,10 +17,10 @@ func _plugging():
 		# Or use tiled? https://www.mapeditor.org/ https://github.com/vnen/godot-tiled-importer
 
 		# Testing
-		plug("MikeSchulze/gdUnit4")
+		#plug("MikeSchulze/gdUnit4")
 
 		# Misc
-		plug("Ericdowney/SignalVisualizer")
+		#plug("Ericdowney/SignalVisualizer")
 
 
 

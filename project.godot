@@ -10,10 +10,11 @@ config_version=5
 
 [application]
 
-config/name="Sacation Simulation Game"
+config/name="Sacation fantastic Simulation Game"
 config/version="0.1"
+config/tags=PackedStringArray("3d")
 run/main_scene="res://scenes/Menus/MainMenu/MainMenu.tscn"
-config/features=PackedStringArray("4.2")
+config/features=PackedStringArray("4.2", "C#")
 config/icon="res://icon.png"
 
 [autoload]
@@ -39,7 +40,7 @@ version_control/autoload_on_startup=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gd-plug-ui/plugin.cfg", "res://addons/maaacks_game_template/plugin.cfg")
+enabled=PackedStringArray("res://addons/gd-plug-ui/plugin.cfg", "res://addons/maaacks_game_template/plugin.cfg", "res://addons/waterways_net/plugin.cfg", "res://addons/zylann.hterrain/plugin.cfg")
 
 [gui]
 

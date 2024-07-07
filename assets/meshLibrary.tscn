@@ -1,8 +1,15 @@
-[gd_scene load_steps=4 format=3 uid="uid://djrvliidakqvm"]
+[gd_scene load_steps=11 format=3 uid="uid://djrvliidakqvm"]
 
 [ext_resource type="PackedScene" uid="uid://kr2gpaqmip54" path="res://assets/buildings/grass.blend" id="1_2fm4h"]
 [ext_resource type="PackedScene" uid="uid://bs0ilcslgtmej" path="res://assets/buildings/house.blend" id="2_ane5p"]
 [ext_resource type="PackedScene" uid="uid://dyxy1khb2gub7" path="res://assets/buildings/road.blend" id="3_nr4k3"]
+[ext_resource type="PackedScene" uid="uid://bvx0x5dtj6jh5" path="res://assets/buildings/tree.blend" id="4_5061p"]
+[ext_resource type="PackedScene" uid="uid://c88tae8mj4l7r" path="res://assets/buildings/woodpile.blend" id="5_l3jao"]
+[ext_resource type="PackedScene" uid="uid://b8ue5gm3vf18u" path="res://assets/buildings/woodpile_100.blend" id="6_xyv5y"]
+[ext_resource type="PackedScene" uid="uid://egc5mm4mbgbk" path="res://assets/buildings/woodpile_20.blend" id="7_nqqxu"]
+[ext_resource type="PackedScene" uid="uid://bh5atsvq8mkoh" path="res://assets/buildings/woodpile_40.blend" id="8_eephb"]
+[ext_resource type="PackedScene" uid="uid://b73shehayasri" path="res://assets/buildings/woodpile_60.blend" id="9_ittys"]
+[ext_resource type="PackedScene" uid="uid://b1i7ik2rerfk1" path="res://assets/buildings/woodpile_80.blend" id="10_kfrj8"]
 
 [node name="MeshLibrary" type="Node3D"]
 
@@ -13,3 +20,24 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
 
 [node name="road" parent="." instance=ExtResource("3_nr4k3")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+
+[node name="tree" parent="." instance=ExtResource("4_5061p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+
+[node name="woodpile2" parent="." instance=ExtResource("5_l3jao")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
+
+[node name="woodpile_100" parent="." instance=ExtResource("6_xyv5y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
+
+[node name="woodpile_202" parent="." instance=ExtResource("7_nqqxu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12)
+
+[node name="woodpile_402" parent="." instance=ExtResource("8_eephb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 14)
+
+[node name="woodpile_602" parent="." instance=ExtResource("9_ittys")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 16)
+
+[node name="woodpile_802" parent="." instance=ExtResource("10_kfrj8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 18)
