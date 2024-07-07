@@ -1,10 +1,11 @@
-[gd_scene load_steps=20 format=3 uid="uid://1pdv76fc2dve"]
+[gd_scene load_steps=22 format=3 uid="uid://1pdv76fc2dve"]
 
 [ext_resource type="Script" path="res://scripts/MapGrid.gd" id="1_hlywx"]
 [ext_resource type="MeshLibrary" uid="uid://b5j2pronxwe7b" path="res://meshlibrary.tres" id="1_hph7t"]
 [ext_resource type="Script" path="res://scripts/GameManager.gd" id="4_hvygn"]
 [ext_resource type="Script" path="res://scripts/RaycastVisualizer.gd" id="5_7rxv2"]
 [ext_resource type="Script" path="res://addons/zylann.hterrain/hterrain.gd" id="5_vpyhk"]
+[ext_resource type="Script" path="res://scripts/map/MapGridManager.gd" id="5_vyfpq"]
 [ext_resource type="Resource" path="res://assets/TerrainData/data.hterrain" id="6_j82wu"]
 [ext_resource type="Script" path="res://addons/zylann.hterrain/hterrain_texture_set.gd" id="7_jcitx"]
 [ext_resource type="Texture2D" uid="uid://qoa16dqhiq3h" path="res://scenes/GameScene/Levels/Level1_slot0_albedo_bump.png" id="8_5m7q0"]
@@ -15,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://6jmdwj3vn6m0" path="res://addons/zylann.hterrain/tools/icons/icon_detail_layer_node.svg" id="13_tsads"]
 [ext_resource type="Script" path="res://addons/waterways_net/RiverManager.cs" id="14_w7lxc"]
 [ext_resource type="Texture2D" uid="uid://b85tlq8wcklbo" path="res://addons/waterways_net/Textures/water_normal_bump.png" id="15_845nl"]
+[ext_resource type="Script" path="res://scenes/GameScene/Levels/TerrainGradientVisualizer.gd" id="15_sogxl"]
 [ext_resource type="Script" path="res://addons/waterways_net/Data/RiverShaderSettings.cs" id="16_3blqo"]
 
 [sub_resource type="Resource" id="Resource_q1l88"]
@@ -78,7 +80,7 @@ line_color = Color(0.876848, 0.000388126, 0.827348, 1)
 [node name="MeshInstance3D" type="MeshInstance3D" parent="MapGrid/RaycastVisualizer"]
 
 [node name="CamaraWrap" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.258819, 0.965926, 0, -0.965926, 0.258819, 4, 30, 14)
+transform = Transform3D(1, 0, 0, 0, 0.258819, 0.965926, 0, -0.965926, 0.258819, 4, 250, 14)
 
 [node name="Camera3D" type="Camera3D" parent="CamaraWrap"]
 transform = Transform3D(1, -1.49012e-08, 1.49012e-08, 1.49012e-08, 1, -2.98023e-08, -1.49012e-08, -2.98023e-08, 1, 0, 0, 0)
@@ -89,7 +91,7 @@ transform = Transform3D(1, -1.49012e-08, 1.49012e-08, 1.49012e-08, 1, -2.98023e-
 script = ExtResource("4_hvygn")
 gridmap = NodePath("../MapGrid")
 
-[node name="HTerrain" type="Node3D" parent="."]
+[node name="Map" type="Node3D" parent="."]
 script = ExtResource("5_vpyhk")
 map_scale = Vector3(0.5, 0.5, 0.5)
 centered = true
@@ -109,7 +111,7 @@ shader_params/u_depth_blending = true
 shader_params/u_triplanar = null
 shader_params/u_tile_reduction = null
 
-[node name="HTerrainDetailLayer" type="Node3D" parent="HTerrain"]
+[node name="HTerrainDetailLayer" type="Node3D" parent="Map"]
 script = ExtResource("12_aveog")
 shader_params/u_globalmap_tint_bottom = null
 shader_params/u_globalmap_tint_top = null
@@ -117,6 +119,13 @@ shader_params/u_bottom_ao = null
 shader_params/u_instance_scale = null
 shader_params/u_roughness = null
 metadata/_editor_icon = ExtResource("13_tsads")
+
+[node name="MapGridManager" type="Node3D" parent="Map" node_paths=PackedStringArray("terrain")]
+script = ExtResource("5_vyfpq")
+terrain = NodePath("..")
+
+[node name="TerrainGradientVisualizer" type="Node3D" parent="Map/MapGridManager"]
+script = ExtResource("15_sogxl")
 
 [node name="RiverManager" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -87.4372, -0.5, 125.77)
