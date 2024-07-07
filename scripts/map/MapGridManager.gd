@@ -4,6 +4,11 @@ extends Node3D
 #region initialization
 
 @export var terrain: Node3D
+@export var show_slope_gradients: bool = false:
+    set(value):
+        show_slope_gradients = value
+        if gradient_visualizer:
+            gradient_visualizer.show_slope_gradients = value
 
 @onready var gradient_visualizer = $TerrainGradientVisualizer
 
@@ -17,17 +22,64 @@ var directions = [
 var terrainGradients:Dictionary
 
 #endregion initialization
+const GRADIENTS_FILE = "user://terrain_gradients.json"
+
+func save_terrain_gradients() -> void:
+    var file = FileAccess.open(GRADIENTS_FILE, FileAccess.WRITE)
+    if file:
+        var json_string = JSON.stringify(terrainGradients)
+        file.store_string(json_string)
+        file.close()
+    else:
+        print("Failed to save terrain gradients")
+
+func load_terrain_gradients() -> bool:
+    if FileAccess.file_exists(GRADIENTS_FILE):
+        var file = FileAccess.open(GRADIENTS_FILE, FileAccess.READ)
+        if file:
+            var json_string = file.get_as_text()
+            file.close()
+            var json = JSON.new()
+            var error = json.parse(json_string)
+            if error == OK:
+                var data = json.get_data()
+                if data is Dictionary:
+                    terrainGradients = {}
+                    for key in data:
+                        var keyVec = parse_vector2i(key) # please transform this key in vector2i
+                        #print("%s has type %s and %s, %s after transform. Value is %s " % [key, type_string(typeof(key)), keyVec, type_string(typeof(keyVec)), data[key]])
+                        terrainGradients[keyVec] = data[key]
+
+                    return true
+    return false
+
+func parse_vector2i(key: String) -> Vector2i:
+    # Remove the parentheses and split by comma
+    var cleaned_key = key.replace("(", "").replace(")", "")
+    var components = cleaned_key.split(",")
+    if components.size() == 2:
+        var x = components[0].to_int()
+        var y = components[1].to_int()
+        return Vector2i(x, y)
+    return Vector2i() # Return a default Vector2i if parsing fails
 
 #region node events
 func _ready():
     var grid: Dictionary = map_terrain(terrain)
     print_terrain_info(grid)
 
-    terrainGradients = calculate_terrain_gradients(grid)
+    if load_terrain_gradients():
+        print("Loaded terrain gradients from file")
+    else:
+        print("Calculating terrain gradients...")
+        terrainGradients = calculate_terrain_gradients(grid)
+        save_terrain_gradients()
+        print("Terrain gradients calculated and saved")
 
     gradient_visualizer.position = Vector3(terrain.global_transform.origin.x,gradient_visualizer.position.y, terrain.global_transform.origin.z)
-    #gradient_visualizer.scale = Vector2(your_scale_factor, your_scale_factor)
+
     gradient_visualizer.set_gradients(terrainGradients, Vector2(cell_size.x, cell_size.y))
+    gradient_visualizer.show_slope_gradients = show_slope_gradients
 
 #endregion
 
