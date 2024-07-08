@@ -1,5 +1,5 @@
 class_name GameManager
-extends Node
+extends Node3D
 
 @export var gridmap:GridMapMain
 #var builder_scene = preload("res://assets/units/unit.tscn")

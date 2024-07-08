@@ -8,8 +8,8 @@ extends Node3D
 var terrainGradients: Dictionary
 var cellSize: Vector2
 var colorRamp: Gradient
-var visualHeight: float = 20.0
-var transparency: float = 0.3
+var visualHeight: float = 1.15
+var transparency: float = 0.1
 
 func _ready():
     colorRamp = create_color_ramp()

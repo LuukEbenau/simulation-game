@@ -133,9 +133,21 @@ script = ExtResource("4_jbmhn")
 transform = Transform3D(1, 0, 0, 0, 0.173648, 0.984808, 0, -0.984808, 0.173648, 0, 0, 0)
 current = true
 
-[node name="GameManager" type="Node" parent="." node_paths=PackedStringArray("gridmap")]
+[node name="GameManager" type="Node3D" parent="." node_paths=PackedStringArray("gridmap")]
 script = ExtResource("4_hvygn")
 gridmap = NodePath("../MapGrid")
+
+[node name="MapManager" type="Node3D" parent="GameManager" node_paths=PackedStringArray("terrain")]
+script = ExtResource("5_vyfpq")
+terrain = NodePath("../../Map")
+
+[node name="TerrainGradientVisualizer" type="Node3D" parent="GameManager/MapManager"]
+script = ExtResource("15_sogxl")
+
+[node name="TerrainMapper" type="Node3D" parent="GameManager/MapManager"]
+script = ExtResource("16_8balh")
+
+[node name="BuildingManager" type="Node3D" parent="GameManager/MapManager"]
 
 [node name="Map" type="Node3D" parent="."]
 script = ExtResource("5_vpyhk")
@@ -165,16 +177,6 @@ shader_params/u_bottom_ao = null
 shader_params/u_instance_scale = null
 shader_params/u_roughness = null
 metadata/_editor_icon = ExtResource("13_tsads")
-
-[node name="MapManager" type="Node3D" parent="Map" node_paths=PackedStringArray("terrain")]
-script = ExtResource("5_vyfpq")
-terrain = NodePath("..")
-
-[node name="TerrainGradientVisualizer" type="Node3D" parent="Map/MapManager"]
-script = ExtResource("15_sogxl")
-
-[node name="TerrainMapper" type="Node3D" parent="Map/MapManager"]
-script = ExtResource("16_8balh")
 
 [node name="RiverManager" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -87.4372, -0.5, 125.77)
