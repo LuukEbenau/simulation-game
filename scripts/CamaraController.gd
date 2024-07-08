@@ -1,6 +1,8 @@
 extends Node3D
 
-@export var move_speed : float = 30.0
+@export var move_speed : float = 75.0
+var move_speed_dynamic: float = 75.0
+
 @export var zoom_speed : float = 5
 @export var min_zoom : float = 9.0
 @export var max_zoom : float = 150.0
@@ -31,27 +33,32 @@ func _process(delta):
     var move_dir = Vector3.ZERO
 
     # Check if mouse is near the borders
-    if mouse_pos.x < border_threshold:
+    if mouse_pos.x < border_threshold or Input.is_action_pressed("moveCameraLeft"):
         move_dir.x -= 1
-    elif mouse_pos.x > viewport_size.x - border_threshold:
+    elif mouse_pos.x > viewport_size.x - border_threshold or Input.is_action_pressed("moveCameraRight"):
         move_dir.x += 1
 
-    if mouse_pos.y < border_threshold:
+    if mouse_pos.y < border_threshold or Input.is_action_pressed("moveCameraTop"):
         move_dir.z -= 1
-    elif mouse_pos.y > viewport_size.y - border_threshold:
+    elif mouse_pos.y > viewport_size.y - border_threshold or Input.is_action_pressed("moveCameraBottom"):
         move_dir.z += 1
 
     # Normalize and apply movement
-    if move_dir != Vector3.ZERO:
-        move_dir = move_dir.normalized()
-        global_translate(move_dir * move_speed * delta)
+    #move_screen(move_dir)
+    move_screen(move_dir,delta)
+
+func move_screen(dir:Vector3, delta:float = 1):
+    if dir != Vector3.ZERO:
+        dir = dir.normalized()
+        global_translate(dir * move_speed_dynamic * delta)
 
 func _input(event):
-    if event is InputEventMouseButton:
-        if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-            zoom_camera(-1)
-        elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-            zoom_camera(1)
+    if event.is_action_pressed("zoomOutCamera"):
+        zoom_camera(-1)
+    elif event.is_action_pressed("zoomInCamera"):
+        zoom_camera(1)
+
+
 
 func zoom_camera(direction):
     if not camera or not map:
@@ -85,6 +92,8 @@ func update_camera_angle():
 
     var percent_zoom = current_zoom / zoom_range
     percent_zoom = clamp(percent_zoom, 0, 1)
+
+    move_speed_dynamic = 5 + move_speed * percent_zoom # scale speed with zoom level
 
     var eased_percent = ease(1 - percent_zoom, 3)
     var target_angle = lerp(min_angle, max_angle, 1 - eased_percent)
