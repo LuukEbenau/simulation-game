@@ -14,7 +14,7 @@ public partial class TerrainMapper : Node3D
     private string MAPDATA_FILE;
     private float raycastStartHeight = 50.0f;
     private float raycastLength = 100.0f;
-    private Vector2I[] directions = new Vector2I[]
+    public Vector2I[] directions = new Vector2I[]
     {
     new Vector2I(1, 0), new Vector2I(-1, 0), new Vector2I(0, 1), new Vector2I(0, -1)
     };
@@ -23,6 +23,8 @@ public partial class TerrainMapper : Node3D
     {
         MAPDATA_FILE = $"user://{currentMap}_data.json";
     }
+
+
 
     public Dictionary<Vector2I, MapDataItem> LoadMapdata(Node3D terrain, Vector2I cellSize)
     {
@@ -119,11 +121,11 @@ public partial class TerrainMapper : Node3D
         return slopeGradients;
     }
 
-    private float GetCellSlope(Vector2I pos, Vector2I cellSize)
+    private float GetCellSlope(Vector2 pos, Vector2 cellSize)
     {
         var h1 = CheckHeightAtPosition(pos);
-        var h2 = CheckHeightAtPosition(pos + new Vector2I(cellSize.X, 0));
-        var h3 = CheckHeightAtPosition(pos + new Vector2I(0, cellSize.Y));
+        var h2 = CheckHeightAtPosition(pos + new Vector2(cellSize.X, 0));
+        var h3 = CheckHeightAtPosition(pos + new Vector2(0, cellSize.Y));
         var h4 = CheckHeightAtPosition(pos + cellSize);
 
         var slopeX1 = Math.Abs((h2 - h1) / cellSize.X);
@@ -138,7 +140,7 @@ public partial class TerrainMapper : Node3D
         return angle;
     }
 
-    private float CheckHeightAtPosition(Vector2I pos)
+    private float CheckHeightAtPosition(Vector2 pos)
     {
         var spaceState = GetWorld3D().DirectSpaceState;
         var start = new Vector3(pos.X, raycastStartHeight, pos.Y);
@@ -198,19 +200,6 @@ public partial class TerrainMapper : Node3D
         return result.Count > 0;
     }
 
-    //private Vector2I ParseVector2I(string key)
-    //{
-    //    var cleanedKey = key.Replace("(", "").Replace(")", "");
-    //    var components = cleanedKey.Split(',');
-    //    if (components.Length == 2)
-    //    {
-    //        var x = int.Parse(components[0]);
-    //        var y = int.Parse(components[1]);
-    //        return new Vector2I(x, y);
-    //    }
-    //    return new Vector2I();
-    //}
-
     private Vector2 GetTerrainSize(Dictionary<Vector2I, MapDataItem> grid, Vector2I cellSize)
     {
         var minX = float.PositiveInfinity;
@@ -237,4 +226,3 @@ public partial class TerrainMapper : Node3D
         GD.Print($"Approximate area: {size.X * size.Y} square units");
     }
 }
-//}

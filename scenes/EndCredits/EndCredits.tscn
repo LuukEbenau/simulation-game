@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://dgdf7sv3ppi33"]
+[gd_scene load_steps=6 format=3 uid="uid://dgdf7sv3ppi33"]
 
-[ext_resource type="PackedScene" path="res://scenes/Credits/Credits.tscn" id="1_h2fy7"]
+[ext_resource type="PackedScene" uid="uid://clabvuaem7bsx" path="res://scenes/Credits/Credits.tscn" id="1_h2fy7"]
 [ext_resource type="Script" path="res://scenes/EndCredits/EndCredits.gd" id="2_aiyqd"]
-[ext_resource type="PackedScene" path="res://addons/maaacks_game_template/base/scenes/MusicPlayers/BackgroundMusicPlayer.tscn" id="3_liyoa"]
+[ext_resource type="PackedScene" uid="uid://bkcsjsk2ciff" path="res://addons/maaacks_game_template/base/scenes/MusicPlayers/BackgroundMusicPlayer.tscn" id="3_liyoa"]
+[ext_resource type="AudioStream" uid="uid://b14ywbhr0c6sd" path="res://assets/music/mainmenu.mp3" id="4_gt7rm"]
 [ext_resource type="Script" path="res://addons/maaacks_game_template/base/scripts/CaptureFocus.gd" id="4_mf17t"]
 
 [node name="EndCredits" instance=ExtResource("1_h2fy7")]
@@ -10,6 +11,7 @@ script = ExtResource("2_aiyqd")
 main_menu_scene = "res://scenes/Menus/MainMenu/MainMenuWithAnimations.tscn"
 
 [node name="BackgroundMusicPlayer" parent="." index="0" instance=ExtResource("3_liyoa")]
+stream = ExtResource("4_gt7rm")
 
 [node name="BackgroundColor" type="ColorRect" parent="." index="1"]
 layout_mode = 1
@@ -32,6 +34,21 @@ stretch_mode = 5
 
 [node name="ScrollContainer" parent="." index="3"]
 scroll_vertical = 0
+
+[node name="CreditsLabel" parent="ScrollContainer/VBoxContainer" index="1"]
+text = "[center][font_size=48]Collaborators[/font_size]
+[url=https://www.enikoagotai.com/]Enikő Ágotai | Designer[/url]
+[font_size=48]Godot Simulation Game[/font_size]
+Author: [url=https://github.com/LuukEbenau]Luuk Ebenau | Main Developer[/url]
+
+[font_size=48]Tools[/font_size]
+Thanks to the community of Godot for providing their Engine!
+
+[font_size=48]Plugins[/font_size]
+- Maaacks Game Template: providing a foundation for the game layout of menu's
+- Waterways.net: realistic water dynamics
+- Zylann Hterrain: terain designing tooling
+[/center]"
 
 [node name="CenterContainer" type="CenterContainer" parent="." index="4"]
 layout_mode = 0

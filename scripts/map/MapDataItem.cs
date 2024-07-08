@@ -10,5 +10,10 @@ namespace GameTemplate.scripts.map
     public class MapDataItem
     {
         public float Slope { get; set; }
+
+        public override string ToString()
+        {
+            return "{\"Slope\":"+Slope+"}";
+        }
     }
 }

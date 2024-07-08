@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dbxq20lxewlf1"]
+[gd_scene load_steps=19 format=3 uid="uid://dbxq20lxewlf1"]
 
 [ext_resource type="Script" path="res://scenes/GameScene/GameUI.gd" id="1_xquw8"]
 [ext_resource type="PackedScene" uid="uid://bedjg8boij6ji" path="res://scenes/WinScreen/WinScreen.tscn" id="2_gkmdf"]
@@ -7,9 +7,33 @@
 [ext_resource type="PackedScene" uid="uid://cd86c2axyabh3" path="res://scenes/Menus/PauseMenu/PauseMenu.tscn" id="5_86gef"]
 [ext_resource type="Script" path="res://addons/maaacks_game_template/extras/scripts/LevelLoader.gd" id="6_y03ga"]
 [ext_resource type="PackedScene" uid="uid://bkcsjsk2ciff" path="res://addons/maaacks_game_template/base/scenes/MusicPlayers/BackgroundMusicPlayer.tscn" id="7_aibl4"]
+[ext_resource type="AudioStream" uid="uid://drdqx4w3blirs" path="res://assets/music/gameplaylist/02.mp3" id="8_7ecdp"]
 [ext_resource type="PackedScene" uid="uid://cd0jbh4metflb" path="res://addons/maaacks_game_template/base/scenes/LoadingScreen/LoadingScreen.tscn" id="8_elxsf"]
 [ext_resource type="Script" path="res://scenes/GameScene/ConfigurableSubViewport.gd" id="9_ba104"]
+[ext_resource type="AudioStream" uid="uid://vtm7ddd7njat" path="res://assets/music/gameplaylist/04.mp3" id="9_k5wkp"]
+[ext_resource type="AudioStream" uid="uid://e848gs3muuqy" path="res://assets/music/gameplaylist/08.mp3" id="10_4a65m"]
 [ext_resource type="Script" path="res://scenes/GameScene/InputDisplayLabel.gd" id="10_yni8k"]
+[ext_resource type="AudioStream" uid="uid://y5x3ty4sy6ay" path="res://assets/music/gameplaylist/09.mp3" id="11_p3530"]
+[ext_resource type="AudioStream" uid="uid://deuw17lxpictn" path="res://assets/music/gameplaylist/10.mp3" id="12_1e05h"]
+[ext_resource type="AudioStream" uid="uid://dcm815sntmrmo" path="res://assets/music/gameplaylist/11.mp3" id="13_oj11k"]
+[ext_resource type="AudioStream" uid="uid://bveua0ua6smxe" path="res://assets/music/generated_gameplaylist/01_flutesong.mp3" id="14_kciar"]
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_sv60v"]
+streams_count = 7
+stream_0/stream = ExtResource("8_7ecdp")
+stream_0/weight = 1.0
+stream_1/stream = ExtResource("9_k5wkp")
+stream_1/weight = 1.0
+stream_2/stream = ExtResource("10_4a65m")
+stream_2/weight = 1.0
+stream_3/stream = ExtResource("11_p3530")
+stream_3/weight = 1.0
+stream_4/stream = ExtResource("12_1e05h")
+stream_4/weight = 1.0
+stream_5/stream = ExtResource("13_oj11k")
+stream_5/weight = 1.0
+stream_6/stream = ExtResource("14_kciar")
+stream_6/weight = 1.0
 
 [node name="GameUI" type="Control"]
 layout_mode = 3
@@ -29,10 +53,12 @@ pause_menu_packed = ExtResource("5_86gef")
 [node name="LevelLoader" type="Node" parent="." node_paths=PackedStringArray("level_container")]
 script = ExtResource("6_y03ga")
 level_container = NodePath("../ViewportContainer/ConfigurableSubViewport")
-files = Array[String](["res://scenes/GameScene/Levels/Level1.tscn", "res://scenes/GameScene/Levels/Level1_old.tscn", "res://scenes/GameScene/Levels/Level2.tscn", "res://scenes/GameScene/Levels/Level3.tscn"])
+files = Array[String](["res://scenes/GameScene/Levels/Level1.tscn"])
 directory = "res://scenes/GameScene/Levels"
 
 [node name="BackgroundMusicPlayer" parent="." instance=ExtResource("7_aibl4")]
+stream = SubResource("AudioStreamRandomizer_sv60v")
+autoplay = false
 
 [node name="LoadingScreen" parent="." instance=ExtResource("8_elxsf")]
 visible = false
