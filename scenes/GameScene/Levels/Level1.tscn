@@ -173,8 +173,9 @@ mesh = SubResource("ArrayMesh_iovt6")
 metadata/BaseMeshGenerator = true
 
 [node name="StaticBody3D" type="StaticBody3D" parent="RiverManagerMesh"]
-collision_layer = 513
-collision_mask = 513
+collision_layer = 515
+collision_mask = 515
+collision_priority = 20.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RiverManagerMesh/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_h331y")

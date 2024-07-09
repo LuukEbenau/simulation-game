@@ -7,13 +7,16 @@ using System.Linq;
 public partial class WorldMapManager : Node3D
 {
     [Export]
-    public Vector2I CellSize { get; set; } = new Vector2I(3, 3);
+    public Vector2I CellSize { get; set; } = new Vector2I(4, 4);
 
     [Export]
     public Node3D Terrain { get; set; }
 
     [Export]
     public StaticBody3D RiverCollider { get; set; }
+
+    [Export]
+    public bool MapPropertiesCacheEnabled { get; set; } = true;
 
 
     [Export]
@@ -60,7 +63,7 @@ public partial class WorldMapManager : Node3D
         GradientVisualizer = GetNode<TerrainGradientVisualizer>("TerrainGradientVisualizer");
         TerrainMapper = GetNode<TerrainMapper>("TerrainMapper");
 
-        MapData = TerrainMapper.LoadMapdata(Terrain, CellSize);
+        MapData = TerrainMapper.LoadMapdata(Terrain, CellSize, this.MapPropertiesCacheEnabled);
 
         // Initialize gradient
         GradientVisualizer.Position = new Vector3(

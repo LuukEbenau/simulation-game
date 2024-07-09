@@ -39,7 +39,7 @@ public partial class BuildingManager : Node3D
             To = to,
             CollideWithAreas = true,
             CollideWithBodies = true,
-            CollisionMask = Globals.CollisionTypeMap[CollisionType.BUILDING]
+            CollisionMask = Globals.CollisionTypeMap[CollisionType.WORLDMAPPING]
         };
 
         var result = spaceState.IntersectRay(query);
@@ -62,37 +62,44 @@ public partial class BuildingManager : Node3D
             if (collider.AsGodotObject() != null) {
                 if (collider.AsGodotObject() is Node3D colliderNode)
                 {
-                    if (colliderNode.Name == MapManager.Terrain.Name)
+                    //if (colliderNode.Name == MapManager.Terrain.Name)
+                    //{
+                    var cell = MapManager.WorldToCell(position);
+
+                    var building = new House();
+                    for (int x = 0; x < building.Shape.X; x++)
                     {
-                        var cell = MapManager.WorldToCell(position);
-                        var cellWorldPos = MapManager.CellToWorld(cell);
-                        if (MapManager.MapData.TryGetValue(cell, out MapDataItem data))
+                        for (int y = 0; y < building.Shape.Y; y++)
                         {
-                            var building = new Road();
-
-                            Color color;
-                            if (data.CellType == CellType.WATER)
+                            var cellShifted = cell + new Vector2I(x, y);
+                            if (MapManager.MapData.TryGetValue(cellShifted, out MapDataItem data))
                             {
-                                color = new Color(0, 0, 1);
-                            }
-                            else if (data.Slope <= building.MaxSlopeAngle) color = new Color(0, 1, 0);
-                            else color = new Color(1, 0, 0);
+                                Color color;
+                                if (data.CellType == CellType.WATER)
+                                {
+                                    color = new Color(0, 0, 1);
+                                }
+                                else if (data.Slope <= building.MaxSlopeAngle) color = new Color(0, 1, 0);
+                                else color = new Color(1, 0, 0);
 
-                            var worldPos3d = new Vector3(cellWorldPos.X, data.Height+0.2f, cellWorldPos.Y);
-                            VisualiseHover(worldPos3d, color, shape: building.Shape, this.MapManager.CellSize);
+                                var cellWorldPos = MapManager.CellToWorld(cellShifted);
+                                var worldPos3d = new Vector3(cellWorldPos.X, data.Height + 0.4f, cellWorldPos.Y);
+                                VisualiseHover(worldPos3d, color, this.MapManager.CellSize);
+                            }
                         }
                     }
+                    //}
                 }
             }       
         }
 
     }
-    private void VisualiseHover(Vector3 worldPos, Color color, Vector2 shape, Vector2 cellSize)
+    private void VisualiseHover(Vector3 worldPos, Color color, Vector2 cellSize)
     {
         var meshInstance = new MeshInstance3D();
         var planeMesh = new PlaneMesh
         {
-            Size = new Vector2(cellSize.X * shape.X, cellSize.Y * shape.X)
+            Size = new Vector2(cellSize.X, cellSize.Y)
         };
         meshInstance.Mesh = planeMesh;
 

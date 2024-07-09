@@ -39,8 +39,17 @@ public partial class TerrainGradientVisualizer : Node3D
     {
         foreach (var cell in TerrainGradients.Keys)
         {
-            float slope = TerrainGradients[cell].Slope;
-            Color color = GetColorForAngle(slope);
+            Color color;
+            if (TerrainGradients[cell].CellType == CellType.WATER)
+            {
+                color = new Color(0, 0, 1);
+            }
+            else
+            {
+                float slope = TerrainGradients[cell].Slope;
+                color = GetColorForAngle(slope);
+            }
+
             CreateCellVisual(cell, color);
         }
         UpdateVisibility();

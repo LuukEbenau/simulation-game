@@ -28,9 +28,9 @@ public partial class TerrainMapper : Node3D
         
     }
 
-    public Dictionary<Vector2I, MapDataItem> LoadMapdata(Node3D terrain, Vector2I cellSize)
+    public Dictionary<Vector2I, MapDataItem> LoadMapdata(Node3D terrain, Vector2I cellSize, bool mapPropertiesCacheEnabled)
     {
-        if (LoadMapdataFromFile(out Dictionary<Vector2I, MapDataItem> mapData))
+        if (mapPropertiesCacheEnabled && LoadMapdataFromFile(out Dictionary<Vector2I, MapDataItem> mapData))
         {
             GD.Print("Loaded terrain gradients from file");
         }
@@ -53,7 +53,7 @@ public partial class TerrainMapper : Node3D
         {
             var settings = new JsonSerializerSettings();
             settings.Converters.Add(new Vector2IConverter());
-            GD.Print("Converter added");
+            //GD.Print("Converter added");
             var jsonString = JsonConvert.SerializeObject(mapData, settings);
 
             file.StoreString(jsonString);
@@ -74,7 +74,7 @@ public partial class TerrainMapper : Node3D
                 var jsonString = file.GetAsText();
                 try
                 {
-                    GD.Print("Converter added");
+                    //GD.Print("Converter added");
 
                     var settings = new JsonSerializerSettings();
                     settings.Converters.Add(new Vector2IConverter());
@@ -140,7 +140,9 @@ public partial class TerrainMapper : Node3D
         {
             From = start,
             To = end,
-            CollisionMask = Globals.CollisionTypeMap[CollisionType.WORLDMAPPING]
+            CollisionMask = Globals.CollisionTypeMap[CollisionType.WORLDMAPPING],
+            CollideWithAreas=true,
+            CollideWithBodies=true,
         };
         var result = spaceState.IntersectRay(query);
         if (result.Count > 0)
@@ -222,23 +224,20 @@ public partial class TerrainMapper : Node3D
             }
             Vector3 position = _position.AsVector3();
 
+            //GD.Print($"collider name: {collider}");
             if (collider.AsGodotObject() != null)
             {
                 if (collider.AsGodotObject() is Node3D colliderNode)
                 {
+                    if (colliderNode.Name == MapManager.RiverCollider.Name)
+                    {
+                        //GD.Print("river");
+                        return (CellType.WATER, position.Y);
+                    }
                     if (colliderNode.Name == MapManager.Terrain.Name)
                     {
                         return (CellType.GROUND, position.Y);
                     }
-                }
-                else if(collider.AsGodotObject() is StaticBody3D staticBody)
-                {
-                    if (staticBody.Name == MapManager.RiverCollider.Name)
-                    {
-                        GD.Print("river");
-                        return (CellType.WATER, position.Y);
-                    }
-
                 }
             }
             GD.Print($"unknown collider name: {collider}");
