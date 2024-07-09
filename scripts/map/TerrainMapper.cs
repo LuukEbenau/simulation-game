@@ -5,31 +5,32 @@ using System.Linq;
 using Newtonsoft.Json;
 using GameTemplate.scripts.map;
 using SacaSimulationGame.scripts.map;
+using SacaSimulationGame.scripts;
+using SacaSimulationGame.scripts.buildings;
+using System.Reflection.Metadata.Ecma335;
 
-//namespace GameTemplate.scripts.map
-//{
+
 public partial class TerrainMapper : Node3D
 {
     private string currentMap = "scene1";
     private string MAPDATA_FILE;
     private float raycastStartHeight = 50.0f;
     private float raycastLength = 100.0f;
-    public Vector2I[] directions = new Vector2I[]
-    {
-    new Vector2I(1, 0), new Vector2I(-1, 0), new Vector2I(0, 1), new Vector2I(0, -1)
-    };
+    public Vector2I[] directions = [
+        new(1, 0), new(-1, 0), new(0, 1), new(0, -1)
+    ];
 
+    private WorldMapManager MapManager;
     public override void _Ready()
     {
         MAPDATA_FILE = $"user://{currentMap}_data.json";
+        this.MapManager = GetParent<WorldMapManager>();
+        
     }
-
-
 
     public Dictionary<Vector2I, MapDataItem> LoadMapdata(Node3D terrain, Vector2I cellSize)
     {
-        Dictionary<Vector2I, MapDataItem> mapData;
-        if (LoadMapdataFromFile(out mapData))
+        if (LoadMapdataFromFile(out Dictionary<Vector2I, MapDataItem> mapData))
         {
             GD.Print("Loaded terrain gradients from file");
         }
@@ -110,17 +111,6 @@ public partial class TerrainMapper : Node3D
         return new Vector2I(int.Parse(parts[0]), int.Parse(parts[1]));
     }
 
-    private Dictionary<Vector2I, float> CalculateTerrainGradients(Dictionary<Vector2I, MapDataItem> grid, Vector2I cellSize)
-    {
-        var slopeGradients = new Dictionary<Vector2I, float>();
-        foreach (var cell in grid.Keys)
-        {
-            var slope = GetCellSlope(cell, cellSize);
-            slopeGradients[cell] = slope;
-        }
-        return slopeGradients;
-    }
-
     private float GetCellSlope(Vector2 pos, Vector2 cellSize)
     {
         var h1 = CheckHeightAtPosition(pos);
@@ -145,7 +135,13 @@ public partial class TerrainMapper : Node3D
         var spaceState = GetWorld3D().DirectSpaceState;
         var start = new Vector3(pos.X, raycastStartHeight, pos.Y);
         var end = start + Vector3.Down * raycastLength;
-        var query = PhysicsRayQueryParameters3D.Create(start, end);
+        
+        var query = new PhysicsRayQueryParameters3D
+        {
+            From = start,
+            To = end,
+            CollisionMask = Globals.CollisionTypeMap[CollisionType.WORLDMAPPING]
+        };
         var result = spaceState.IntersectRay(query);
         if (result.Count > 0)
         {
@@ -161,24 +157,33 @@ public partial class TerrainMapper : Node3D
         var toCheck = new Queue<Vector2I>();
         var mappedCells = new Dictionary<Vector2I, MapDataItem>();
 
-        var center = new Vector2I((int)terrain.GlobalTransform.Origin.X, (int)terrain.GlobalTransform.Origin.Z);
+        //var center = new Vector2I((int)terrain.GlobalPosition.X, (int)terrain.GlobalPosition.Z);
+
+        var center = new Vector2I(0, 0);
+
+
         toCheck.Enqueue(center);
 
         while (toCheck.Count > 0)
         {
-            var current = toCheck.Dequeue();
-            if (!mappedCells.ContainsKey(current))
+            var currentCell = toCheck.Dequeue();
+            var currentGlobalPos = MapManager.CellToWorld(currentCell);
+
+            if (!mappedCells.ContainsKey(currentCell))
             {
-                if (CheckCellInGrid(current))
+                var (cellType, height) = CheckCellTypeAndCellInsideGrid(currentGlobalPos);
+                if (cellType != CellType.NONE)
                 {
-                    var slope = GetCellSlope(current, cellSize);
-                    mappedCells[current] = new MapDataItem {
-                        Slope=slope
+                    var slope = GetCellSlope(currentGlobalPos, cellSize);
+                    mappedCells[currentCell] = new MapDataItem {
+                        Slope = slope,
+                        CellType = cellType,
+                        Height = height
                     };
 
                     foreach (var dir in directions)
                     {
-                        toCheck.Enqueue(current + dir * cellSize);
+                        toCheck.Enqueue(currentCell + dir);
                     }
                 }
             }
@@ -188,16 +193,58 @@ public partial class TerrainMapper : Node3D
         return mappedCells;
     }
 
-    private bool CheckCellInGrid(Vector2I cell)
+    private (CellType type, float height) CheckCellTypeAndCellInsideGrid(Vector2 worldPos)
     {
         var spaceState = GetWorld3D().DirectSpaceState;
-        var start = new Vector3(cell.X, raycastStartHeight, cell.Y);
+        var start = new Vector3(worldPos.X, raycastStartHeight, worldPos.Y);
         var end = start + Vector3.Down * raycastLength;
 
-        var query = PhysicsRayQueryParameters3D.Create(start, end);
+        var query = new PhysicsRayQueryParameters3D
+        {
+            From = start,
+            To = end,
+            CollisionMask = Globals.CollisionTypeMap[CollisionType.WORLDMAPPING],
+            CollideWithAreas = true,
+            CollideWithBodies = true,
+
+        };
         var result = spaceState.IntersectRay(query);
 
-        return result.Count > 0;
+        if(result.Count > 0)
+        {
+            if (!result.TryGetValue("collider", out var collider))
+            {
+                GD.Print("collider not found on raycast result");
+            }
+            if (!result.TryGetValue("position", out var _position))
+            {
+                GD.Print("position not found on raycast result");
+            }
+            Vector3 position = _position.AsVector3();
+
+            if (collider.AsGodotObject() != null)
+            {
+                if (collider.AsGodotObject() is Node3D colliderNode)
+                {
+                    if (colliderNode.Name == MapManager.Terrain.Name)
+                    {
+                        return (CellType.GROUND, position.Y);
+                    }
+                }
+                else if(collider.AsGodotObject() is StaticBody3D staticBody)
+                {
+                    if (staticBody.Name == MapManager.RiverCollider.Name)
+                    {
+                        GD.Print("river");
+                        return (CellType.WATER, position.Y);
+                    }
+
+                }
+            }
+            GD.Print($"unknown collider name: {collider}");
+        }
+        
+        return (CellType.NONE, default);
     }
 
     private Vector2 GetTerrainSize(Dictionary<Vector2I, MapDataItem> grid, Vector2I cellSize)

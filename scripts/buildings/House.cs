@@ -14,7 +14,7 @@ namespace SacaSimulationGame.scripts.buildings
         public House() {
 
             this.Shape = new Vector2I(3, 3);
-            this.MaxSlopeAngle = 10f;
+            this.MaxSlopeAngle = 7f;
         }
     }
 }
