@@ -5,13 +5,10 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-namespace GameTemplate.scripts.map
+using SacaSimulationGame.scripts.map;
+namespace SacaSimulationGame.scripts.map
 {
-    public enum CellType { 
-        NONE,
-        GROUND,
-        WATER
-    }
+
     public class MapDataItem
     {
         public CellType CellType;

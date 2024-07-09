@@ -4,16 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Godot;
+using SacaSimulationGame.scripts.map;
 
 namespace SacaSimulationGame.scripts.buildings
 {
     public class House: Building
     {
-        public override Vector2I Shape { get; }
+        public override CellType[,] Shape { get; }
         public override float MaxSlopeAngle { get; }
         public House() {
-
-            this.Shape = new Vector2I(2, 2);
+            this.Shape = new CellType[2, 2]
+            {
+                { CellType.GROUND, CellType.GROUND},
+                { CellType.GROUND, CellType.GROUND },
+            };
             this.MaxSlopeAngle = 10f;
         }
     }

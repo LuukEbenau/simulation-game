@@ -1,10 +1,10 @@
-using GameTemplate.scripts.map;
 using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-public partial class WorldMapManager : Node3D
+namespace SacaSimulationGame.scripts.map
+{
+    public partial class WorldMapManager : Node3D
 {
     [Export]
     public Vector2I CellSize { get; set; } = new Vector2I(4, 4);
@@ -75,4 +75,5 @@ public partial class WorldMapManager : Node3D
         GradientVisualizer.SetGradients(MapData, CellSize);
         GradientVisualizer.ShowSlopeGradients = ShowSlopeGradients;
     }
+}
 }

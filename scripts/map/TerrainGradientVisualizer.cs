@@ -1,104 +1,105 @@
-using GameTemplate.scripts.map;
 using Godot;
 using System;
 using System.Collections.Generic;
-
-public partial class TerrainGradientVisualizer : Node3D
+namespace SacaSimulationGame.scripts.map
 {
-    [Export]
-    public bool ShowSlopeGradients
+    public partial class TerrainGradientVisualizer : Node3D
     {
-        get => _showSlopeGradients;
-        set
+        [Export]
+        public bool ShowSlopeGradients
         {
-            _showSlopeGradients = value;
+            get => _showSlopeGradients;
+            set
+            {
+                _showSlopeGradients = value;
+                UpdateVisibility();
+            }
+        }
+        private bool _showSlopeGradients = true;
+
+        private Dictionary<Vector2I, MapDataItem> TerrainGradients = new Dictionary<Vector2I, MapDataItem>();
+        private Vector2 CellSize;
+        private Gradient ColorRamp;
+        private float VisualHeight = 1.15f;
+        private float Transparency = 0.25f;
+
+        public override void _Ready()
+        {
+            ColorRamp = CreateColorRamp();
+        }
+
+        public void SetGradients(Dictionary<Vector2I, MapDataItem> gradients, Vector2I cellSize)
+        {
+            TerrainGradients = gradients;
+            CellSize = cellSize;
+            CreateVisualization();
+        }
+
+        private void CreateVisualization()
+        {
+            foreach (var cell in TerrainGradients.Keys)
+            {
+                Color color;
+                if (TerrainGradients[cell].CellType == CellType.WATER)
+                {
+                    color = new Color(0, 0, 1);
+                }
+                else
+                {
+                    float slope = TerrainGradients[cell].Slope;
+                    color = GetColorForAngle(slope);
+                }
+
+                CreateCellVisual(cell, color);
+            }
             UpdateVisibility();
         }
-    }
-    private bool _showSlopeGradients = true;
 
-    private Dictionary<Vector2I, MapDataItem> TerrainGradients = new Dictionary<Vector2I, MapDataItem>();
-    private Vector2 CellSize;
-    private Gradient ColorRamp;
-    private float VisualHeight = 1.15f;
-    private float Transparency = 0.25f;
-
-    public override void _Ready()
-    {
-        ColorRamp = CreateColorRamp();
-    }
-
-    public void SetGradients(Dictionary<Vector2I, MapDataItem> gradients, Vector2I cellSize)
-    {
-        TerrainGradients = gradients;
-        CellSize = cellSize;
-        CreateVisualization();
-    }
-
-    private void CreateVisualization()
-    {
-        foreach (var cell in TerrainGradients.Keys)
+        private void CreateCellVisual(Vector2I cell, Color color)
         {
-            Color color;
-            if (TerrainGradients[cell].CellType == CellType.WATER)
-            {
-                color = new Color(0, 0, 1);
-            }
-            else
-            {
-                float slope = TerrainGradients[cell].Slope;
-                color = GetColorForAngle(slope);
-            }
+            var meshInstance = new MeshInstance3D();
+            var planeMesh = new PlaneMesh();
+            planeMesh.Size = new Vector2(CellSize.X, CellSize.Y);
+            meshInstance.Mesh = planeMesh;
 
-            CreateCellVisual(cell, color);
+            var material = new StandardMaterial3D();
+            material.AlbedoColor = color;
+            material.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
+            //material.TransparentEnabled = true;
+            material.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
+            material.CullMode = BaseMaterial3D.CullModeEnum.Disabled;
+            meshInstance.SetSurfaceOverrideMaterial(0, material);
+
+            meshInstance.Position = new Vector3(cell.X * CellSize.X, VisualHeight, cell.Y * CellSize.Y);
+            AddChild(meshInstance);
         }
-        UpdateVisibility();
-    }
 
-    private void CreateCellVisual(Vector2I cell, Color color)
-    {
-        var meshInstance = new MeshInstance3D();
-        var planeMesh = new PlaneMesh();
-        planeMesh.Size = new Vector2(CellSize.X, CellSize.Y);
-        meshInstance.Mesh = planeMesh;
-
-        var material = new StandardMaterial3D();
-        material.AlbedoColor = color;
-        material.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
-        //material.TransparentEnabled = true;
-        material.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
-        material.CullMode = BaseMaterial3D.CullModeEnum.Disabled;
-        meshInstance.SetSurfaceOverrideMaterial(0, material);
-
-        meshInstance.Position = new Vector3(cell.X * CellSize.X, VisualHeight, cell.Y * CellSize.Y);
-        AddChild(meshInstance);
-    }
-
-    private Color GetColorForAngle(float angle)
-    {
-        angle = Mathf.Clamp(angle, 0, 90);
-        float t = angle / 90.0f;
-        Color color = ColorRamp.Sample(t);
-        color.A = Transparency;
-        return color;
-    }
-
-    private Gradient CreateColorRamp()
-    {
-        var gradient = new Gradient();
-        gradient.SetColor(0, new Color(0, 1, 0, 1));  // Bright green
-        gradient.AddPoint(0.5f, new Color(1, 1, 0, 1));  // Bright yellow
-        gradient.SetColor(1, new Color(1, 0, 0, 1));  // Bright red
-        return gradient;
-    }
-
-    private void UpdateVisibility()
-    {
-        foreach (var child in GetChildren())
+        private Color GetColorForAngle(float angle)
         {
-            if (child is MeshInstance3D meshInstance)
+            angle = Mathf.Clamp(angle, 0, 90);
+            float t = angle / 90.0f;
+            Color color = ColorRamp.Sample(t);
+            color.A = Transparency;
+            return color;
+        }
+
+        private Gradient CreateColorRamp()
+        {
+            var gradient = new Gradient();
+            gradient.SetColor(0, new Color(0, 1, 0, 1));  // Bright green
+            gradient.AddPoint(0.5f, new Color(1, 1, 0, 1));  // Bright yellow
+            gradient.SetColor(1, new Color(1, 0, 0, 1));  // Bright red
+            return gradient;
+        }
+
+        private void UpdateVisibility()
+        {
+            foreach (var child in GetChildren())
             {
-                meshInstance.Visible = ShowSlopeGradients;
+                if (child is MeshInstance3D meshInstance)
+                {
+                    meshInstance.Visible = ShowSlopeGradients;
+                }
             }
         }
     }
