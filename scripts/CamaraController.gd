@@ -4,12 +4,12 @@ extends Node3D
 var move_speed_dynamic: float = 75.0
 
 @export var zoom_speed : float = 5
-@export var min_zoom : float = 9.0
-@export var max_zoom : float = 150.0
+@export var min_zoom : float = 6.0
+@export var max_zoom : float = 190.0
 @export var border_threshold : float = 50.0
 
 @export var max_angle : float = -85.0  # Angle when fully zoomed out
-@export var min_angle : float = -14.0  # Angle when fully zoomed in
+@export var min_angle : float = -12.0  # Angle when fully zoomed in
 
 var viewport_size : Vector2
 var camera : Camera3D
@@ -33,14 +33,14 @@ func _process(delta):
     var move_dir = Vector3.ZERO
 
     # Check if mouse is near the borders
-    if mouse_pos.x < border_threshold or Input.is_action_pressed("moveCameraLeft"):
+    if mouse_pos.x < border_threshold or Input.is_action_pressed("Move Camera Left"):
         move_dir.x -= 1
-    elif mouse_pos.x > viewport_size.x - border_threshold or Input.is_action_pressed("moveCameraRight"):
+    elif mouse_pos.x > viewport_size.x - border_threshold or Input.is_action_pressed("Move Camera Right"):
         move_dir.x += 1
 
-    if mouse_pos.y < border_threshold or Input.is_action_pressed("moveCameraTop"):
+    if mouse_pos.y < border_threshold or Input.is_action_pressed("Move Camera Top"):
         move_dir.z -= 1
-    elif mouse_pos.y > viewport_size.y - border_threshold or Input.is_action_pressed("moveCameraBottom"):
+    elif mouse_pos.y > viewport_size.y - border_threshold or Input.is_action_pressed("Move Camera Bottom"):
         move_dir.z += 1
 
     # Normalize and apply movement
@@ -53,9 +53,9 @@ func move_screen(dir:Vector3, delta:float = 1):
         global_translate(dir * move_speed_dynamic * delta)
 
 func _input(event):
-    if event.is_action_pressed("zoomOutCamera"):
+    if event.is_action_pressed("Zoom Out Camera"):
         zoom_camera(-1)
-    elif event.is_action_pressed("zoomInCamera"):
+    elif event.is_action_pressed("Zoom In Camera"):
         zoom_camera(1)
 
 

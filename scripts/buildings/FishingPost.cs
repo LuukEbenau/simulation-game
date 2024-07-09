@@ -7,14 +7,15 @@ using Godot;
 
 namespace SacaSimulationGame.scripts.buildings
 {
-    public class Road : Building
+    internal class FishingPost: Building
     {
         public override Vector2I Shape { get; }
         public override float MaxSlopeAngle { get; }
-        public Road()
+        public FishingPost()
         {
-            this.Shape = new Vector2I(1, 1);
-            this.MaxSlopeAngle = 20f;
+
+            this.Shape = new Vector2I(2, 8);
+            this.MaxSlopeAngle = 10f;
         }
     }
 }

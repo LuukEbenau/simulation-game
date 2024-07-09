@@ -7,10 +7,10 @@ using Godot;
 
 namespace SacaSimulationGame.scripts.buildings
 {
-    public class House
+    public class House: Building
     {
-        public Vector2I Shape { get; }
-        public float MaxSlopeAngle { get; }
+        public override Vector2I Shape { get; }
+        public override float MaxSlopeAngle { get; }
         public House() {
 
             this.Shape = new Vector2I(2, 2);
