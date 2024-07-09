@@ -14,7 +14,7 @@ dest_files=["res://.godot/imported/road.blend-40155df3b7d31bf9381b8118e0ee8f02.s
 [params]
 
 nodes/root_type=""
-nodes/root_name=""
+nodes/root_name="Road"
 nodes/apply_root_scale=true
 nodes/root_scale=1.0
 meshes/ensure_tangents=true

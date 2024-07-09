@@ -40,7 +40,7 @@ namespace SacaSimulationGame.scripts.map
             foreach (var cell in TerrainGradients.Keys)
             {
                 Color color;
-                if (TerrainGradients[cell].CellType == CellType.WATER)
+                if (TerrainGradients[cell].CellType.HasFlag(CellType.WATER))
                 {
                     color = new Color(0, 0, 1);
                 }

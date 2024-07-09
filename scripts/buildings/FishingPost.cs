@@ -12,21 +12,21 @@ namespace SacaSimulationGame.scripts.buildings
     {
         public override CellType[,] Shape { get; }
         public override float MaxSlopeAngle { get; }
+        public override string Name => "FishingPost";
+        private static PackedScene _scene;
+        public override PackedScene Scene => _scene ??= GD.Load("res://assets/buildings/house.blend") as PackedScene;
         public FishingPost()
         {
 
-            this.Shape = new CellType[8, 2]
+            this.Shape = new CellType[5, 2]
             {
                 { CellType.GROUND,CellType.GROUND},
+                { CellType.WATER | CellType.GROUND, CellType.WATER | CellType.GROUND },
                 { CellType.WATER, CellType.WATER },
                 { CellType.WATER, CellType.WATER },
                 { CellType.WATER, CellType.WATER },
-                { CellType.WATER, CellType.WATER },
-                { CellType.WATER, CellType.WATER },
-                { CellType.WATER, CellType.WATER },
-                { CellType.WATER, CellType.WATER }
             };
-            this.MaxSlopeAngle = 10f;
+            this.MaxSlopeAngle = 15f;
         }
     }
 }

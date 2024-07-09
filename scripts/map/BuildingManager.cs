@@ -8,10 +8,16 @@ namespace SacaSimulationGame.scripts.map
     public partial class BuildingManager : Node3D
     {
         // Called when the node enters the scene tree for the first time.
-        private WorldMapManager MapManager { get; set; }
+        private IWorldMapManager MapManager { get; set; }
         private Camera3D Camera { get; set; }
 
         private readonly Vector2I _defaultVec = new(int.MinValue, int.MinValue);
+
+
+        [Export]
+        public PackedScene HouseBuilding { get; set; }
+        [Export]
+        public PackedScene RoadBuilding { get; set; }
 
         public override void _Ready()
         {
@@ -20,6 +26,60 @@ namespace SacaSimulationGame.scripts.map
         }
 
         private Building selectedBuilding = null;
+        // Called every frame. 'delta' is the elapsed time since the previous frame.
+        private Vector2I lastHoveredCell = default;
+        private BuildingRotation buildingRotation = BuildingRotation.Top;
+
+        private double timeElapsedSinceLastHoverUpdate = 0;
+        private double hoverIndicatorUpdateInterval = 1 / 60;
+
+        private void CycleRotation()
+        {
+            switch (buildingRotation)
+            {
+                case BuildingRotation.Top:
+                    buildingRotation = BuildingRotation.Right; 
+                    break;
+                case BuildingRotation.Right:
+                    buildingRotation = BuildingRotation.Bottom;
+                    break;
+                case BuildingRotation.Bottom:
+                    buildingRotation = BuildingRotation.Left;
+                    break;
+                case BuildingRotation.Left:
+                    buildingRotation = BuildingRotation.Top;
+                    break;
+
+            }
+        }
+
+        public override void _Process(double delta)
+        {
+            if (selectedBuilding != null)
+            {
+                timeElapsedSinceLastHoverUpdate += delta;
+                if (timeElapsedSinceLastHoverUpdate > hoverIndicatorUpdateInterval)
+                {
+                    timeElapsedSinceLastHoverUpdate = 0;
+                    var cell = GetHoveredCell();
+                    if (cell == _defaultVec)
+                    {
+                        ClearHoverIndicator();
+                    }
+                    else if (lastHoveredCell == cell)
+                    {
+                        // nothing changes, hover stays
+                    }
+                    else
+                    {
+                        lastHoveredCell = cell;
+                        ClearHoverIndicator();
+                        bool buildingIsBuildable = CheckBuildingBuildable(cell, selectedBuilding, visualiseHover: true);
+                    }
+                }
+            }
+        }
+
         public override void _Input(InputEvent @event)
         {
             if (@event.IsActionPressed("Building Slot 1"))
@@ -43,37 +103,102 @@ namespace SacaSimulationGame.scripts.map
                 selectedBuilding = null;
                 ClearHoverIndicator();
             }
-        }
 
-        // Called every frame. 'delta' is the elapsed time since the previous frame.
-        private Vector2I lastHoveredCell = default;
-        private double timeElapsedSinceLastHoverUpdate = 0;
-        private double hoverIndicatorUpdateInterval = 1 / 60;
-        public override void _Process(double delta)
-        {
-            if (selectedBuilding != null)
+            if(@event.IsActionPressed("Rotate Building"))
             {
-                timeElapsedSinceLastHoverUpdate += delta;
-                if (timeElapsedSinceLastHoverUpdate > hoverIndicatorUpdateInterval)
+                GD.Print("rotating building");
+                CycleRotation();
+            }
+
+            if (selectedBuilding != null && lastHoveredCell != default)
+            {
+                if (@event.IsActionPressed("Build"))
                 {
-                    timeElapsedSinceLastHoverUpdate = 0;
-                    var cell = GetHoveredCell();
-                    if (cell == _defaultVec)
+                    GD.Print("check building buildable");
+                    if (CheckBuildingBuildable(lastHoveredCell, selectedBuilding))
                     {
-                        ClearHoverIndicator();
-                    }
-                    else if (lastHoveredCell == cell)
-                    {
-                        // nothing changes, hover stays
-                    }
-                    else
-                    {
-                        ClearHoverIndicator();
-                        UpdateHoverIndicator(cell, selectedBuilding);
+                        // Build building
+                        GD.Print("start building");
+                        if(BuildBuilding(lastHoveredCell, selectedBuilding, buildingRotation))
+                        {
+                            GD.Print("building building success");
+                        }
+                        else
+                        {
+                            GD.Print("building building failed");
+                        }
                     }
                 }
             }
         }
+
+        private bool BuildBuilding(Vector2I cell, Building building, BuildingRotation rotation)
+        {
+            // Instantiate the scene
+            PackedScene scene;
+            if(building.Name == "House")
+            {
+                scene = this.HouseBuilding;
+            }
+            else if(building.Name == "Road")
+            {
+                scene = this.RoadBuilding;
+            }
+            else
+            {
+                scene = this.HouseBuilding;
+            }
+            Node3D buildingInstance = scene.Instantiate<Node3D>();
+
+            if (buildingInstance == null)
+            {
+                GD.PrintErr("Failed to instantiate building scene");
+                return false;
+            }
+
+            // Set the position
+            Vector2 worldPosition2d = MapManager.CellToWorld(cell,centered:true);
+            var height = MapManager.MapData[cell].Height;
+            Vector3 worldPosition = new(worldPosition2d.X, height+0.15f, worldPosition2d.Y);
+
+            buildingInstance.GlobalPosition = worldPosition;
+            buildingInstance.Scale = new Vector3(MapManager.CellSize.X, MapManager.CellSize.X, MapManager.CellSize.Y);
+
+            // Apply rotation
+            ApplyBuildingRotation(buildingInstance, rotation);
+
+            // Add the building to the scene
+            AddChild(buildingInstance);
+
+            // You might want to store the building instance in a data structure for later reference
+            // For example: buildings[cell] = buildingInstance;
+
+            return true;
+        }
+
+        private void ApplyBuildingRotation(Node3D buildingInstance, BuildingRotation rotation)
+        {
+            switch (rotation)
+            {
+                case BuildingRotation.Top:
+                    //buildingInstance.RotateY(0);
+                    buildingInstance.RotationDegrees = new Vector3(0, 0, 0);
+                    break;
+                case BuildingRotation.Right:
+                    //buildingInstance.RotateY(90);
+                    buildingInstance.RotationDegrees = new Vector3(0, -90, 0);
+                    break;
+                case BuildingRotation.Bottom:
+                    //buildingInstance.RotateY(180);
+                    buildingInstance.RotationDegrees = new Vector3(0, -180, 0);
+                    break;
+                case BuildingRotation.Left:
+                    //buildingInstance.RotateY(270);
+                    buildingInstance.RotationDegrees = new Vector3(0, -270, 0);
+                    break;
+            }
+        }
+
 
 
         private Vector2I GetHoveredCell()
@@ -156,34 +281,54 @@ namespace SacaSimulationGame.scripts.map
             }
         }
 
-
-        private void UpdateHoverIndicator(Vector2I cell, Building building)
+        private bool CheckBuildingBuildable(Vector2I cell, Building building, bool visualiseHover = false)
         {
-            for (int x = 0; x < building.Shape.GetLength(0); x++)
-            {
-                for (int y = 0; y < building.Shape.GetLength(1); y++)
-                {
-                    var meshInstanceIndex = y + x * building.Shape.GetLength(1);
+            bool buildingBuildable = true;
+            int shapeWidth = building.Shape.GetLength(0);
+            int shapeHeight = building.Shape.GetLength(1);
 
+            for (int x = 0; x < shapeWidth; x++)
+            {
+                for (int y = 0; y < shapeHeight; y++)
+                {
                     var cellShifted = cell + new Vector2I(x, y);
                     if (MapManager.MapData.TryGetValue(cellShifted, out MapDataItem data))
                     {
-                        Color color;
-                        if (data.CellType == CellType.WATER)
-                        {
-                            color = new Color(0, 0, 1);
-                        }
-                        else if (data.Slope <= building.MaxSlopeAngle) color = new Color(0, 1, 0);
-                        else color = new Color(1, 0, 0);
+                        bool cellBuildable = IsCellBuildable(data, building.Shape[x, y], building.MaxSlopeAngle, cellShifted);
+                        buildingBuildable &= cellBuildable;
 
-                        var cellWorldPos = MapManager.CellToWorld(cellShifted);
-                        var worldPos3d = new Vector3(cellWorldPos.X, data.Height + 0.4f, cellWorldPos.Y);
-
-                        var hoverIndicatorMesh = GetHoverIndicator(meshInstanceIndex, MapManager.CellSize);
-                        VisualiseHover(hoverIndicatorMesh, worldPos3d, color, this.MapManager.CellSize);
+                        if(visualiseHover) VisualizeCell(x, y, cellShifted, data, cellBuildable, shapeHeight);
                     }
                 }
             }
+            return buildingBuildable;
+        }
+
+        private bool IsCellBuildable(MapDataItem data, CellType buildingCellType, float maxSlopeAngle, Vector2I cell)
+        {
+            if (data.CellType.HasFlag(CellType.WATER))
+            {
+                return buildingCellType.HasFlag(CellType.WATER);
+            }
+            else if (data.CellType.HasFlag(CellType.GROUND))
+            {
+                return buildingCellType.HasFlag(CellType.GROUND) && data.Slope <= maxSlopeAngle;
+            }
+            else
+            {
+                GD.Print($"Unknown cell type: {data.CellType} of cell {cell}");
+                return false;
+            }
+        }
+
+        private void VisualizeCell(int x, int y, Vector2I cellShifted, MapDataItem data, bool cellBuildable, int shapeHeight)
+        {
+            var meshInstanceIndex = y + x * shapeHeight;
+            var color = cellBuildable ? new Color(0, 1, 0) : new Color(1, 0, 0);
+            var cellWorldPos = MapManager.CellToWorld(cellShifted);
+            var worldPos3d = new Vector3(cellWorldPos.X, data.Height + 2.6f, cellWorldPos.Y);
+            var hoverIndicatorMesh = GetHoverIndicator(meshInstanceIndex, MapManager.CellSize);
+            VisualiseHover(hoverIndicatorMesh, worldPos3d, color, this.MapManager.CellSize);
         }
 
         private void VisualiseHover(MeshInstance3D meshInstance, Vector3 worldPos, Color color, Vector2 cellSize)

@@ -11,6 +11,8 @@ namespace SacaSimulationGame.scripts.buildings
     public abstract class Building
     {
         public abstract CellType[,] Shape { get; }
+        public abstract PackedScene Scene { get; }
         public abstract float MaxSlopeAngle { get; }
+        public abstract string Name { get; }
     }
 }

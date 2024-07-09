@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://1pdv76fc2dve"]
+[gd_scene load_steps=28 format=3 uid="uid://1pdv76fc2dve"]
 
 [ext_resource type="Script" path="res://scripts/map/WorldMapManager.cs" id="3_21r36"]
 [ext_resource type="Script" path="res://scripts/GameManager.gd" id="4_hvygn"]
@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://scripts/map/BuildingManager.cs" id="6_2cj4d"]
 [ext_resource type="Resource" path="res://assets/TerrainData/data.hterrain" id="6_j82wu"]
 [ext_resource type="Script" path="res://addons/zylann.hterrain/hterrain_texture_set.gd" id="7_jcitx"]
+[ext_resource type="PackedScene" uid="uid://bs0ilcslgtmej" path="res://assets/buildings/house.blend" id="7_ny41d"]
+[ext_resource type="PackedScene" uid="uid://dyxy1khb2gub7" path="res://assets/buildings/road.blend" id="8_ke6w6"]
 [ext_resource type="Texture2D" uid="uid://cjvjhaa5ta2w3" path="res://assets/TerrainData/Level1_slot0_albedo_bump.png" id="10_iah8u"]
 [ext_resource type="Texture2D" uid="uid://dwr5rscyhfdau" path="res://assets/TerrainData/Level1_slot1_albedo_bump.png" id="11_ovtdu"]
 [ext_resource type="Texture2D" uid="uid://md6s1dhjxc6i" path="res://assets/TerrainData/Level1_slot2_albedo_bump.png" id="12_is0kv"]
@@ -136,6 +138,8 @@ script = ExtResource("5_laoth")
 
 [node name="BuildingManager" type="Node3D" parent="GameManager"]
 script = ExtResource("6_2cj4d")
+HouseBuilding = ExtResource("7_ny41d")
+RoadBuilding = ExtResource("8_ke6w6")
 
 [node name="Map" type="Node3D" parent="."]
 script = ExtResource("5_vpyhk")

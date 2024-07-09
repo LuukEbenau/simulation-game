@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace SacaSimulationGame.scripts.map
 {
-    [Flags]
-    public enum CellType
+    internal enum BuildingRotation
     {
-        NONE = 0,
-        GROUND = 1,
-        WATER =2
+        Top,
+        Right,
+        Bottom,
+        Left
     }
 }
