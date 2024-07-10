@@ -132,8 +132,12 @@ namespace SacaSimulationGame.scripts.map
             }
         }
 
-        private bool BuildBuilding(Vector2I cell, Building building, BuildingRotation rotation)
+        public bool BuildBuilding(Vector2I cell, Building building, BuildingRotation rotation)
         {
+            if (MapManager.MapData[cell].CellType != CellType.GROUND) {
+                GD.Print("Tried to place building on terrain different than ground");
+                return false; 
+            }
             // Instantiate the scene
             PackedScene scene;
             if(building.Name == "House")
@@ -157,12 +161,10 @@ namespace SacaSimulationGame.scripts.map
             }
 
             // Set the position
-            Vector2 worldPosition2d = MapManager.CellToWorld(cell,centered:true);
-            var height = MapManager.MapData[cell].Height;
-            Vector3 worldPosition = new(worldPosition2d.X, height+0.15f, worldPosition2d.Y);
+            Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.MapData[cell].Height + 0.15f, centered: true);
 
             buildingInstance.GlobalPosition = worldPosition;
-            buildingInstance.Scale = new Vector3(MapManager.CellSize.X, MapManager.CellSize.X, MapManager.CellSize.Y);
+            buildingInstance.Scale = MapManager.CellSize;
 
             // Apply rotation
             ApplyBuildingRotation(buildingInstance, rotation);
@@ -172,7 +174,7 @@ namespace SacaSimulationGame.scripts.map
 
             // You might want to store the building instance in a data structure for later reference
             // For example: buildings[cell] = buildingInstance;
-
+            GD.Print($"Building building at coordinate {worldPosition}");
             return true;
         }
 
@@ -252,7 +254,7 @@ namespace SacaSimulationGame.scripts.map
 
         #region visualisation of hover
         private readonly List<MeshInstance3D> hoverVisualiseMesh = [];
-        private MeshInstance3D GetHoverIndicator(int indicatorIndex, Vector2 cellSize)
+        private MeshInstance3D GetHoverIndicator(int indicatorIndex, Vector3I cellSize)
         {
             if (indicatorIndex < this.hoverVisualiseMesh.Count)
             {
@@ -262,7 +264,7 @@ namespace SacaSimulationGame.scripts.map
             var meshInstance = new MeshInstance3D();
             var planeMesh = new PlaneMesh
             {
-                Size = MapManager.CellSize
+                Size = cellSize.ToVec2World()
             };
             meshInstance.Mesh = planeMesh;
 
@@ -325,13 +327,13 @@ namespace SacaSimulationGame.scripts.map
         {
             var meshInstanceIndex = y + x * shapeHeight;
             var color = cellBuildable ? new Color(0, 1, 0) : new Color(1, 0, 0);
-            var cellWorldPos = MapManager.CellToWorld(cellShifted);
-            var worldPos3d = new Vector3(cellWorldPos.X, data.Height + 2.6f, cellWorldPos.Y);
+            Vector3 worldPos3d = MapManager.CellToWorld(cellShifted, data.Height + 2.6f);
+
             var hoverIndicatorMesh = GetHoverIndicator(meshInstanceIndex, MapManager.CellSize);
-            VisualiseHover(hoverIndicatorMesh, worldPos3d, color, this.MapManager.CellSize);
+            VisualiseHover(hoverIndicatorMesh, worldPos3d, color);
         }
 
-        private void VisualiseHover(MeshInstance3D meshInstance, Vector3 worldPos, Color color, Vector2 cellSize)
+        private void VisualiseHover(MeshInstance3D meshInstance, Vector3 worldPos, Color color)
         {
             meshInstance.Visible = true;
             var material = new StandardMaterial3D

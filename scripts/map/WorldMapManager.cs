@@ -7,7 +7,7 @@ namespace SacaSimulationGame.scripts.map
     public partial class WorldMapManager : Node3D, IWorldMapManager
     {
         [Export]
-        public Vector2I CellSize { get; set; } = new Vector2I(4, 4);
+        public Vector3I CellSize { get; set; } = new Vector3I(4, 4, 4);
 
         [Export]
         public Node3D Terrain { get; set; }
@@ -17,7 +17,6 @@ namespace SacaSimulationGame.scripts.map
 
         [Export]
         public bool MapPropertiesCacheEnabled { get; set; } = true;
-
 
         [Export]
         public bool ShowSlopeGradients
@@ -38,16 +37,18 @@ namespace SacaSimulationGame.scripts.map
         public TerrainMapper TerrainMapper { get; set; }
         public Dictionary<Vector2I, MapDataItem> MapData { get; set; } 
 
-
-        public Vector2 CellToWorld(Vector2I cell, bool centered = false)
+        public Vector3 CellToWorld(Vector2I cell, float height = 0, bool centered = false)
         {
-            var origin = new Vector2(Terrain.GlobalPosition.X, Terrain.GlobalPosition.Z);
-            var worldPos = origin + cell * CellSize;
+            var origin = Terrain.GlobalPosition;
+            //var worldPos = origin + cell * CellSize;
+
+            var worldPos = new Vector3(origin.X + cell.X * CellSize.X, height, origin.Z + cell.Y * CellSize.Z);
             if (centered)
             {
-                worldPos.X +=  CellSize.X/2f;
-                worldPos.Y += CellSize.Y / 2f;
+                worldPos.X += CellSize.X / 2f;
+                worldPos.Z += CellSize.Z / 2f;
             }
+
             return worldPos;
         }
 
@@ -59,9 +60,9 @@ namespace SacaSimulationGame.scripts.map
             var relativePos = worldPos2d - origin;
 
             var cellX = Mathf.FloorToInt(relativePos.X / CellSize.X);
-            var cellY = Mathf.FloorToInt(relativePos.Y / CellSize.Y);
-            return new Vector2I(cellX, cellY);
+            var cellY = Mathf.FloorToInt(relativePos.Y / CellSize.Z);
 
+            return new Vector2I(cellX, cellY);
         }
 
         public override void _Ready()

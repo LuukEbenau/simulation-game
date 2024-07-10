@@ -23,7 +23,7 @@ namespace SacaSimulationGame.scripts.map
             this.MapManager = GetParent<WorldMapManager>();
         }
 
-        public Dictionary<Vector2I, MapDataItem> LoadMapdata(Node3D terrain, Vector2I cellSize, bool mapPropertiesCacheEnabled)
+        public Dictionary<Vector2I, MapDataItem> LoadMapdata(Node3D terrain, Vector3I cellSize, bool mapPropertiesCacheEnabled)
         {
             if (mapPropertiesCacheEnabled && LoadMapdataFromFile(out Dictionary<Vector2I, MapDataItem> mapData))
             {
@@ -106,18 +106,18 @@ namespace SacaSimulationGame.scripts.map
             return new Vector2I(int.Parse(parts[0]), int.Parse(parts[1]));
         }
 
-        private float GetCellSlope(Vector2 pos, Vector2 cellSize)
+        private float GetCellSlope(Vector3 pos, Vector3I cellSize)
         {
             var h1 = CheckHeightAtPosition(pos);
-            var h2 = CheckHeightAtPosition(pos + new Vector2(cellSize.X, 0));
-            var h3 = CheckHeightAtPosition(pos + new Vector2(0, cellSize.Y));
+            var h2 = CheckHeightAtPosition(pos + new Vector3(cellSize.X, 0,0));
+            var h3 = CheckHeightAtPosition(pos + new Vector3(0, 0, cellSize.Z));
             var h4 = CheckHeightAtPosition(pos + cellSize);
 
             var slopeX1 = Math.Abs((h2 - h1) / cellSize.X);
             var slopeX2 = Math.Abs((h4 - h3) / cellSize.X);
-            var slopeZ1 = Math.Abs((h3 - h1) / cellSize.Y);
-            var slopeZ2 = Math.Abs((h4 - h2) / cellSize.Y);
-            var slopeDiagonal = Math.Abs((h4 - h1) / Math.Sqrt(cellSize.X * cellSize.X + cellSize.Y * cellSize.Y));
+            var slopeZ1 = Math.Abs((h3 - h1) / cellSize.Z);
+            var slopeZ2 = Math.Abs((h4 - h2) / cellSize.Z);
+            var slopeDiagonal = Math.Abs((h4 - h1) / Math.Sqrt(cellSize.X * cellSize.X + cellSize.Z * cellSize.Z));
 
             var maxSlope = new[] { slopeX1, slopeX2, slopeZ1, slopeZ2, slopeDiagonal }.Max();
             float angle = (float)Mathf.RadToDeg(Mathf.Atan(maxSlope));
@@ -125,10 +125,10 @@ namespace SacaSimulationGame.scripts.map
             return angle;
         }
 
-        private float CheckHeightAtPosition(Vector2 pos)
+        private float CheckHeightAtPosition(Vector3 pos)
         {
             var spaceState = GetWorld3D().DirectSpaceState;
-            var start = new Vector3(pos.X, raycastStartHeight, pos.Y);
+            var start = new Vector3(pos.X, raycastStartHeight, pos.Z);
             var end = start + Vector3.Down * raycastLength;
 
             var query = new PhysicsRayQueryParameters3D
@@ -149,7 +149,7 @@ namespace SacaSimulationGame.scripts.map
             return -1;
         }
 
-        private Dictionary<Vector2I, MapDataItem> MapTerrain(Node3D terrain, Vector2I cellSize)
+        private Dictionary<Vector2I, MapDataItem> MapTerrain(Node3D terrain, Vector3I cellSize)
         {
             var toCheck = new Queue<Vector2I>();
             var mappedCells = new Dictionary<Vector2I, MapDataItem>();
@@ -164,7 +164,7 @@ namespace SacaSimulationGame.scripts.map
             while (toCheck.Count > 0)
             {
                 var currentCell = toCheck.Dequeue();
-                var currentGlobalPos = MapManager.CellToWorld(currentCell);
+                Vector3 currentGlobalPos = MapManager.CellToWorld(currentCell);
 
                 if (!mappedCells.ContainsKey(currentCell))
                 {
@@ -191,10 +191,10 @@ namespace SacaSimulationGame.scripts.map
             return mappedCells;
         }
 
-        private (CellType type, float height) CheckCellTypeAndCellInsideGrid(Vector2 worldPos)
+        private (CellType type, float height) CheckCellTypeAndCellInsideGrid(Vector3 worldPos)
         {
             var spaceState = GetWorld3D().DirectSpaceState;
-            var start = new Vector3(worldPos.X, raycastStartHeight, worldPos.Y);
+            var start = new Vector3(worldPos.X, raycastStartHeight, worldPos.Z);
             var end = start + Vector3.Down * raycastLength;
 
             var query = new PhysicsRayQueryParameters3D
@@ -242,7 +242,7 @@ namespace SacaSimulationGame.scripts.map
             return (CellType.NONE, default);
         }
 
-        private Vector2 GetTerrainSize(Dictionary<Vector2I, MapDataItem> grid, Vector2I cellSize)
+        private Vector2 GetTerrainSize(Dictionary<Vector2I, MapDataItem> grid, Vector3I cellSize)
         {
             var minX = float.PositiveInfinity;
             var maxX = float.NegativeInfinity;
@@ -257,10 +257,10 @@ namespace SacaSimulationGame.scripts.map
                 maxZ = Math.Max(maxZ, cell.Y);
             }
 
-            return new Vector2(maxX - minX, maxZ - minZ) * cellSize;
+            return new Vector2(maxX - minX, maxZ - minZ) * cellSize.ToVec2World();
         }
 
-        private void PrintTerrainInfo(Dictionary<Vector2I, MapDataItem> grid, Vector2I cellSize)
+        private void PrintTerrainInfo(Dictionary<Vector2I, MapDataItem> grid, Vector3I cellSize)
         {
             var size = GetTerrainSize(grid, cellSize);
             GD.Print($"Approximate terrain size: {size}");

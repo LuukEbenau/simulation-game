@@ -1,8 +1,7 @@
-[gd_scene load_steps=28 format=3 uid="uid://1pdv76fc2dve"]
+[gd_scene load_steps=31 format=3 uid="uid://1pdv76fc2dve"]
 
+[ext_resource type="Script" path="res://scripts/GameManager.cs" id="2_06t5d"]
 [ext_resource type="Script" path="res://scripts/map/WorldMapManager.cs" id="3_21r36"]
-[ext_resource type="Script" path="res://scripts/GameManager.gd" id="4_hvygn"]
-[ext_resource type="Script" path="res://scripts/CamaraController.gd" id="4_jbmhn"]
 [ext_resource type="Script" path="res://scripts/map/TerrainGradientVisualizer.cs" id="4_rjmbe"]
 [ext_resource type="Script" path="res://scripts/map/TerrainMapper.cs" id="5_laoth"]
 [ext_resource type="Script" path="res://addons/zylann.hterrain/hterrain.gd" id="5_vpyhk"]
@@ -11,7 +10,10 @@
 [ext_resource type="Script" path="res://addons/zylann.hterrain/hterrain_texture_set.gd" id="7_jcitx"]
 [ext_resource type="PackedScene" uid="uid://bs0ilcslgtmej" path="res://assets/buildings/house.blend" id="7_ny41d"]
 [ext_resource type="PackedScene" uid="uid://dyxy1khb2gub7" path="res://assets/buildings/road.blend" id="8_ke6w6"]
+[ext_resource type="Script" path="res://scripts/units/UnitManager.cs" id="9_pljrj"]
 [ext_resource type="Texture2D" uid="uid://cjvjhaa5ta2w3" path="res://assets/TerrainData/Level1_slot0_albedo_bump.png" id="10_iah8u"]
+[ext_resource type="PackedScene" uid="uid://b22mfraw7krug" path="res://assets/units/builder.tscn" id="10_s8ai3"]
+[ext_resource type="PackedScene" uid="uid://d1qsv4j46j40e" path="res://assets/units/servant.tscn" id="11_8mgng"]
 [ext_resource type="Texture2D" uid="uid://dwr5rscyhfdau" path="res://assets/TerrainData/Level1_slot1_albedo_bump.png" id="11_ovtdu"]
 [ext_resource type="Texture2D" uid="uid://md6s1dhjxc6i" path="res://assets/TerrainData/Level1_slot2_albedo_bump.png" id="12_is0kv"]
 [ext_resource type="Texture2D" uid="uid://v45mx0ysfpoc" path="res://assets/TerrainData/Level1_slot0_normal_roughness.png" id="13_li7dd"]
@@ -22,12 +24,119 @@
 [ext_resource type="Script" path="res://addons/waterways_net/Data/RiverShaderSettings.cs" id="16_3blqo"]
 [ext_resource type="Shader" path="res://addons/waterways_net/Shaders/river.gdshader" id="19_cywl1"]
 
+[sub_resource type="GDScript" id="GDScript_ttjlt"]
+script/source = "extends Node3D
+
+@export var move_speed : float = 75.0
+var move_speed_dynamic: float = 75.0
+
+@export var zoom_speed : float = 5
+@export var min_zoom : float = 6.0
+@export var max_zoom : float = 190.0
+@export var border_threshold : float = 50.0
+
+@export var max_angle : float = -85.0  # Angle when fully zoomed out
+@export var min_angle : float = -12.0  # Angle when fully zoomed in
+
+var viewport_size : Vector2
+var camera : Camera3D
+var map : Node3D
+
+func _ready():
+    viewport_size = get_viewport().size
+    camera = $Camera3D
+    map = get_parent().get_node(\"Map\")
+
+    if not camera:
+        push_error(\"Camera3D node not found in CameraWrap\")
+    if not map:
+        push_error(\"Map node not found as sibling of CameraWrap\")
+
+    global_position.y = map.global_position.y + max_zoom
+    update_camera_angle()
+
+func _process(delta):
+    var mouse_pos = get_viewport().get_mouse_position()
+    var move_dir = Vector3.ZERO
+
+    # Check if mouse is near the borders
+    if mouse_pos.x < border_threshold or Input.is_action_pressed(\"Move Camera Left\"):
+        move_dir.x -= 1
+    elif mouse_pos.x > viewport_size.x - border_threshold or Input.is_action_pressed(\"Move Camera Right\"):
+        move_dir.x += 1
+
+    if mouse_pos.y < border_threshold or Input.is_action_pressed(\"Move Camera Top\"):
+        move_dir.z -= 1
+    elif mouse_pos.y > viewport_size.y - border_threshold or Input.is_action_pressed(\"Move Camera Bottom\"):
+        move_dir.z += 1
+
+    # Normalize and apply movement
+    #move_screen(move_dir)
+    move_screen(move_dir,delta)
+
+func move_screen(dir:Vector3, delta:float = 1):
+    if dir != Vector3.ZERO:
+        dir = dir.normalized()
+        global_translate(dir * move_speed_dynamic * delta)
+
+func _input(event):
+    if event.is_action_pressed(\"Zoom Out Camera\"):
+        zoom_camera(-1)
+    elif event.is_action_pressed(\"Zoom In Camera\"):
+        zoom_camera(1)
+
+
+
+func zoom_camera(direction):
+    if not camera or not map:
+        return
+
+    var new_position = global_position + global_transform.basis.y * direction * zoom_speed
+
+    var mapPosY = map.global_position.y
+
+
+    #var distance_to_origin = new_position.distance_to(global_transform.origin)
+
+    # Check if zooming in would go below the map's y-coordinate
+    if direction < 0 and new_position.y <= mapPosY + min_zoom:
+        return
+
+    var distance_to_origin = abs(new_position.y - mapPosY)
+    # Check if zooming out would exceed the max zoom distance
+    if direction > 0 and distance_to_origin > max_zoom:
+        return
+
+    global_translate(global_transform.basis.y * direction * zoom_speed)
+    update_camera_angle()
+
+func update_camera_angle():
+    var current_zoom = global_position.y - (map.global_position.y + min_zoom)
+    var zoom_range = max_zoom - min_zoom
+
+    if zoom_range == 0:
+        return
+
+    var percent_zoom = current_zoom / zoom_range
+    percent_zoom = clamp(percent_zoom, 0, 1)
+
+    move_speed_dynamic = 5 + move_speed * percent_zoom # scale speed with zoom level
+
+    var eased_percent = ease(1 - percent_zoom, 3)
+    var target_angle = lerp(min_angle, max_angle, 1 - eased_percent)
+
+    camera.rotation_degrees.x = target_angle
+
+func ease(x: float, curve: float) -> float:
+    return 1.0 - pow(1.0 - x, curve)
+"
+
 [sub_resource type="Resource" id="Resource_q1l88"]
 script = ExtResource("7_jcitx")
 mode = 0
 textures = [[ExtResource("10_iah8u"), ExtResource("11_ovtdu"), ExtResource("12_is0kv")], [ExtResource("13_li7dd"), ExtResource("14_smaa8"), ExtResource("15_o345l")]]
 
-[sub_resource type="Resource" id="Resource_sfp5y"]
+[sub_resource type="Resource" id="Resource_3x6or"]
 script = ExtResource("16_3blqo")
 MatShaderType = 1
 mat_albedo_color_first = Color(0.6, 0.7, 0.65, 1)
@@ -55,7 +164,7 @@ mat_edge_fade = 0.25
 LodLod0Distance = 50.0
 _selectedShader = 1
 
-[sub_resource type="Curve3D" id="Curve3D_xo6l7"]
+[sub_resource type="Curve3D" id="Curve3D_wpmom"]
 resource_local_to_scene = true
 bake_interval = 0.05
 _data = {
@@ -114,14 +223,14 @@ data = PackedVector3Array(-53.4832, -0.5, 127.86, -53.8511, -0.5, 127.703, -51.6
 
 [node name="CamaraWrap" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 150, 49)
-script = ExtResource("4_jbmhn")
+script = SubResource("GDScript_ttjlt")
 
 [node name="Camera3D" type="Camera3D" parent="CamaraWrap"]
 transform = Transform3D(1, 0, 0, 0, 0.173648, 0.984808, 0, -0.984808, 0.173648, 0, 0, 0)
 current = true
 
 [node name="GameManager" type="Node3D" parent="."]
-script = ExtResource("4_hvygn")
+script = ExtResource("2_06t5d")
 
 [node name="MapManager" type="Node3D" parent="GameManager" node_paths=PackedStringArray("Terrain", "RiverCollider")]
 script = ExtResource("3_21r36")
@@ -140,6 +249,14 @@ script = ExtResource("5_laoth")
 script = ExtResource("6_2cj4d")
 HouseBuilding = ExtResource("7_ny41d")
 RoadBuilding = ExtResource("8_ke6w6")
+
+[node name="UnitManager" type="Node3D" parent="GameManager"]
+script = ExtResource("9_pljrj")
+BuilderScene = ExtResource("10_s8ai3")
+WorkerScene = ExtResource("11_8mgng")
+
+[node name="SpawnLocation" type="Node3D" parent="GameManager"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -68, 0, 36)
 
 [node name="Map" type="Node3D" parent="."]
 script = ExtResource("5_vpyhk")
@@ -166,9 +283,9 @@ transform = Transform3D(1, 0, 0, 0, 0.173648, 0.984808, 0, -0.984808, 0.173648, 
 [node name="RiverManager" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133.349, -0.5, -256.646)
 script = ExtResource("14_w7lxc")
-ShaderSettings = SubResource("Resource_sfp5y")
+ShaderSettings = SubResource("Resource_3x6or")
 PointWidths = [1.0, 1.0, 8.93679, 12.6499, 12.9542, 12.5382, 10.2224, 13.528, 18.2722, 13.807, 17.5397, 22.8556, 13.1956, 18.1966, 15.4319, 14.9793, 21.8071, 19.0437, 20.3709, 17.991, 15.3338, 15.8683, 15.8851, 14.1605, 17.1658, 11.7789, 11.5452, 13.9985, 13.8821, 14.9215]
-Curve = SubResource("Curve3D_xo6l7")
+Curve = SubResource("Curve3D_wpmom")
 
 [node name="RiverManagerMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133.349, -0.5, -256.646)

@@ -18,7 +18,7 @@ namespace SacaSimulationGame.scripts.map
         private bool _showSlopeGradients = true;
 
         private Dictionary<Vector2I, MapDataItem> TerrainGradients = new Dictionary<Vector2I, MapDataItem>();
-        private Vector2 CellSize;
+        private Vector3I CellSize;
         private Gradient ColorRamp;
         private float VisualHeight = 1.15f;
         private float Transparency = 0.25f;
@@ -28,7 +28,7 @@ namespace SacaSimulationGame.scripts.map
             ColorRamp = CreateColorRamp();
         }
 
-        public void SetGradients(Dictionary<Vector2I, MapDataItem> gradients, Vector2I cellSize)
+        public void SetGradients(Dictionary<Vector2I, MapDataItem> gradients, Vector3I cellSize)
         {
             TerrainGradients = gradients;
             CellSize = cellSize;
@@ -59,7 +59,7 @@ namespace SacaSimulationGame.scripts.map
         {
             var meshInstance = new MeshInstance3D();
             var planeMesh = new PlaneMesh();
-            planeMesh.Size = new Vector2(CellSize.X, CellSize.Y);
+            planeMesh.Size = new Vector2(CellSize.X, CellSize.Z);
             meshInstance.Mesh = planeMesh;
 
             var material = new StandardMaterial3D();
@@ -70,7 +70,7 @@ namespace SacaSimulationGame.scripts.map
             material.CullMode = BaseMaterial3D.CullModeEnum.Disabled;
             meshInstance.SetSurfaceOverrideMaterial(0, material);
 
-            meshInstance.Position = new Vector3(cell.X * CellSize.X, VisualHeight, cell.Y * CellSize.Y);
+            meshInstance.Position = new Vector3(cell.X * CellSize.X, VisualHeight, cell.Y * CellSize.Z);
             AddChild(meshInstance);
         }
 

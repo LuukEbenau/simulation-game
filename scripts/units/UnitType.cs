@@ -4,13 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SacaSimulationGame.scripts.map
+namespace SacaSimulationGame.scripts.units
 {
-    public enum BuildingRotation
+    public enum UnitType
     {
-        Top,
-        Right,
-        Bottom,
-        Left
+        WORKER,
+        BUILDER
     }
 }
