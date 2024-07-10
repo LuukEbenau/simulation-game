@@ -2,14 +2,15 @@ using Godot;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.map;
 using SacaSimulationGame.scripts.units;
+using SacaSimulationGame.scripts.units.dataObjects;
 using System;
 using System.Linq;
 
 public partial class GameManager : Node3D
 {
-    UnitManager UnitManager { get; set; }
-    IWorldMapManager MapManager { get; set; }
-    BuildingManager BuildingManager { get; set; }
+    public UnitManager UnitManager { get; set; }
+    public IWorldMapManager MapManager { get; set; }
+    public BuildingManager BuildingManager { get; set; }
     private Node3D SpawnLocation { get; set; }
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
@@ -44,11 +45,11 @@ public partial class GameManager : Node3D
             spawnSucces = BuildingManager.BuildBuilding(spawnCell, new House(), BuildingRotation.Bottom);
         }
 
-        (Unit unit, Vector2I offset)[] unitsToSpawn = [
-            (new Builder(gender: UnitGender.MALE), new Vector2I(2,2)),
-            (new Worker(gender: UnitGender.FEMALE), new Vector2I(2,3)),
-            (new Worker(gender: UnitGender.FEMALE), new Vector2I(2,-2)),
-            (new Worker(gender: UnitGender.MALE), new Vector2I(2,-3))
+        (UnitDataObject unit, Vector2I offset)[] unitsToSpawn = [
+            (new BuilderDataObject(gender: UnitGender.MALE), new Vector2I(2,2)),
+            (new WorkerDataObject(gender: UnitGender.FEMALE), new Vector2I(2,3)),
+            (new WorkerDataObject(gender: UnitGender.FEMALE), new Vector2I(2,-2)),
+            (new WorkerDataObject(gender: UnitGender.MALE), new Vector2I(2,-3))
         ];
         foreach(var (unit, offset) in unitsToSpawn)
         {

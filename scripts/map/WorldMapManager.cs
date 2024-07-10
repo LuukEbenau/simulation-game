@@ -1,4 +1,5 @@
 using Godot;
+using SacaSimulationGame.scripts.pathfinding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +36,16 @@ namespace SacaSimulationGame.scripts.map
 
         private TerrainGradientVisualizer GradientVisualizer;
         public TerrainMapper TerrainMapper { get; set; }
+
+        public int MinX { get; private set; }
+        public int MinY { get; private set; }
+        public int MaxX { get; private set; }
+        public int MaxY { get; private set; }
+        public int MapWidth { get; private set; }
+        public int MapHeight {  get; private set; }
         public Dictionary<Vector2I, MapDataItem> MapData { get; set; } 
+
+        public AstarPathfinder Pathfinder { get; private set; }
 
         public Vector3 CellToWorld(Vector2I cell, float height = 0, bool centered = false)
         {
@@ -51,6 +61,22 @@ namespace SacaSimulationGame.scripts.map
 
             return worldPos;
         }
+        /// <summary>
+        /// Results a world position on a interpolated position inside the cell
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="height"></param>
+        /// <param name="centered"></param>
+        /// <returns></returns>
+        public Vector3 CellToWorldInterpolated(Vector2 cell, float height = 0)
+        {
+            var origin = Terrain.GlobalPosition;
+
+            var worldPos = new Vector3(origin.X + cell.X * CellSize.X, height, origin.Z + cell.Y * CellSize.Z);
+
+            return worldPos;
+        }
+
 
         public Vector2I WorldToCell(Vector3 worldPos)
         {
@@ -65,12 +91,24 @@ namespace SacaSimulationGame.scripts.map
             return new Vector2I(cellX, cellY);
         }
 
+        private (int minX, int minY, int maxX, int maxY) GetMapDimensions(Dictionary<Vector2I,MapDataItem> mapData) 
+        {
+            var minX = mapData.Keys.Min(k => k.X);
+            var minY = mapData.Keys.Min(k => k.Y);
+            var maxX = mapData.Keys.Max(k => k.X);
+            var maxY = mapData.Keys.Max(k => k.Y);
+            return (minX, minY, maxX, maxY);
+        }
+
         public override void _Ready()
         {
             GradientVisualizer = GetNode<TerrainGradientVisualizer>("TerrainGradientVisualizer");
             TerrainMapper = GetNode<TerrainMapper>("TerrainMapper");
 
             MapData = TerrainMapper.LoadMapdata(Terrain, CellSize, this.MapPropertiesCacheEnabled);
+            (this.MinX, this.MinY, this.MaxX, this.MaxY) = GetMapDimensions(MapData);
+            this.MapWidth = this.MaxX - this.MinX;
+            this.MapHeight = this.MaxY - this.MinY;
 
             // Initialize gradient
             GradientVisualizer.Position = new Vector3(
@@ -81,6 +119,8 @@ namespace SacaSimulationGame.scripts.map
 
             GradientVisualizer.SetGradients(MapData, CellSize);
             GradientVisualizer.ShowSlopeGradients = ShowSlopeGradients;
+
+            this.Pathfinder = new AstarPathfinder(this);
         }
     }
 }

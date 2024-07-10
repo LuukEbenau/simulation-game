@@ -3,18 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Godot;
+using SacaSimulationGame.scripts.units.dataObjects;
 
 namespace SacaSimulationGame.scripts.units
 {
-    [Flags]
-    public enum UnitGender
+    public partial class Unit: Node3D
     {
-        MALE = 1,
-        FEMALE = 2
-    }
-    public abstract class Unit(UnitGender gender)
-    {
-        public abstract UnitType Type { get; }
-        public UnitGender Gender { get; } = gender;
+        public GameManager GameManager { get; set; }
+        public UnitDataObject UnitData { get; set; }
     }
 }

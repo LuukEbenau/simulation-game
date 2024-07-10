@@ -1,5 +1,6 @@
 using Godot;
 using SacaSimulationGame.scripts.units;
+using SacaSimulationGame.scripts.units.dataObjects;
 using System;
 
 public partial class UnitManager : Node3D
@@ -11,11 +12,12 @@ public partial class UnitManager : Node3D
     public PackedScene WorkerScene { get; set; }
 
 
+    private GameManager GameManager { get; set; }
     // Called when the node enters the scene tree for the first time.
     //private 
     public override void _Ready()
     {
-
+        this.GameManager = this.GetParent<GameManager>();
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -23,14 +25,22 @@ public partial class UnitManager : Node3D
     {
     }
 
-    public bool SpawnUnit(Vector3 spawnLocation, Unit unit) {
-        Node3D instance = unit.Type switch
+    public bool SpawnUnit(Vector3 spawnLocation, UnitDataObject unit) {
+        Unit instance;
+        if (unit.Type == UnitType.WORKER)
         {
-            UnitType.BUILDER => this.BuilderScene.Instantiate<Node3D>(),
-            UnitType.WORKER => this.WorkerScene.Instantiate<Node3D>(),
-            _ => throw new Exception($"Unit type {unit.Type} is not handled by switch"),
-        };
+            instance = this.WorkerScene.Instantiate<Worker>();
+        }
+        else if (unit.Type == UnitType.BUILDER) {
+            instance = this.BuilderScene.Instantiate<Builder>();
+        }
+        else
+        {
+            throw new Exception("undefined instance type");
+        }
 
+        instance.UnitData = unit;
+        instance.GameManager = this.GameManager;
         instance.GlobalPosition = spawnLocation;
 
         AddChild(instance);
