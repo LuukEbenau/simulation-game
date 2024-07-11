@@ -134,7 +134,7 @@ namespace SacaSimulationGame.scripts.map
 
         public bool BuildBuilding(Vector2I cell, Building building, BuildingRotation rotation)
         {
-            if (MapManager.MapData[cell].CellType != CellType.GROUND) {
+            if (MapManager.GetCell(cell).CellType != CellType.GROUND) {
                 GD.Print("Tried to place building on terrain different than ground");
                 return false; 
             }
@@ -161,7 +161,7 @@ namespace SacaSimulationGame.scripts.map
             }
 
             // Set the position
-            Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.MapData[cell].Height + 0.15f, centered: true);
+            Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + 0.15f, centered: true);
 
             buildingInstance.GlobalPosition = worldPosition;
             buildingInstance.Scale = MapManager.CellSize;
@@ -294,7 +294,7 @@ namespace SacaSimulationGame.scripts.map
                 for (int y = 0; y < shapeHeight; y++)
                 {
                     var cellShifted = cell + new Vector2I(x, y);
-                    if (MapManager.MapData.TryGetValue(cellShifted, out MapDataItem data))
+                    if (MapManager.TryGetCell(cellShifted, out MapDataItem data))
                     {
                         bool cellBuildable = IsCellBuildable(data, building.Shape[x, y], building.MaxSlopeAngle, cellShifted);
                         buildingBuildable &= cellBuildable;

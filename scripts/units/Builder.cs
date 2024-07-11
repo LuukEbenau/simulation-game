@@ -16,13 +16,13 @@ namespace SacaSimulationGame.scripts.units
         
 
         private float speed = 5;
-        private Random _rnd;
+
         private bool arrived = false;
         private int currentPathIndex = 0;
         private List<Vector3> localPath = null;
         public override void _Ready()
         {
-            _rnd = new Random();
+            
             GD.Print("builder ready");
         }
 
@@ -34,7 +34,7 @@ namespace SacaSimulationGame.scripts.units
                 GD.Print($"Unit {this.Name} of type {this.UnitData.Type} moving to cell {destinationCell}");
 
                 var currentCellPos = GameManager.MapManager.WorldToCell(GlobalPosition);
-                Vector2[] cellPath = GameManager.MapManager.Pathfinder.FindPath(currentCellPos, destinationCell);
+                List<Vector2I> cellPath = GameManager.MapManager.Pathfinder.FindPath(currentCellPos, destinationCell);
 
                 localPath = cellPath.Select(cp => ToLocal(GameManager.MapManager.CellToWorldInterpolated(cp))).ToList();
 
@@ -64,7 +64,7 @@ namespace SacaSimulationGame.scripts.units
             }
             else
             {
-                Position = target; // probably unneeded
+                //Position = target; // probably unneeded
                 currentPathIndex++;
 
                 if (currentPathIndex >= localPath.Count)
@@ -83,13 +83,6 @@ namespace SacaSimulationGame.scripts.units
             this.GameManager.BuildingManager.BuildBuilding(cell,new House(), map.BuildingRotation.Bottom);
         }
 
-        private Vector2I GetNewDestination()
-        {
-            Vector3 destination = new(_rnd.Next(0, 40), 0, _rnd.Next(0, 40));
-
-            var destinationCell = GameManager.MapManager.WorldToCell(destination);
-            return destinationCell;
-        }
 
 
     }

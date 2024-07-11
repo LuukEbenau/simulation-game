@@ -6,12 +6,14 @@ namespace SacaSimulationGame.scripts.map
 {
     public interface IWorldMapManager
     {
-        Dictionary<Vector2I, MapDataItem> MapData { get; }
-
+        MapDataItem GetCell(Vector2I cell);
+        bool ContainsCell(Vector2I cell);
+        bool TryGetCell(Vector2I cell, out MapDataItem item);
+        int CellCount { get; }
         Vector3I CellSize { get; set; }
         
         StaticBody3D RiverCollider { get; set; }
-        AstarPathfinder Pathfinder { get; }
+        CustomAStarPathfinder Pathfinder { get; }
         Node3D Terrain { get; set; }
 
         Vector3 CellToWorld(Vector2I cell, float height=0, bool centered = false);

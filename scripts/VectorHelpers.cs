@@ -17,5 +17,9 @@ namespace SacaSimulationGame.scripts
         {
             return new Vector3(v.X, height, v.Y);
         }
+        public static float DistanceTo(this Vector2I a, Vector2I b)
+        {
+            return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
+        }
     }
 }

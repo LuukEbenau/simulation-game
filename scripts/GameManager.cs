@@ -39,7 +39,7 @@ public partial class GameManager : Node3D
         while (!spawnSucces && spawnRetryCount < spawnRetryCoundCap) {
             spawnRetryCount++;
 
-            var randI = rand.Next(0, MapManager.MapData.Count);
+            //var randI = rand.Next(0, MapManager.GetCellCount());
             //spawnCell = MapManager.MapData.ElementAt(randI).Key;
             //TODO: give randomness in the spawn location, now the loop doesnt do anything
             spawnSucces = BuildingManager.BuildBuilding(spawnCell, new House(), BuildingRotation.Bottom);
@@ -59,7 +59,7 @@ public partial class GameManager : Node3D
                 spawnRetryCount++;
 
                 var unitCell = spawnCell + offset;
-                var height = MapManager.MapData[unitCell].Height + 0.1f;
+                var height = MapManager.GetCell(unitCell).Height + 0.1f;
                 Vector3 spawnCoordinate = MapManager.CellToWorld(unitCell, height);
 
                 //TODO: give randomness in the spawn location, now the loop doesnt do anything

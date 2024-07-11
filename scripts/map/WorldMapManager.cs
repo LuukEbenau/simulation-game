@@ -43,9 +43,27 @@ namespace SacaSimulationGame.scripts.map
         public int MaxY { get; private set; }
         public int MapWidth { get; private set; }
         public int MapHeight {  get; private set; }
-        public Dictionary<Vector2I, MapDataItem> MapData { get; set; } 
+        private Dictionary<Vector2I, MapDataItem> MapData { get; set; } 
 
-        public AstarPathfinder Pathfinder { get; private set; }
+        public MapDataItem GetCell(Vector2I cell)
+        {
+            if (!this.MapData.TryGetValue(cell, out MapDataItem content))
+            {
+                return null;
+            }
+            return content;
+        }
+        public bool ContainsCell(Vector2I cell)
+        {
+            return this.MapData.TryGetValue(cell, out MapDataItem _);
+        }
+        public bool TryGetCell(Vector2I cell, out MapDataItem item)
+        {
+            return this.MapData.TryGetValue(cell, out item);
+        }
+        public int CellCount => MapData.Count;
+
+        public CustomAStarPathfinder Pathfinder { get; private set; }
 
         public Vector3 CellToWorld(Vector2I cell, float height = 0, bool centered = false)
         {
@@ -120,7 +138,7 @@ namespace SacaSimulationGame.scripts.map
             GradientVisualizer.SetGradients(MapData, CellSize);
             GradientVisualizer.ShowSlopeGradients = ShowSlopeGradients;
 
-            this.Pathfinder = new AstarPathfinder(this);
+            this.Pathfinder = new CustomAStarPathfinder(this);
         }
     }
 }

@@ -37,32 +37,32 @@ namespace SacaSimulationGame.scripts.pathfinding
 
         private void AssignCoefficientsToGrid()
         {
-            foreach(var p in MapManager.MapData)
-            {
-                float coefficient = 1;
-                bool solid;
-                if (p.Value.CellType == CellType.WATER)
-                {
-                    solid = false;
-                }
-                else if (p.Value.CellType == CellType.GROUND)
-                {
-                    solid = true;
-                }
-                else {
-                    throw new Exception($"undefined celltype in pathfinding");
-                }
-                //TODO: check for roads, and decreace coefficient for those
+            //foreach(var p in MapManager.MapData)
+            //{
+            //    float coefficient = 1;
+            //    bool solid;
+            //    if (p.Value.CellType == CellType.WATER)
+            //    {
+            //        solid = false;
+            //    }
+            //    else if (p.Value.CellType == CellType.GROUND)
+            //    {
+            //        solid = true;
+            //    }
+            //    else {
+            //        throw new Exception($"undefined celltype in pathfinding");
+            //    }
+            //    //TODO: check for roads, and decreace coefficient for those
 
-                //if (!solid)
-                //{
-                //    AStarGrid.SetPointSolid(p.Key, solid);
-                //}
-                //else
-                //{
-                //AStarGrid.SetPointWeightScale(p.Key, coefficient);
-                //}
-            }
+            //    //if (!solid)
+            //    //{
+            //    //    AStarGrid.SetPointSolid(p.Key, solid);
+            //    //}
+            //    //else
+            //    //{
+            //    //AStarGrid.SetPointWeightScale(p.Key, coefficient);
+            //    //}
+            //}
         }
     }
 }
