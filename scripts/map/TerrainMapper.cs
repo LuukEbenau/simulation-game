@@ -34,10 +34,10 @@ namespace SacaSimulationGame.scripts.map
                 GD.Print("Calculating terrain gradients...");
                 mapData = MapTerrain(terrain, cellSize);
                 PrintTerrainInfo(mapData, cellSize);
-                //mapData = CalculateTerrainGradients(grid, cellSize);
-                SaveMapdata(mapData);
+
                 GD.Print("Terrain gradients calculated and saved");
             }
+            SaveMapdata(mapData);
             return mapData;
         }
 

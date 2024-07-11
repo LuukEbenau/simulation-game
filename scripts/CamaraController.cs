@@ -8,14 +8,20 @@ public partial class CamaraController : Node3D
     [Export] public float ZoomSpeed { get; set; } = 5.0f;
     [Export] public float MinZoom { get; set; } = 6.0f;
     [Export] public float MaxZoom { get; set; } = 190.0f;
-    [Export] public float BorderThreshold { get; set; } = 50.0f;
-    [Export] public float MaxAngle { get; set; } = -85.0f;  // Angle when fully zoomed out
-    [Export] public float MinAngle { get; set; } = -12.0f;  // Angle when fully zoomed in
+    /// <summary>
+    /// MouseDistanceFromBorder
+    /// </summary>
+    [Export] public float MouseDistanceFromScreenBorderThreshhold { get; set; } = 50.0f;
+    [Export] public float MaxAngle { get; set; } = -85.0f;
+    [Export] public float MinAngle { get; set; } = -12.0f;
 
     private Vector2 _viewportSize;
     private Camera3D _camera;
     private Node3D _map;
+    private Vector3 _minWorldCoord;
+    private Vector3 _maxWorldCoord;
 
+    private GameManager GameManager { get; set; }
     public override void _Ready()
     {
         GD.Print("loading camera");
@@ -30,22 +36,42 @@ public partial class CamaraController : Node3D
 
         GlobalPosition = new Vector3(GlobalPosition.X, _map.GlobalPosition.Y + MaxZoom, GlobalPosition.Z);
         UpdateCameraAngle();
+
+        this.GameManager = GetParent().GetNode<GameManager>("GameManager");
     }
 
     public override void _Process(double delta)
     {
+        if(_minWorldCoord == default)
+        {
+            var borderBoundarySize = 5;
+            var minCell = new Vector2I(borderBoundarySize, borderBoundarySize);
+            var maxCell = new Vector2I(this.GameManager.MapManager.MapWidth - borderBoundarySize, GameManager.MapManager.MapHeight - borderBoundarySize);
+            _minWorldCoord = this.GameManager.MapManager.CellToWorld(minCell);
+            _maxWorldCoord = this.GameManager.MapManager.CellToWorld(maxCell);
+        }
+
         Vector2 mousePos = GetViewport().GetMousePosition();
         Vector3 moveDir = Vector3.Zero;
 
+        //TODO: i want to prevent scrolling outside map borders. The borders of the map are defined as following:
+
+        //var borderBoundarySize = 40;
+
+        //var minCell = new Vector2I(this.GameManager.MapManager.MinX + borderBoundarySize, this.GameManager.MapManager.MinY + borderBoundarySize);
+        //var maxCell = new Vector2I(this.GameManager.MapManager.MaxX - borderBoundarySize, GameManager.MapManager.MaxY - borderBoundarySize);
+        //var minWorldCoord = this.GameManager.MapManager.CellToWorld(minCell);
+        //var maxWorldCoord = this.GameManager.MapManager.CellToWorld(maxCell);
+
         // Check if mouse is near the borders
-        if (mousePos.X < BorderThreshold || Input.IsActionPressed("Move Camera Left"))
+        if (mousePos.X < MouseDistanceFromScreenBorderThreshhold || Input.IsActionPressed("Move Camera Left"))
             moveDir.X -= 1;
-        else if (mousePos.X > _viewportSize.X - BorderThreshold || Input.IsActionPressed("Move Camera Right"))
+        else if (mousePos.X > _viewportSize.X - MouseDistanceFromScreenBorderThreshhold || Input.IsActionPressed("Move Camera Right"))
             moveDir.X += 1;
 
-        if (mousePos.Y < BorderThreshold || Input.IsActionPressed("Move Camera Top"))
+        if (mousePos.Y < MouseDistanceFromScreenBorderThreshhold || Input.IsActionPressed("Move Camera Top"))
             moveDir.Z -= 1;
-        else if (mousePos.Y > _viewportSize.Y - BorderThreshold || Input.IsActionPressed("Move Camera Bottom"))
+        else if (mousePos.Y > _viewportSize.Y - MouseDistanceFromScreenBorderThreshhold || Input.IsActionPressed("Move Camera Bottom"))
             moveDir.Z += 1;
 
         MoveScreen(moveDir, (float)delta);
@@ -56,7 +82,17 @@ public partial class CamaraController : Node3D
         if (dir != Vector3.Zero)
         {
             dir = dir.Normalized();
-            GlobalTranslate(dir * _moveSpeedDynamic * delta);
+            Vector3 newPosition = GlobalPosition + dir * _moveSpeedDynamic * delta;
+
+            // Clamp the new position within the map boundaries
+            newPosition.X = Mathf.Clamp(newPosition.X, _minWorldCoord.X, _maxWorldCoord.X);
+            newPosition.Z = Mathf.Clamp(newPosition.Z, _minWorldCoord.Z, _maxWorldCoord.Z);
+
+            // Only move if the new position is different
+            if (newPosition != GlobalPosition)
+            {
+                GlobalPosition = newPosition;
+            }
         }
     }
 
