@@ -13,7 +13,7 @@ namespace SacaSimulationGame.scripts
         {
             return new Vector2I(v.X, v.Z);
         }
-        public static Vector3 ToVec3World(this Vector2 v, int height = 0)
+        public static Vector3 ToVec3World(this Vector2 v, float height = 0)
         {
             return new Vector3(v.X, height, v.Y);
         }

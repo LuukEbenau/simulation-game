@@ -5,6 +5,7 @@ namespace Waterways.Util;
 
 public static class RiverShaderHelper
 {
+    [System.Diagnostics.DebuggerHidden]
     public static void SetStandardMaterialShader(ShaderMaterial material, ShaderType shaderType)
     {
         switch (shaderType)

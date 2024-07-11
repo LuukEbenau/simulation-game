@@ -8,7 +8,7 @@ namespace SacaSimulationGame.scripts.map
     public partial class BuildingManager : Node3D
     {
         // Called when the node enters the scene tree for the first time.
-        private IWorldMapManager MapManager { get; set; }
+        private WorldMapManager MapManager { get; set; }
         private Camera3D Camera { get; set; }
 
         private readonly Vector2I _defaultVec = new(int.MinValue, int.MinValue);

@@ -49,14 +49,14 @@ namespace SacaSimulationGame.scripts.units
 
                 arrived = false;
                 currentPathIndex = 0;
-                GD.Print($"path is: {JsonConvert.SerializeObject(path)}");
+                //GD.Print($"path is: {JsonConvert.SerializeObject(path)}");
             }
             else if (path != null && path.Count > 0)
             {
                 FollowPath(delta);
             }
             else if (path.Count == 0) {
-                GD.Print("Path is not reachable");
+                //GD.Print("Path is not reachable");
                 path = null;
             }
         }

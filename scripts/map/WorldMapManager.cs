@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace SacaSimulationGame.scripts.map
 {
-    public partial class WorldMapManager : Node3D, IWorldMapManager
+    public partial class WorldMapManager : Node3D
     {
         [Export]
         public Vector3I CellSize { get; set; } = new Vector3I(4, 4, 4);
@@ -43,32 +43,59 @@ namespace SacaSimulationGame.scripts.map
         public int MaxY { get; private set; }
         public int MapWidth { get; private set; }
         public int MapHeight {  get; private set; }
-        private Dictionary<Vector2I, MapDataItem> MapData { get; set; } 
+        private Dictionary<Vector2I, MapDataItem> MapData2 { get; set; } 
+        private MapDataItem[,] MapData { get; set; }
 
         public MapDataItem GetCell(Vector2I cell)
         {
-            if (!this.MapData.TryGetValue(cell, out MapDataItem content))
-            {
+
+            if (!CellInsideBounds(cell)) {
+                GD.Print("coordinate outside bounds");
                 return null;
             }
-            return content;
+
+            return this.MapData[cell.X, cell.Y];
+
+            //if (!this.MapData.TryGetValue(cell, out MapDataItem content))
+            //{
+            //    return null;
+            //}
+            //return content;
         }
-        public bool ContainsCell(Vector2I cell)
+        public bool CellInsideBounds(Vector2I cell)
         {
-            return this.MapData.TryGetValue(cell, out MapDataItem _);
+            if (cell.X < 0 || cell.Y < 0 || cell.X >= MapWidth || cell.Y >= MapHeight)
+            {
+                return false;
+            }
+            return true;
+            //return this.MapData.TryGetValue(cell, out MapDataItem _);
         }
+
+
         public bool TryGetCell(Vector2I cell, out MapDataItem item)
         {
-            return this.MapData.TryGetValue(cell, out item);
+            var data = GetCell(cell);
+            if (data != null) {
+                item = data;
+                return true;
+            }
+            item = null;
+            return false;
         }
-        public int CellCount => MapData.Count;
+        public int CellCount => MapData.Length;
 
         public CustomAStarPathfinder Pathfinder { get; private set; }
 
+
+        #region cell mapping to world
         public Vector3 CellToWorld(Vector2I cell, float height = 0, bool centered = false)
         {
             var origin = Terrain.GlobalPosition;
             //var worldPos = origin + cell * CellSize;
+
+            // Since we removed this when calculating cellnumbers, now we have to add them
+            cell += new Vector2I(MinX, MinY);
 
             var worldPos = new Vector3(origin.X + cell.X * CellSize.X, height, origin.Z + cell.Y * CellSize.Z);
             if (centered)
@@ -79,6 +106,7 @@ namespace SacaSimulationGame.scripts.map
 
             return worldPos;
         }
+
         /// <summary>
         /// Results a world position on a interpolated position inside the cell
         /// </summary>
@@ -90,9 +118,17 @@ namespace SacaSimulationGame.scripts.map
         {
             var origin = Terrain.GlobalPosition;
 
+            cell += new Vector2I(MinX, MinY);
+
             var worldPos = new Vector3(origin.X + cell.X * CellSize.X, height, origin.Z + cell.Y * CellSize.Z);
 
             return worldPos;
+        }
+
+        public bool WorldPosInsideBounds(Vector3 worldPos)
+        {
+            var cell = WorldToCell(worldPos);
+            return CellInsideBounds(cell);
         }
 
 
@@ -106,8 +142,14 @@ namespace SacaSimulationGame.scripts.map
             var cellX = Mathf.FloorToInt(relativePos.X / CellSize.X);
             var cellY = Mathf.FloorToInt(relativePos.Y / CellSize.Z);
 
+            // Since we removed this when calculating cellnumbers, now we have to add them
+            cellX -= this.MinX;
+            cellY -= this.MinY;
+
             return new Vector2I(cellX, cellY);
         }
+
+        #endregion
 
         private (int minX, int minY, int maxX, int maxY) GetMapDimensions(Dictionary<Vector2I,MapDataItem> mapData) 
         {
@@ -115,7 +157,38 @@ namespace SacaSimulationGame.scripts.map
             var minY = mapData.Keys.Min(k => k.Y);
             var maxX = mapData.Keys.Max(k => k.X);
             var maxY = mapData.Keys.Max(k => k.Y);
+
             return (minX, minY, maxX, maxY);
+        }
+
+        private MapDataItem[,] TransformMapdataToArray(Dictionary<Vector2I, MapDataItem> mapData)
+        {
+            MapDataItem[,] mapArray = new MapDataItem[MapWidth, MapHeight];
+
+            foreach (var kvp in mapData)
+            {
+                Vector2I position = kvp.Key;
+                MapDataItem item = kvp.Value;
+
+                int arrayX = position.X - MinX;
+                int arrayY = position.Y - MinY;
+                if(item == null)
+                {
+                    GD.Print($"WARNING: item is set to null at {position}");
+                }
+                mapArray[arrayX, arrayY] = item;
+            }
+
+            return mapArray;
+        }
+
+        private void StoreMapdata(Dictionary<Vector2I, MapDataItem> mapData)
+        {
+            (this.MinX, this.MinY, this.MaxX, this.MaxY) = GetMapDimensions(mapData);
+            this.MapWidth = this.MaxX - this.MinX + 1;
+            this.MapHeight = this.MaxY - this.MinY + 1;
+
+            this.MapData = this.TransformMapdataToArray(mapData);
         }
 
         public override void _Ready()
@@ -123,10 +196,8 @@ namespace SacaSimulationGame.scripts.map
             GradientVisualizer = GetNode<TerrainGradientVisualizer>("TerrainGradientVisualizer");
             TerrainMapper = GetNode<TerrainMapper>("TerrainMapper");
 
-            MapData = TerrainMapper.LoadMapdata(Terrain, CellSize, this.MapPropertiesCacheEnabled);
-            (this.MinX, this.MinY, this.MaxX, this.MaxY) = GetMapDimensions(MapData);
-            this.MapWidth = this.MaxX - this.MinX;
-            this.MapHeight = this.MaxY - this.MinY;
+            var mapData = TerrainMapper.LoadMapdata(Terrain, CellSize, this.MapPropertiesCacheEnabled);
+            StoreMapdata(mapData);
 
             // Initialize gradient
             GradientVisualizer.Position = new Vector3(
@@ -135,7 +206,7 @@ namespace SacaSimulationGame.scripts.map
                 Terrain.GlobalTransform.Origin.Z
             );
 
-            GradientVisualizer.SetGradients(MapData, CellSize);
+            GradientVisualizer.SetGradients(MapData, CellSize, this);
             GradientVisualizer.ShowSlopeGradients = ShowSlopeGradients;
 
             this.Pathfinder = new CustomAStarPathfinder(this);

@@ -17,19 +17,22 @@ namespace SacaSimulationGame.scripts.map
         }
         private bool _showSlopeGradients = true;
 
-        private Dictionary<Vector2I, MapDataItem> TerrainGradients = new Dictionary<Vector2I, MapDataItem>();
+        private MapDataItem[,] TerrainGradients;
         private Vector3I CellSize;
         private Gradient ColorRamp;
         private float VisualHeight = 1.15f;
         private float Transparency = 0.25f;
+
+        private WorldMapManager MapManager = null;
 
         public override void _Ready()
         {
             ColorRamp = CreateColorRamp();
         }
 
-        public void SetGradients(Dictionary<Vector2I, MapDataItem> gradients, Vector3I cellSize)
+        public void SetGradients(MapDataItem[,] gradients, Vector3I cellSize, WorldMapManager mapManager)
         {
+            this.MapManager = mapManager;
             TerrainGradients = gradients;
             CellSize = cellSize;
             CreateVisualization();
@@ -37,25 +40,39 @@ namespace SacaSimulationGame.scripts.map
 
         private void CreateVisualization()
         {
-            foreach (var cell in TerrainGradients.Keys)
-            {
-                Color color;
-                if (TerrainGradients[cell].CellType.HasFlag(CellType.WATER))
+            var xLen = TerrainGradients.GetLength(0);
+            var yLen = TerrainGradients.GetLength(1);
+            for (int x = 0; x < xLen; x++) {
+                for (int y = 0; y < yLen; y++)
                 {
-                    color = new Color(0, 0, 1);
-                }
-                else
-                {
-                    float slope = TerrainGradients[cell].Slope;
-                    color = GetColorForAngle(slope);
-                }
+                    Color color;
+                    var cellData = TerrainGradients[x, y];
+                    if(cellData == null)
+                    {
+                        GD.Print($"content oc cell {x},{y} is null");
+                        color = new Color(1, 1, 1);
+                    }
+                    else if (cellData.CellType.HasFlag(CellType.WATER))
+                    {
+                        color = new Color(0, 0, 1);
+                    }
+                    else
+                    {
+                        float slope = cellData.Slope;
+                        color = GetColorForAngle(slope);
+                    }
 
-                CreateCellVisual(cell, color);
+                    CreateCellVisual(x,y, color);
+                }
             }
+            //foreach (var cell in TerrainGradients.Keys)
+            //{
+
+            //}
             UpdateVisibility();
         }
 
-        private void CreateCellVisual(Vector2I cell, Color color)
+        private void CreateCellVisual(int x, int y, Color color)
         {
             var meshInstance = new MeshInstance3D();
             var planeMesh = new PlaneMesh();
@@ -70,7 +87,9 @@ namespace SacaSimulationGame.scripts.map
             material.CullMode = BaseMaterial3D.CullModeEnum.Disabled;
             meshInstance.SetSurfaceOverrideMaterial(0, material);
 
-            meshInstance.Position = new Vector3(cell.X * CellSize.X, VisualHeight, cell.Y * CellSize.Z);
+            //MapManager.CellToWorldInterpolated(new Vector2(x + 0.5f, y + 0.5f))
+            //n.ToVec3World();
+            meshInstance.Position = MapManager.CellToWorldInterpolated(new Vector2(x + 0.5f, y + 0.5f), VisualHeight);// new Vector3(x * CellSize.X, , y * CellSize.Z);
             AddChild(meshInstance);
         }
 

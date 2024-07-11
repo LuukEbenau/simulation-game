@@ -188,7 +188,7 @@ public partial class RiverShaderSettings : Resource
     #endregion
 
     #region Properties Management
-
+    [System.Diagnostics.DebuggerHidden]
     public RiverShaderSettings()
     {
         Material ??= new ShaderMaterial();

@@ -10,8 +10,8 @@ namespace SacaSimulationGame.scripts.map
     {
         private string currentMap = "scene1";
         private string MAPDATA_FILE;
-        private float raycastStartHeight = 50.0f;
-        private float raycastLength = 100.0f;
+        private float raycastStartHeight = 150.0f;
+        private float raycastLength = 200.0f;
         public Vector2I[] directions = [
             new(1, 0), new(-1, 0), new(0, 1), new(0, -1)
         ];

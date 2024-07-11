@@ -9,7 +9,7 @@ using System.Linq;
 public partial class GameManager : Node3D
 {
     public UnitManager UnitManager { get; set; }
-    public IWorldMapManager MapManager { get; set; }
+    public WorldMapManager MapManager { get; set; }
     public BuildingManager BuildingManager { get; set; }
     private Node3D SpawnLocation { get; set; }
     // Called when the node enters the scene tree for the first time.

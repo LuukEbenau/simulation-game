@@ -136,7 +136,7 @@ script = ExtResource("7_jcitx")
 mode = 0
 textures = [[ExtResource("10_iah8u"), ExtResource("11_ovtdu"), ExtResource("12_is0kv")], [ExtResource("13_li7dd"), ExtResource("14_smaa8"), ExtResource("15_o345l")]]
 
-[sub_resource type="Resource" id="Resource_7eswx"]
+[sub_resource type="Resource" id="Resource_esc25"]
 script = ExtResource("16_3blqo")
 MatShaderType = 1
 mat_albedo_color_first = Color(0.6, 0.7, 0.65, 1)
@@ -164,7 +164,7 @@ mat_edge_fade = 0.25
 LodLod0Distance = 50.0
 _selectedShader = 1
 
-[sub_resource type="Curve3D" id="Curve3D_2bulm"]
+[sub_resource type="Curve3D" id="Curve3D_7tm0n"]
 resource_local_to_scene = true
 bake_interval = 0.05
 _data = {
@@ -236,7 +236,7 @@ script = ExtResource("2_06t5d")
 script = ExtResource("3_21r36")
 Terrain = NodePath("../../Map")
 RiverCollider = NodePath("../../RiverManagerMesh/StaticBody3D")
-ShowSlopeGradients = false
+MapPropertiesCacheEnabled = false
 
 [node name="TerrainGradientVisualizer" type="Node3D" parent="GameManager/MapManager"]
 script = ExtResource("4_rjmbe")
@@ -283,9 +283,9 @@ transform = Transform3D(1, 0, 0, 0, 0.173648, 0.984808, 0, -0.984808, 0.173648, 
 [node name="RiverManager" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133.349, -0.5, -256.646)
 script = ExtResource("14_w7lxc")
-ShaderSettings = SubResource("Resource_7eswx")
+ShaderSettings = SubResource("Resource_esc25")
 PointWidths = [1.0, 1.0, 8.93679, 12.6499, 12.9542, 12.5382, 10.2224, 13.528, 18.2722, 13.807, 17.5397, 22.8556, 13.1956, 18.1966, 15.4319, 14.9793, 21.8071, 19.0437, 20.3709, 17.991, 15.3338, 15.8683, 15.8851, 14.1605, 17.1658, 11.7789, 11.5452, 13.9985, 13.8821, 14.9215]
-Curve = SubResource("Curve3D_2bulm")
+Curve = SubResource("Curve3D_7tm0n")
 
 [node name="RiverManagerMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133.349, -0.5, -256.646)
