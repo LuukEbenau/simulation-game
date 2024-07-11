@@ -1,4 +1,5 @@
 using Godot;
+using SacaSimulationGame.scripts.managers;
 using System;
 
 public partial class CamaraController : Node3D

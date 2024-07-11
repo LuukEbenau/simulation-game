@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Godot;
 using Newtonsoft.Json;
+using SacaSimulationGame.scripts.managers;
 using SacaSimulationGame.scripts.units.dataObjects;
 
 namespace SacaSimulationGame.scripts.units

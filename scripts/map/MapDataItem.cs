@@ -6,9 +6,9 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SacaSimulationGame.scripts.map;
+
 namespace SacaSimulationGame.scripts.map
 {
-
     public class MapDataItem
     {
         public CellType CellType;

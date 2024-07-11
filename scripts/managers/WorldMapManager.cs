@@ -1,9 +1,10 @@
 using Godot;
+using SacaSimulationGame.scripts.map;
 using SacaSimulationGame.scripts.pathfinding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-namespace SacaSimulationGame.scripts.map
+namespace SacaSimulationGame.scripts.managers
 {
     public partial class WorldMapManager : Node3D
     {

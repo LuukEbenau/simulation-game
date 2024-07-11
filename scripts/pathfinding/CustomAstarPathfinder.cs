@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using SacaSimulationGame.scripts;
+using SacaSimulationGame.scripts.managers;
 using SacaSimulationGame.scripts.map;
 
 namespace SacaSimulationGame.scripts.pathfinding

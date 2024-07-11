@@ -123,6 +123,7 @@ script = ExtResource("2_lea2q")
 Terrain = NodePath("../../Map")
 RiverCollider = NodePath("../../RiverManagerMesh/StaticBody3D")
 MapPropertiesCacheEnabled = false
+ShowSlopeGradients = false
 
 [node name="TerrainGradientVisualizer" type="Node3D" parent="GameManager/MapManager"]
 script = ExtResource("4_rjmbe")
