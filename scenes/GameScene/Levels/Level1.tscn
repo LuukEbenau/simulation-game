@@ -1,19 +1,19 @@
 [gd_scene load_steps=31 format=3 uid="uid://1pdv76fc2dve"]
 
-[ext_resource type="Script" path="res://scripts/GameManager.cs" id="2_06t5d"]
-[ext_resource type="Script" path="res://scripts/map/WorldMapManager.cs" id="3_21r36"]
+[ext_resource type="Script" path="res://scripts/managers/GameManager.cs" id="1_jcks0"]
+[ext_resource type="Script" path="res://scripts/managers/WorldMapManager.cs" id="2_lea2q"]
 [ext_resource type="Script" path="res://scripts/map/TerrainGradientVisualizer.cs" id="4_rjmbe"]
 [ext_resource type="Script" path="res://scripts/map/TerrainMapper.cs" id="5_laoth"]
+[ext_resource type="Script" path="res://scripts/managers/BuildingManager.cs" id="5_ssqwi"]
 [ext_resource type="Script" path="res://addons/zylann.hterrain/hterrain.gd" id="5_vpyhk"]
-[ext_resource type="Script" path="res://scripts/map/BuildingManager.cs" id="6_2cj4d"]
+[ext_resource type="Script" path="res://scripts/managers/UnitManager.cs" id="6_be53k"]
 [ext_resource type="Resource" path="res://assets/TerrainData/data.hterrain" id="6_j82wu"]
 [ext_resource type="Script" path="res://addons/zylann.hterrain/hterrain_texture_set.gd" id="7_jcitx"]
 [ext_resource type="PackedScene" uid="uid://bs0ilcslgtmej" path="res://assets/buildings/house.blend" id="7_ny41d"]
+[ext_resource type="PackedScene" uid="uid://d1qsv4j46j40e" path="res://assets/units/worker.tscn" id="8_8e585"]
 [ext_resource type="PackedScene" uid="uid://dyxy1khb2gub7" path="res://assets/buildings/road.blend" id="8_ke6w6"]
-[ext_resource type="Script" path="res://scripts/units/UnitManager.cs" id="9_pljrj"]
 [ext_resource type="Texture2D" uid="uid://cjvjhaa5ta2w3" path="res://assets/TerrainData/Level1_slot0_albedo_bump.png" id="10_iah8u"]
 [ext_resource type="PackedScene" uid="uid://b22mfraw7krug" path="res://assets/units/builder.tscn" id="10_s8ai3"]
-[ext_resource type="PackedScene" uid="uid://d1qsv4j46j40e" path="res://assets/units/servant.tscn" id="11_8mgng"]
 [ext_resource type="Texture2D" uid="uid://dwr5rscyhfdau" path="res://assets/TerrainData/Level1_slot1_albedo_bump.png" id="11_ovtdu"]
 [ext_resource type="Texture2D" uid="uid://md6s1dhjxc6i" path="res://assets/TerrainData/Level1_slot2_albedo_bump.png" id="12_is0kv"]
 [ext_resource type="Texture2D" uid="uid://v45mx0ysfpoc" path="res://assets/TerrainData/Level1_slot0_normal_roughness.png" id="13_li7dd"]
@@ -116,13 +116,13 @@ data = PackedVector3Array(-53.4828, -0.5, 127.859, -53.8509, -0.5, 127.703, -51.
 [node name="root" type="Node3D"]
 
 [node name="GameManager" type="Node3D" parent="."]
-script = ExtResource("2_06t5d")
+script = ExtResource("1_jcks0")
 
 [node name="MapManager" type="Node3D" parent="GameManager" node_paths=PackedStringArray("Terrain", "RiverCollider")]
-script = ExtResource("3_21r36")
+script = ExtResource("2_lea2q")
 Terrain = NodePath("../../Map")
-RiverCollider = NodePath("")
-ShowSlopeGradients = false
+RiverCollider = NodePath("../../RiverManagerMesh/StaticBody3D")
+MapPropertiesCacheEnabled = false
 
 [node name="TerrainGradientVisualizer" type="Node3D" parent="GameManager/MapManager"]
 script = ExtResource("4_rjmbe")
@@ -132,14 +132,14 @@ ShowSlopeGradients = false
 script = ExtResource("5_laoth")
 
 [node name="BuildingManager" type="Node3D" parent="GameManager"]
-script = ExtResource("6_2cj4d")
+script = ExtResource("5_ssqwi")
 HouseBuilding = ExtResource("7_ny41d")
 RoadBuilding = ExtResource("8_ke6w6")
 
 [node name="UnitManager" type="Node3D" parent="GameManager"]
-script = ExtResource("9_pljrj")
+script = ExtResource("6_be53k")
 BuilderScene = ExtResource("10_s8ai3")
-WorkerScene = ExtResource("11_8mgng")
+WorkerScene = ExtResource("8_8e585")
 
 [node name="SpawnLocation" type="Node3D" parent="GameManager"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -68, 0, 36)
