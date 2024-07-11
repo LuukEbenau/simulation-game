@@ -48,7 +48,7 @@ public partial class GameManager : Node3D
         (UnitDataObject unit, Vector2I offset)[] unitsToSpawn = [
             (new BuilderDataObject(gender: UnitGender.MALE), new Vector2I(2,2)),
             (new WorkerDataObject(gender: UnitGender.FEMALE), new Vector2I(2,3)),
-            (new WorkerDataObject(gender: UnitGender.FEMALE), new Vector2I(2,-2)),
+            (new BuilderDataObject(gender: UnitGender.FEMALE), new Vector2I(2,-2)),
             (new WorkerDataObject(gender: UnitGender.MALE), new Vector2I(2,-3))
         ];
         foreach(var (unit, offset) in unitsToSpawn)

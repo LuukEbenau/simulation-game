@@ -163,15 +163,13 @@ namespace SacaSimulationGame.scripts.map
             // Set the position
             Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + 0.15f, centered: true);
 
-            buildingInstance.GlobalPosition = worldPosition;
-            buildingInstance.Scale = MapManager.CellSize;
-
             // Apply rotation
             ApplyBuildingRotation(buildingInstance, rotation);
 
             // Add the building to the scene
             AddChild(buildingInstance);
-
+            buildingInstance.GlobalPosition = worldPosition;
+            buildingInstance.Scale = MapManager.CellSize;
             // You might want to store the building instance in a data structure for later reference
             // For example: buildings[cell] = buildingInstance;
             GD.Print($"Building building at coordinate {worldPosition}");
@@ -344,7 +342,7 @@ namespace SacaSimulationGame.scripts.map
                 CullMode = BaseMaterial3D.CullModeEnum.Disabled
             };
             meshInstance.SetSurfaceOverrideMaterial(0, material);
-            meshInstance.Position = worldPos;
+            meshInstance.GlobalPosition = worldPos;
         }
         #endregion
     }

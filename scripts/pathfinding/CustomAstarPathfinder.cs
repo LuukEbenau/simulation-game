@@ -9,7 +9,15 @@ namespace SacaSimulationGame.scripts.pathfinding
 {
     public class CustomAStarPathfinder(WorldMapManager mapManager)
     {
-        public List<Vector2I> FindPath(Vector2I start, Vector2I goal, CellType traversableTerrainType = CellType.GROUND)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="start">start position</param>
+        /// <param name="goal">goal position</param>
+        /// <param name="traversableTerrainType">the types of terrain which are traversable by this path</param>
+        /// <param name="maxIterationCount">maximum amount of explored cells before canceling</param>
+        /// <returns></returns>
+        public List<Vector2I> FindPath(Vector2I start, Vector2I goal, CellType traversableTerrainType = CellType.GROUND, int maxIterationCount = 500)
         {
             //var comparer = Comparer<(float cost, Vector2I node)>
             //    .Create((a, b) => a.cost == b.cost ? a.node..CompareTo(b.node) : a.cost.CompareTo(b.cost));
@@ -20,8 +28,14 @@ namespace SacaSimulationGame.scripts.pathfinding
 
             openSet.Add((fScore[start], start));
 
+            int iCount = 0;
             while (openSet.Count > 0)
             {
+                iCount++;
+                if(iCount>= maxIterationCount)
+                {
+                    return [];
+                }
                 var current = openSet.Min.node;
                 if (current == goal)
                     return ReconstructPath(cameFrom, current);
