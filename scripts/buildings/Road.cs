@@ -1,27 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Godot;
-using SacaSimulationGame.scripts.map;
+using SacaSimulationGame.scripts.buildings;
+using System;
 
 namespace SacaSimulationGame.scripts.buildings
 {
-    public class Road : Building
-    {
-        public override CellType[,] Shape { get; }
-        public override string Name => "Road";
-        public override float MaxSlopeAngle { get; }
-        private static PackedScene _scene;
-        public override PackedScene Scene => _scene ??= GD.Load("res://assets/buildings/road.blend") as PackedScene;
-        public Road()
+    public partial class Road : Building
+{
+        
+
+        // Called when the node enters the scene tree for the first time.
+        public override void _Ready()
         {
-            this.Shape = new CellType[1, 1]
-            {
-                { CellType.GROUND}
-            };
-            this.MaxSlopeAngle = 20f;
+            base._Ready();
+        }
+
+        // Called every frame. 'delta' is the elapsed time since the previous frame.
+        public override void _Process(double delta)
+        {
+            base._Process(delta);
         }
     }
+
 }

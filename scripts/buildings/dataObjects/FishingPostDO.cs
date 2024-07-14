@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 using Godot;
 using SacaSimulationGame.scripts.map;
 
-namespace SacaSimulationGame.scripts.buildings
+namespace SacaSimulationGame.scripts.buildings.dataObjects
 {
-    internal class FishingPost: Building
+    internal class FishingPostDO : BuildingDO
     {
         public override CellType[,] Shape { get; }
         public override float MaxSlopeAngle { get; }
         public override string Name => "FishingPost";
         private static PackedScene _scene;
         public override PackedScene Scene => _scene ??= GD.Load("res://assets/buildings/house.blend") as PackedScene;
-        public FishingPost()
+        public FishingPostDO()
         {
 
-            this.Shape = new CellType[5, 2]
+            Shape = new CellType[5, 2]
             {
                 { CellType.GROUND,CellType.GROUND},
                 { CellType.WATER | CellType.GROUND, CellType.WATER | CellType.GROUND },
@@ -26,7 +26,9 @@ namespace SacaSimulationGame.scripts.buildings
                 { CellType.WATER, CellType.WATER },
                 { CellType.WATER, CellType.WATER },
             };
-            this.MaxSlopeAngle = 15f;
+            MaxSlopeAngle = 15f;
         }
+
+        public override float TotalBuildingProgressNeeded => 30;
     }
 }

@@ -1,30 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Godot;
-using SacaSimulationGame.scripts.map;
-
+using SacaSimulationGame.scripts.buildings;
+using System;
 namespace SacaSimulationGame.scripts.buildings
 {
-    public class House: Building
+    public partial class House : Building
     {
-        public override CellType[,] Shape { get; }
-        public override float MaxSlopeAngle { get; }
-        public override string Name => "House";
 
-        private static PackedScene _scene;
-        public override PackedScene Scene => _scene ??= ResourceLoader.Load<PackedScene>("res://assets/buildings/house.blend");
+        // Called when the node enters the scene tree for the first time.
+        public override void _Ready()
+        {
+            base._Ready();
+        }
 
-        public House() {
-            
-            this.Shape = new CellType[2, 2]
-            {
-                { CellType.GROUND, CellType.GROUND},
-                { CellType.GROUND, CellType.GROUND },
-            };
-            this.MaxSlopeAngle = 10f;
+        // Called every frame. 'delta' is the elapsed time since the previous frame.
+        public override void _Process(double delta)
+        {
+            base._Process(delta);
         }
     }
+
 }

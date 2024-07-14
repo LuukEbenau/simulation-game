@@ -1,5 +1,6 @@
 using Godot;
 using SacaSimulationGame.scripts.buildings;
+using SacaSimulationGame.scripts.buildings.dataObjects;
 using SacaSimulationGame.scripts.map;
 using SacaSimulationGame.scripts.units;
 using SacaSimulationGame.scripts.units.dataObjects;
@@ -47,7 +48,13 @@ namespace SacaSimulationGame.scripts.managers
                 //var randI = rand.Next(0, MapManager.GetCellCount());
                 //spawnCell = MapManager.MapData.ElementAt(randI).Key;
                 //TODO: give randomness in the spawn location, now the loop doesnt do anything
-                spawnSucces = BuildingManager.BuildBuilding(spawnCell, new House(), BuildingRotation.Bottom);
+                var building = new HouseDO { 
+                    Rotation = BuildingRotation.Bottom,
+                };
+                building.CurrentBuildingProgress = building.TotalBuildingProgressNeeded;
+
+
+                spawnSucces = BuildingManager.BuildBuilding(spawnCell, building);
             }
 
             (UnitDataObject unit, Vector2I offset)[] unitsToSpawn = [

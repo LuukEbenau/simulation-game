@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Godot;
 using Newtonsoft.Json;
 using SacaSimulationGame.scripts.buildings;
+using SacaSimulationGame.scripts.buildings.dataObjects;
 using SacaSimulationGame.scripts.units.dataObjects;
 
 
@@ -29,7 +30,7 @@ namespace SacaSimulationGame.scripts.units
             {
                 var cell = this.GameManager.MapManager.WorldToCell(GlobalPosition);
                 //TOOD: actual functionality
-                this.GameManager.BuildingManager.BuildBuilding(cell, new House(), map.BuildingRotation.Bottom);
+                this.GameManager.BuildingManager.BuildBuilding(cell, new HouseDO{ Rotation = map.BuildingRotation.Bottom});
             }
             catch (Exception ex)
             {

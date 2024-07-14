@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://b43ook8n7pytq"]
+
+[ext_resource type="PackedScene" uid="uid://dyxy1khb2gub7" path="res://assets/buildings/road.blend" id="1_evxki"]
+[ext_resource type="Script" path="res://scripts/buildings/Road.cs" id="2_h0376"]
+
+[node name="Road" type="Node3D"]
+script = ExtResource("2_h0376")
+
+[node name="Building" parent="." instance=ExtResource("1_evxki")]

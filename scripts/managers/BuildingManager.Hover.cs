@@ -1,6 +1,6 @@
 ﻿using Godot;
 using SacaSimulationGame.scripts;
-using SacaSimulationGame.scripts.buildings;
+using SacaSimulationGame.scripts.buildings.dataObjects;
 using SacaSimulationGame.scripts.map;
 using System.Collections.Generic;
 
@@ -8,6 +8,80 @@ namespace SacaSimulationGame.scripts.managers
 {
     public partial class BuildingManager : Node3D
     {
+
+        private void HandleHoverBehaviour(double delta)
+        {
+            if (selectedBuilding != null)
+            {
+                timeElapsedSinceLastHoverUpdate += delta;
+                if (timeElapsedSinceLastHoverUpdate > hoverIndicatorUpdateInterval)
+                {
+                    timeElapsedSinceLastHoverUpdate = 0;
+                    var cell = GetHoveredCell();
+                    if (cell == _defaultVec)
+                    {
+                        ClearHoverIndicator();
+                    }
+                    else if (lastHoveredCell == cell)
+                    {
+                        // nothing changes, hover stays
+                    }
+                    else
+                    {
+                        lastHoveredCell = cell;
+                        ClearHoverIndicator();
+                        bool buildingIsBuildable = CheckBuildingBuildable(cell, selectedBuilding, visualiseHover: true);
+                    }
+                }
+            }
+        }
+
+        private Vector2I GetHoveredCell()
+        {
+            var mousePos = GetViewport().GetMousePosition();
+            var from = this.Camera.ProjectRayOrigin(mousePos);
+            var to = from + Camera.ProjectRayNormal(mousePos) * 500;
+
+            var spaceState = GetWorld3D().DirectSpaceState;
+
+            var query = new PhysicsRayQueryParameters3D
+            {
+                From = from,
+                To = to,
+                CollideWithAreas = true,
+                CollideWithBodies = true,
+                CollisionMask = Globals.CollisionTypeMap[CollisionType.BUILDING]
+            };
+
+            var result = spaceState.IntersectRay(query);
+
+            if (result != null && result.Count > 0)
+            {
+                GD.Print("Hit something");
+
+                if (!result.TryGetValue("position", out var _position))
+                {
+                    GD.Print("position not found on raycast result");
+                }
+                Vector3 position = _position.AsVector3();
+
+                if (!result.TryGetValue("collider", out var collider))
+                {
+                    GD.Print("collider not found on raycast result");
+                }
+
+                if (collider.AsGodotObject() != null)
+                {
+                    if (collider.AsGodotObject() is Node3D colliderNode)
+                    {
+                        var cell = MapManager.WorldToCell(position);
+                        return cell;
+
+                    }
+                }
+            }
+            return _defaultVec;
+        }
 
         #region visualisation of hover
         private readonly List<MeshInstance3D> hoverVisualiseMesh = [];
@@ -40,7 +114,7 @@ namespace SacaSimulationGame.scripts.managers
             }
         }
 
-        private bool CheckBuildingBuildable(Vector2I cell, Building building, bool visualiseHover = false)
+        private bool CheckBuildingBuildable(Vector2I cell, BuildingDO building, bool visualiseHover = false)
         {
             bool buildingBuildable = true;
             int shapeWidth = building.Shape.GetLength(0);

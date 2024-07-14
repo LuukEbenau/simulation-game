@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Godot;
 using Newtonsoft.Json;
 using SacaSimulationGame.scripts.buildings;
+using SacaSimulationGame.scripts.buildings.dataObjects;
+using SacaSimulationGame.scripts.map;
 using SacaSimulationGame.scripts.units.dataObjects;
 
 namespace SacaSimulationGame.scripts.units
@@ -21,7 +23,7 @@ namespace SacaSimulationGame.scripts.units
         {
             var cell = this.GameManager.MapManager.WorldToCell(GlobalPosition);
             //TOOD: actual functionality
-            this.GameManager.BuildingManager.BuildBuilding(cell, new Road(), map.BuildingRotation.Bottom);
+            this.GameManager.BuildingManager.BuildBuilding(cell, new RoadDO { Rotation= BuildingRotation.Bottom });
         }
 
 

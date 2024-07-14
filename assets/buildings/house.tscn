@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://cgg3hfpq62x27"]
+
+[ext_resource type="Script" path="res://scripts/buildings/House.cs" id="1_nlq14"]
+[ext_resource type="PackedScene" uid="uid://bs0ilcslgtmej" path="res://assets/buildings/house.blend" id="1_yydhl"]
+
+[node name="House" type="Node3D"]
+script = ExtResource("1_nlq14")
+
+[node name="Building" parent="." instance=ExtResource("1_yydhl")]
