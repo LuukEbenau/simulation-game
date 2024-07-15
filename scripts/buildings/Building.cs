@@ -77,47 +77,62 @@ namespace SacaSimulationGame.scripts.buildings
         {
             if (BuildingVisual == null) return;
 
-            // Find the first MeshInstance3D child
-            MeshInstance3D meshInstance = BuildingVisual.FindChild("*", true, false) as MeshInstance3D;
-            if (meshInstance == null)
-            {
-                GD.Print("No MeshInstance3D found in the building hierarchy");
-                return;
-            }
+            // Find all MeshInstance3D children
+            //var meshInstances = BuildingVisual.FindChildren("*", "MeshInstance3D", true, false).OfType<MeshInstance3D>().ToList();
 
-            if (this.BuildingCompleted)
-            {
-                // Remove custom material and restore original
-                GD.Print("Building completed, original material restored");
-                meshInstance.Transparency = 0;
-                return;
-            }
-
-            // Calculate the alpha (transparency) value
-            float baseAlpha = 0.1f;
-            float maxAlpha = 0.8f;
-            float alpha = (float)(this.BuildingCompleted ? 1.0f : baseAlpha + (maxAlpha - baseAlpha) * BuildingPercentageComplete);
-
-            // Get or create the material
-
-            meshInstance.Transparency = 1-alpha;
-
-            //StandardMaterial3D material = meshInstance.MaterialOverride as StandardMaterial3D;
-            //if (material == null)
+            //if (meshInstances.Count == 0)
             //{
-            //    material = new StandardMaterial3D();
-            //    meshInstance.MaterialOverride = material;
+            //    GD.Print("No MeshInstance3D found in the building hierarchy");
+            //    return;
             //}
 
-            //// Set up transparency
-            //material.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
-            //material.AlbedoColor = new Color(1, 1, 1, alpha);
+            //if (this.BuildingCompleted)
+            //{
+            //    foreach (var meshInstance in meshInstances)
+            //    {
+            //        SetMeshInstanceTransparency(meshInstance, 1.0f);
+            //    }
+            //    GD.Print("Building completed, original material restored");
+            //    return;
+            //}
 
-            //// Ensure proper rendering of transparent objects
-            //material.RenderPriority = 1;
-            //meshInstance.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+            //// Calculate the alpha (transparency) value
+            //float baseAlpha = 0.1f;
+            //float maxAlpha = 0.8f;
+            //float alpha = (float)(baseAlpha + (maxAlpha - baseAlpha) * BuildingPercentageComplete);
 
-            //GD.Print($"Updated material transparency: alpha = {alpha}");
+            //foreach (var meshInstance in meshInstances)
+            //{
+            //    SetMeshInstanceTransparency(meshInstance, alpha);
+            //}
+        }
+
+        private void SetMeshInstanceTransparency(MeshInstance3D meshInstance, float alpha)
+        {
+            // Get the current material
+            Material material = meshInstance.GetActiveMaterial(0);
+
+            if (material is StandardMaterial3D standardMaterial)
+            {
+                // If it's already a StandardMaterial3D, just modify it
+                standardMaterial.AlbedoColor = new Color(
+                    standardMaterial.AlbedoColor.R,
+                    standardMaterial.AlbedoColor.G,
+                    standardMaterial.AlbedoColor.B,
+                    alpha
+                );
+                standardMaterial.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
+            }
+            else
+            {
+                // If it's not a StandardMaterial3D, create a new one based on the existing material
+                StandardMaterial3D newMaterial = new StandardMaterial3D();
+                newMaterial.AlbedoColor = new Color(1, 1, 1, alpha);
+                newMaterial.AlbedoTexture = (material as BaseMaterial3D)?.AlbedoTexture;
+                newMaterial.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
+
+                meshInstance.MaterialOverride = newMaterial;
+            }
         }
 
         public double BuildingPercentageComplete => this.CurrentBuildingProgress == 0 ? 0 : this.CurrentBuildingProgress / this.TotalBuildingProgressNeeded;
