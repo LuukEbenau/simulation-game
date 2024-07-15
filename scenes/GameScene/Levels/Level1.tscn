@@ -118,10 +118,8 @@ data = PackedVector3Array(-53.4828, -0.5, 127.859, -53.8509, -0.5, 127.703, -51.
 [node name="GameManager" type="Node3D" parent="."]
 script = ExtResource("1_jcks0")
 
-[node name="MapManager" type="Node3D" parent="GameManager" node_paths=PackedStringArray("Terrain", "RiverCollider")]
+[node name="MapManager" type="Node3D" parent="GameManager"]
 script = ExtResource("2_lea2q")
-Terrain = NodePath("../../Map")
-RiverCollider = NodePath("../../RiverManagerMesh/StaticBody3D")
 
 [node name="TerrainGradientVisualizer" type="Node3D" parent="GameManager/MapManager"]
 script = ExtResource("4_rjmbe")
@@ -174,10 +172,13 @@ Curve = SubResource("Curve3D_byisv")
 
 [node name="RiverManagerMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133.349, -0.5, -256.646)
+layers = 515
 mesh = SubResource("ArrayMesh_nxygm")
 metadata/BaseMeshGenerator = true
 
 [node name="StaticBody3D" type="StaticBody3D" parent="RiverManagerMesh"]
+collision_layer = 515
+collision_mask = 515
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RiverManagerMesh/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_qvwk1")

@@ -11,10 +11,8 @@ namespace SacaSimulationGame.scripts.managers
         [Export]
         public Vector3I CellSize { get; set; } = new Vector3I(4, 4, 4);
 
-        [Export]
         public Node3D Terrain { get; set; }
 
-        [Export]
         public StaticBody3D RiverCollider { get; set; }
 
         [Export]
@@ -194,6 +192,11 @@ namespace SacaSimulationGame.scripts.managers
 
         public override void _Ready()
         {
+            var treeRoot = FindParent("root");
+            this.RiverCollider = treeRoot.GetNode("RiverManagerMesh").GetNode<StaticBody3D>("StaticBody3D");
+            this.Terrain = treeRoot.GetNode<Node3D>("Map");
+
+
             GradientVisualizer = GetNode<TerrainGradientVisualizer>("TerrainGradientVisualizer");
             TerrainMapper = GetNode<TerrainMapper>("TerrainMapper");
 
