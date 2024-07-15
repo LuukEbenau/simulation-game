@@ -48,11 +48,10 @@ namespace SacaSimulationGame.scripts.managers
                 //var randI = rand.Next(0, MapManager.GetCellCount());
                 //spawnCell = MapManager.MapData.ElementAt(randI).Key;
                 //TODO: give randomness in the spawn location, now the loop doesnt do anything
-                var building = new HouseDO { 
+                var building = new HouseBlueprint { 
                     Rotation = BuildingRotation.Bottom,
+                    RequiresBuilding = false
                 };
-                building.CurrentBuildingProgress = building.TotalBuildingProgressNeeded;
-
 
                 spawnSucces = BuildingManager.BuildBuilding(spawnCell, building);
             }

@@ -24,6 +24,7 @@ AppConfig="*res://addons/maaacks_game_template/base/scenes/Autoloads/AppConfig.t
 SceneLoader="*res://addons/maaacks_game_template/base/scenes/Autoloads/SceneLoader.tscn"
 ProjectMusicController="*res://addons/maaacks_game_template/base/scenes/Autoloads/ProjectMusicController.tscn"
 ProjectUISoundController="*res://addons/maaacks_game_template/base/scenes/Autoloads/ProjectUISoundController.tscn"
+SoundManager="*res://addons/sound_manager/sound_manager.gd"
 
 [display]
 
@@ -41,7 +42,7 @@ version_control/autoload_on_startup=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/maaacks_game_template/plugin.cfg", "res://addons/waterways_net/plugin.cfg", "res://addons/zylann.hterrain/plugin.cfg")
+enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/kanban_tasks/plugin.cfg", "res://addons/maaacks_game_template/plugin.cfg", "res://addons/sound_manager/plugin.cfg", "res://addons/waterways_net/plugin.cfg", "res://addons/zylann.hterrain/plugin.cfg")
 
 [gui]
 
@@ -148,6 +149,11 @@ Select={
 [internationalization]
 
 locale/translations=PackedStringArray("res://addons/maaacks_game_template/base/translations/menus_translations.en.translation", "res://addons/maaacks_game_template/base/translations/menus_translations.fr.translation")
+
+[limbo_ai]
+
+behavior_tree/behavior_tree_default_dir="res://ai/"
+behavior_tree/user_task_dir_1="res://ai/"
 
 [maaacks_game_template]
 

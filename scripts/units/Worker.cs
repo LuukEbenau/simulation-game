@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BehaviourTree.FluentBuilder;
+using BehaviourTree;
 using Godot;
 using Newtonsoft.Json;
 using SacaSimulationGame.scripts.buildings;
@@ -15,21 +17,21 @@ namespace SacaSimulationGame.scripts.units
 {
     public partial class Worker: Unit
     {
+        private Random _rnd;
+        public Worker()
+        {
+            _rnd = new Random();
+        }
         public override void _Ready()
         {
+            base._Ready();
         }
-
-        protected override void PerformAction()
-        {
-            var cell = this.GameManager.MapManager.WorldToCell(GlobalPosition);
-            //TOOD: actual functionality
-            this.GameManager.BuildingManager.BuildBuilding(cell, new RoadDO { Rotation= BuildingRotation.Bottom });
-        }
-
 
         public override void _Process(double delta)
         {
-            ManagePathfinding(delta);
+            base._Process(delta);
         }
+
+
     }
 }

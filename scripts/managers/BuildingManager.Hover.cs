@@ -114,7 +114,7 @@ namespace SacaSimulationGame.scripts.managers
             }
         }
 
-        private bool CheckBuildingBuildable(Vector2I cell, BuildingDO building, bool visualiseHover = false)
+        private bool CheckBuildingBuildable(Vector2I cell, BuildingBlueprintBase building, bool visualiseHover = false)
         {
             bool buildingBuildable = true;
             int shapeWidth = building.Shape.GetLength(0);

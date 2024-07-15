@@ -6,22 +6,6 @@ using SacaSimulationGame.scripts.map;
 using System.Collections.Generic;
 namespace SacaSimulationGame.scripts.managers
 {
-    public class BuildingDataObject
-    {
-        private static int buildingIndexCounter = 1; //reserve id 0 for empty tiles
-        public BuildingDO Building { get; set; }
-        public int Id { get; }
-        public List<Vector2I> OccupiedCells { get; set; }
-        public Player Player { get; set; }
-        public BuildingDataObject(Player player, BuildingDO building)
-        {
-            this.Id = buildingIndexCounter++;
-            this.Player = player;
-            this.Building = building;
-        }
-    }
-
-
     public partial class BuildingManager : Node3D
     {
         [Export]
@@ -34,7 +18,7 @@ namespace SacaSimulationGame.scripts.managers
 
 
         private readonly Vector2I _defaultVec = new(int.MinValue, int.MinValue);
-        private BuildingDO selectedBuilding = null;
+        private BuildingBlueprintBase selectedBuilding = null;
         private Vector2I lastHoveredCell = default;
         private BuildingRotation buildingRotation = BuildingRotation.Top;
 
@@ -50,10 +34,16 @@ namespace SacaSimulationGame.scripts.managers
         /// </summary>
         /// 
 
-        public Dictionary<Player, List<BuildingDataObject>> buildingData;
+        private Dictionary<Player, List<BuildingDataObject>> buildingData;
+
+        public List<BuildingDataObject> GetBuildings()
+        {
+            return buildingData.GetValueOrDefault(dummyPlayer);
+        }
+
         public int[,] occupiedCells;
 
-        private Player dummyPlayer;
+        public Player dummyPlayer { get; private set; }
         public override void _Ready()
         {
             this.MapManager = GetParent().GetNode<WorldMapManager>("MapManager");
@@ -80,19 +70,19 @@ namespace SacaSimulationGame.scripts.managers
         {
             if (@event.IsActionPressed("Building Slot 1"))
             {
-                selectedBuilding = new HouseDO();
+                selectedBuilding = new HouseBlueprint();
             }
             else if (@event.IsActionPressed("Building Slot 2"))
             {
-                selectedBuilding = new RoadDO();
+                selectedBuilding = new RoadBlueprint();
             }
             else if (@event.IsActionPressed("Building Slot 3"))
             {
-                selectedBuilding = new FishingPostDO();
+                selectedBuilding = new FishingPostBlueprint();
             }
             else if (@event.IsActionPressed("Building Slot 4"))
             {
-                selectedBuilding = new HouseDO();
+                selectedBuilding = new HouseBlueprint();
             }
             else if (@event.IsActionPressed("Cancel Selection"))
             {
@@ -133,7 +123,7 @@ namespace SacaSimulationGame.scripts.managers
         }
 
         #region building feature
-        public bool BuildBuilding(Vector2I cell, BuildingDO building)
+        public bool BuildBuilding(Vector2I cell, BuildingBlueprintBase buildingBlueprint)
         {
             if (MapManager.GetCell(cell).CellType != CellType.GROUND) {
                 GD.Print("Tried to place building on terrain different than ground");
@@ -141,11 +131,11 @@ namespace SacaSimulationGame.scripts.managers
             }
             // Instantiate the scene
             PackedScene scene;
-            if(building.Name == "House")
+            if(buildingBlueprint is HouseBlueprint)
             {
                 scene = this.HouseBuilding;
             }
-            else if(building.Name == "Road")
+            else if(buildingBlueprint is RoadBlueprint)
             {
                 scene = this.RoadBuilding;
             }
@@ -161,14 +151,18 @@ namespace SacaSimulationGame.scripts.managers
                 return false;
             }
 
-            buildingInstance.BuildingData = building;
+            buildingInstance.Cell = cell;
+            buildingInstance.Blueprint = buildingBlueprint;
 
+            Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + 0.01f, centered: true);
+            ApplyBuildingRotation(buildingInstance, buildingBlueprint.Rotation);
 
-            Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + 0.15f, centered: true);
-            ApplyBuildingRotation(buildingInstance, building.Rotation);
+            var buildingDataObject = new BuildingDataObject(dummyPlayer, buildingInstance);
+            buildingDataObject.OccupiedCells = CalculateOccupiedCellsByBuilding(buildingBlueprint, cell, buildingDataObject.Id);
 
-            var buildingDataObject = new BuildingDataObject(player: dummyPlayer, building = building);
-            buildingDataObject.OccupiedCells = CalculateOccupiedCellsByBuilding(building, cell, buildingDataObject.Id);
+            if (!buildingBlueprint.RequiresBuilding) {
+                buildingDataObject.Building.CompleteBuilding();
+            }
 
             this.buildingData[dummyPlayer]
                 .Add(buildingDataObject);
@@ -189,7 +183,7 @@ namespace SacaSimulationGame.scripts.managers
         /// <param name="cell"></param>
         /// <param name="buildingId"></param>
         /// <returns></returns>
-        private List<Vector2I> CalculateOccupiedCellsByBuilding(BuildingDO building, Vector2I cell, int buildingId) {
+        private List<Vector2I> CalculateOccupiedCellsByBuilding(BuildingBlueprintBase building, Vector2I cell, int buildingId) {
             //// KEEP TRACK OF Building
             var occupiedCellsByBuilding = new List<Vector2I>();
             for (var occX = 0; occX < building.Shape.GetLength(0); occX++)

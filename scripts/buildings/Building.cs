@@ -11,9 +11,18 @@ namespace SacaSimulationGame.scripts.buildings
 {
     public abstract partial class Building: Node3D
     {
-        public BuildingDO BuildingData { get; set; }
+        public BuildingBlueprintBase Blueprint { get; set; }
 
         protected Node3D BuildingVisual { get; private set; }
+
+        public abstract int MaxBuilders { get; }
+
+        public abstract double TotalBuildingProgressNeeded { get; }
+        public bool BuildingCompleted { get; set; } = false;
+        private float _currentBuildingProgress = 0;
+        public double CurrentBuildingProgress { get; set; }
+
+        public Vector2I Cell { get; set; }
 
         public override void _Ready()
         {
@@ -31,29 +40,37 @@ namespace SacaSimulationGame.scripts.buildings
         }
 
         #region progress tracking
-
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="progress"></param>
         /// <returns>finished or not</returns>
-        public bool AddBuildingProgress(float progress)
+        public bool AddBuildingProgress(double progress)
         {
-            var newProgress = this.BuildingData.CurrentBuildingProgress + progress;
-            if (newProgress >= this.BuildingData.TotalBuildingProgressNeeded)
+            var newProgress = this.CurrentBuildingProgress + progress;
+            if (newProgress >= this.TotalBuildingProgressNeeded)
             {
-                this.BuildingData.CurrentBuildingProgress = this.BuildingData.TotalBuildingProgressNeeded;
-                this.BuildingData.BuildingCompleted = true;
+                this.CurrentBuildingProgress = this.TotalBuildingProgressNeeded;
+                this.BuildingCompleted = true;
                 UpdateBuildingProgress();
                 return true;
             }
             else
             {
-                this.BuildingData.CurrentBuildingProgress += progress;
+                this.CurrentBuildingProgress += progress;
                 UpdateBuildingProgress();
                 return false;
             } 
+        }
+
+        /// <summary>
+        /// Forcefully completes building
+        /// </summary>
+        public void CompleteBuilding()
+        {
+            this.CurrentBuildingProgress = this.TotalBuildingProgressNeeded;
+            this.BuildingCompleted = true;
+            UpdateBuildingProgress();
         }
 
         private void UpdateBuildingProgress()
@@ -68,40 +85,42 @@ namespace SacaSimulationGame.scripts.buildings
                 return;
             }
 
-            if (this.BuildingData.BuildingCompleted)
+            if (this.BuildingCompleted)
             {
                 // Remove custom material and restore original
-                meshInstance.MaterialOverride = null;
-                meshInstance.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
                 GD.Print("Building completed, original material restored");
+                meshInstance.Transparency = 0;
                 return;
             }
 
             // Calculate the alpha (transparency) value
-            float baseAlpha = 0.2f;
+            float baseAlpha = 0.1f;
             float maxAlpha = 0.8f;
-            float alpha = this.BuildingData.BuildingCompleted ? 1.0f : baseAlpha + (maxAlpha - baseAlpha) * BuildingPercentageComplete;
+            float alpha = (float)(this.BuildingCompleted ? 1.0f : baseAlpha + (maxAlpha - baseAlpha) * BuildingPercentageComplete);
 
             // Get or create the material
-            StandardMaterial3D material = meshInstance.MaterialOverride as StandardMaterial3D;
-            if (material == null)
-            {
-                material = new StandardMaterial3D();
-                meshInstance.MaterialOverride = material;
-            }
 
-            // Set up transparency
-            material.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
-            material.AlbedoColor = new Color(1, 1, 1, alpha);
+            meshInstance.Transparency = 1-alpha;
 
-            // Ensure proper rendering of transparent objects
-            material.RenderPriority = 1;
-            meshInstance.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+            //StandardMaterial3D material = meshInstance.MaterialOverride as StandardMaterial3D;
+            //if (material == null)
+            //{
+            //    material = new StandardMaterial3D();
+            //    meshInstance.MaterialOverride = material;
+            //}
+
+            //// Set up transparency
+            //material.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
+            //material.AlbedoColor = new Color(1, 1, 1, alpha);
+
+            //// Ensure proper rendering of transparent objects
+            //material.RenderPriority = 1;
+            //meshInstance.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
 
             //GD.Print($"Updated material transparency: alpha = {alpha}");
         }
 
-        public float BuildingPercentageComplete => this.BuildingData.CurrentBuildingProgress == 0 ? 0 : this.BuildingData.CurrentBuildingProgress / this.BuildingData.TotalBuildingProgressNeeded;
+        public double BuildingPercentageComplete => this.CurrentBuildingProgress == 0 ? 0 : this.CurrentBuildingProgress / this.TotalBuildingProgressNeeded;
         #endregion
     }
 }
