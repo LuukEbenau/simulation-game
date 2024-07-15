@@ -7,6 +7,7 @@ namespace SacaSimulationGame.scripts.buildings
     {
         public override int MaxBuilders => 1;
         public override double TotalBuildingProgressNeeded => 15;
+        public override SelectionMode SelectionMode => SelectionMode.Single;
 
         // Called when the node enters the scene tree for the first time.
         public override void _Ready()

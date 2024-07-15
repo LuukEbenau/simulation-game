@@ -8,6 +8,8 @@ namespace SacaSimulationGame.scripts.managers
 {
     public partial class BuildingManager : Node3D
     {
+        private readonly Vector2I _defaultVec = new(int.MinValue, int.MinValue);
+
         [Export]
         public PackedScene HouseBuilding { get; set; }
         [Export]
@@ -15,25 +17,8 @@ namespace SacaSimulationGame.scripts.managers
 
         private WorldMapManager MapManager { get; set; }
         private Camera3D Camera { get; set; }
-
-
-        private readonly Vector2I _defaultVec = new(int.MinValue, int.MinValue);
         private BuildingBlueprintBase selectedBuilding = null;
-        private Vector2I lastHoveredCell = default;
-        private BuildingRotation buildingRotation = BuildingRotation.Top;
-
-        private double timeElapsedSinceLastHoverUpdate = 0;
-        private double hoverIndicatorUpdateInterval = 1 / 60;
-
-        /// <summary>
-        /// What do we need to know of a building?
-        /// building
-        /// location
-        /// orientation
-        /// based on this, we can find out which cells are occupied and which are not. Store this in a matrix so that its efficiently kept in sync?
-        /// </summary>
-        /// 
-
+        
         private Dictionary<Player, List<BuildingDataObject>> buildingData;
 
         public List<BuildingDataObject> GetBuildings()
@@ -66,23 +51,28 @@ namespace SacaSimulationGame.scripts.managers
             HandleHoverBehaviour(delta);
         }
 
+        private void ChangeBuildingSelection(BuildingBlueprintBase blueprint)
+        {
+            this.selectedBuilding = blueprint;
+        }
+
         public override void _Input(InputEvent @event)
         {
             if (@event.IsActionPressed("Building Slot 1"))
             {
-                selectedBuilding = new HouseBlueprint();
+                ChangeBuildingSelection(new HouseBlueprint());
             }
             else if (@event.IsActionPressed("Building Slot 2"))
             {
-                selectedBuilding = new RoadBlueprint();
+                ChangeBuildingSelection(new RoadBlueprint());
             }
             else if (@event.IsActionPressed("Building Slot 3"))
             {
-                selectedBuilding = new FishingPostBlueprint();
+                ChangeBuildingSelection(new FishingPostBlueprint());
             }
             else if (@event.IsActionPressed("Building Slot 4"))
             {
-                selectedBuilding = new HouseBlueprint();
+                ChangeBuildingSelection(new HouseBlueprint());
             }
             else if (@event.IsActionPressed("Cancel Selection"))
             {
@@ -93,16 +83,17 @@ namespace SacaSimulationGame.scripts.managers
             if(@event.IsActionPressed("Rotate Building"))
             {
                 GD.Print("rotating building");
-                CycleRotation();
+                if(selectedBuilding != null)
+                {
+                    CycleRotation();
+                }
+                
             }
 
             if (selectedBuilding != null && lastHoveredCell != default)
             {
                 if (@event.IsActionPressed("Build"))
                 {
-
-                    selectedBuilding.Rotation = buildingRotation;
-
                     GD.Print("check building buildable");
                     if (CheckBuildingBuildable(lastHoveredCell, selectedBuilding))
                     {
@@ -204,19 +195,20 @@ namespace SacaSimulationGame.scripts.managers
 
         private void CycleRotation()
         {
-            switch (buildingRotation)
+            
+            switch (selectedBuilding.Rotation)
             {
                 case BuildingRotation.Top:
-                    buildingRotation = BuildingRotation.Right;
+                    selectedBuilding.Rotation = BuildingRotation.Right;
                     break;
                 case BuildingRotation.Right:
-                    buildingRotation = BuildingRotation.Bottom;
+                    selectedBuilding.Rotation = BuildingRotation.Bottom;
                     break;
                 case BuildingRotation.Bottom:
-                    buildingRotation = BuildingRotation.Left;
+                    selectedBuilding.Rotation = BuildingRotation.Left;
                     break;
                 case BuildingRotation.Left:
-                    buildingRotation = BuildingRotation.Top;
+                    selectedBuilding.Rotation = BuildingRotation.Top;
                     break;
 
             }

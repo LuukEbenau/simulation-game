@@ -8,6 +8,61 @@ namespace SacaSimulationGame.scripts.managers
 {
     public partial class BuildingManager : Node3D
     {
+        private bool buildingSelectionStarted = false;
+        private double timeElapsedSinceLastHoverUpdate = 0;
+        private double hoverIndicatorUpdateInterval = 1 / 60;
+        private Vector2I lastHoveredCell = default;
+
+        private bool CheckBuildingBuildable(Vector2I cell, BuildingBlueprintBase blueprint, bool visualiseHover = false)
+        {
+            bool buildingBuildable = true;
+            int shapeWidth = blueprint.Shape.GetLength(0);
+            int shapeLength = blueprint.Shape.GetLength(1);
+
+            for (int x = 0; x < shapeWidth; x++)
+            {
+                for (int y = 0; y < shapeLength; y++)
+                {
+                    var vecRotated = new Vector2I(x, y).Rotate((int)blueprint.Rotation);
+                    var cellShifted = cell + vecRotated;
+                    if (MapManager.TryGetCell(cellShifted, out MapDataItem data))
+                    {
+                        bool cellBuildable = IsCellBuildable(data, blueprint.Shape[x, y], blueprint.MaxSlopeAngle, cellShifted);
+                        buildingBuildable &= cellBuildable;
+
+                        if (visualiseHover) { 
+                            VisualizeCell(x, y, cellShifted, data, cellBuildable, shapeLength); 
+                        }
+                    }
+                }
+            }
+            return buildingBuildable;
+        }
+
+        private bool IsCellBuildable(MapDataItem data, CellType buildingCellType, float maxSlopeAngle, Vector2I cell)
+        {
+            // check for obstacles
+            var cellOccupied = this.occupiedCells[cell.X, cell.Y] > 0;
+            if (cellOccupied)
+            {
+                return false;
+            }
+
+            //check for terrain
+            if (data.CellType.HasFlag(CellType.WATER))
+            {
+                return buildingCellType.HasFlag(CellType.WATER);
+            }
+            else if (data.CellType.HasFlag(CellType.GROUND))
+            {
+                return buildingCellType.HasFlag(CellType.GROUND) && data.Slope <= maxSlopeAngle;
+            }
+            else
+            {
+                GD.Print($"Unknown cell type: {data.CellType} of cell {cell}");
+                return false;
+            }
+        }
 
         private void HandleHoverBehaviour(double delta)
         {
@@ -30,7 +85,7 @@ namespace SacaSimulationGame.scripts.managers
                     {
                         lastHoveredCell = cell;
                         ClearHoverIndicator();
-                        bool buildingIsBuildable = CheckBuildingBuildable(cell, selectedBuilding, visualiseHover: true);
+                        bool buildingIsBuildable = CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover: true);
                     }
                 }
             }
@@ -57,8 +112,6 @@ namespace SacaSimulationGame.scripts.managers
 
             if (result != null && result.Count > 0)
             {
-                GD.Print("Hit something");
-
                 if (!result.TryGetValue("position", out var _position))
                 {
                     GD.Print("position not found on raycast result");
@@ -113,50 +166,9 @@ namespace SacaSimulationGame.scripts.managers
                 indicator.Visible = false;
             }
         }
-
-        private bool CheckBuildingBuildable(Vector2I cell, BuildingBlueprintBase building, bool visualiseHover = false)
+        private void VisualizeCell(int x, int y, Vector2I cellShifted, MapDataItem data, bool cellBuildable, int shapeLength)
         {
-            bool buildingBuildable = true;
-            int shapeWidth = building.Shape.GetLength(0);
-            int shapeHeight = building.Shape.GetLength(1);
-
-            for (int x = 0; x < shapeWidth; x++)
-            {
-                for (int y = 0; y < shapeHeight; y++)
-                {
-                    var cellShifted = cell + new Vector2I(x, y);
-                    if (MapManager.TryGetCell(cellShifted, out MapDataItem data))
-                    {
-                        bool cellBuildable = IsCellBuildable(data, building.Shape[x, y], building.MaxSlopeAngle, cellShifted);
-                        buildingBuildable &= cellBuildable;
-
-                        if (visualiseHover) VisualizeCell(x, y, cellShifted, data, cellBuildable, shapeHeight);
-                    }
-                }
-            }
-            return buildingBuildable;
-        }
-
-        private bool IsCellBuildable(MapDataItem data, CellType buildingCellType, float maxSlopeAngle, Vector2I cell)
-        {
-            if (data.CellType.HasFlag(CellType.WATER))
-            {
-                return buildingCellType.HasFlag(CellType.WATER);
-            }
-            else if (data.CellType.HasFlag(CellType.GROUND))
-            {
-                return buildingCellType.HasFlag(CellType.GROUND) && data.Slope <= maxSlopeAngle;
-            }
-            else
-            {
-                GD.Print($"Unknown cell type: {data.CellType} of cell {cell}");
-                return false;
-            }
-        }
-
-        private void VisualizeCell(int x, int y, Vector2I cellShifted, MapDataItem data, bool cellBuildable, int shapeHeight)
-        {
-            var meshInstanceIndex = y + x * shapeHeight;
+            var meshInstanceIndex = y + x * shapeLength;
             var color = cellBuildable ? new Color(0, 1, 0) : new Color(1, 0, 0);
             Vector3 worldPos3d = MapManager.CellToWorld(cellShifted, data.Height + 3f);
 

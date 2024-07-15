@@ -19,7 +19,6 @@ namespace SacaSimulationGame.scripts.units
 
         public BehaviourStatus DoNothingSequence(UnitBTContext context)
         {
-            GD.Print("Do Nothing");
             return BehaviourStatus.Succeeded;
         }
 

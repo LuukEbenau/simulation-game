@@ -21,5 +21,16 @@ namespace SacaSimulationGame.scripts
         {
             return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
         }
+        public static Vector2I Rotate(this Vector2I vector, float degrees)
+        {
+            // Convert to Vector2 for rotation
+            Vector2 vec2 = new(vector.X, vector.Y);
+
+            // Rotate
+            Vector2 rotated = vec2.Rotated(Mathf.DegToRad(degrees));
+
+            // Round and convert back to Vector2I
+            return new Vector2I(Mathf.RoundToInt(rotated.X), Mathf.RoundToInt(rotated.Y));
+        }
     }
 }

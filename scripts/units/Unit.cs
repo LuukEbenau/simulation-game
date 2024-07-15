@@ -30,10 +30,6 @@ namespace SacaSimulationGame.scripts.units
         private readonly float speed = 5;
 
         protected UnitBTContext context;
-        public Unit()
-        {
-
-        }
 
         protected IBehaviour<UnitBTContext> BehaviourTree { get; set; }
 
@@ -49,7 +45,6 @@ namespace SacaSimulationGame.scripts.units
             context.Delta = delta;
 
             var status = this.BehaviourTree.Tick(context);
-            GD.Print($"status: {status}");
             if (status == BehaviourStatus.Failed)
             {
                 this.BehaviourTree.Reset();
