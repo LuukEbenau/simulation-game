@@ -4,6 +4,7 @@ using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.dataObjects;
 using SacaSimulationGame.scripts.map;
 using System.Collections.Generic;
+using System.Linq;
 namespace SacaSimulationGame.scripts.managers
 {
     public partial class BuildingManager : Node3D
@@ -17,18 +18,35 @@ namespace SacaSimulationGame.scripts.managers
 
         private WorldMapManager MapManager { get; set; }
         private Camera3D Camera { get; set; }
-        private BuildingBlueprintBase selectedBuilding = null;
-        
-        private Dictionary<Player, List<BuildingDataObject>> buildingData;
 
+        /// <summary>
+        /// Temporary variable
+        /// </summary>
+        private Player dummyPlayer { get; set; }
+
+        /// <summary>
+        /// Contains all buildings for each player
+        /// </summary>
+        private Dictionary<Player, List<BuildingDataObject>> buildingData=[];
         public List<BuildingDataObject> GetBuildings()
         {
             return buildingData.GetValueOrDefault(dummyPlayer);
         }
 
+        /// <summary>
+        /// For Path Selection or area Selection buildings
+        /// </summary>
+        private Vector2I SelectionPathStart { get; set; } = Vector2I.MaxValue;
+        /// <summary>
+        /// When using selectionmode.Path, this is used to store the path
+        /// </summary>
+        private List<Vector2I> SelectionPath { get; set; } = null;
+
+
+        private BuildingBlueprintBase selectedBuilding = null;
         public int[,] occupiedCells;
 
-        public Player dummyPlayer { get; private set; }
+        //TODO: i need to make the selectedbuilding a copy instead, otherwise they all share the same instance. Or, not use the blueprint anymore after building.
         public override void _Ready()
         {
             this.MapManager = GetParent().GetNode<WorldMapManager>("MapManager");
@@ -38,7 +56,6 @@ namespace SacaSimulationGame.scripts.managers
             }
             this.Camera = GetViewport().GetCamera3D();
 
-            this.buildingData = [];
             dummyPlayer = new Player();
             buildingData.Add(dummyPlayer, []);
 
@@ -90,23 +107,58 @@ namespace SacaSimulationGame.scripts.managers
                 
             }
 
+            // For path/area selection
+            if (@event.IsActionReleased("Build") && selectedBuilding != null && SelectionPathStart != Vector2I.MaxValue)
+            {
+                if (selectedBuilding.SelectionMode == SelectionMode.Path)
+                {
+                    if (SelectionPath != null && SelectionPath.Count >= 1)
+                    {
+                        bool isPathBuildable = SelectionPath.All(cell => CheckBuildingBuildable(cell, selectedBuilding).All(b=>b.isBuildable));
+
+                        if (isPathBuildable)
+                        {
+                            foreach (var cell in SelectionPath)
+                            {
+                                //TODO: smart rotations of the building
+                                BuildBuilding(cell, selectedBuilding);
+                            }
+                        }
+                    }
+                }
+
+                //always reset back to max, regardless mode
+                SelectionPathStart = Vector2I.MaxValue;
+                SelectionPath = null;
+            }
+            
+
             if (selectedBuilding != null && lastHoveredCell != default)
             {
                 if (@event.IsActionPressed("Build"))
                 {
                     GD.Print("check building buildable");
-                    if (CheckBuildingBuildable(lastHoveredCell, selectedBuilding))
+                    if (CheckBuildingBuildable(lastHoveredCell, selectedBuilding).All(b=>b.isBuildable))
                     {
                         // Build building
                         GD.Print("start building");
-                        
-                        if(BuildBuilding(lastHoveredCell, selectedBuilding))
+                        if (selectedBuilding.SelectionMode == SelectionMode.Single)
                         {
-                            GD.Print("building building success");
+                            if (BuildBuilding(lastHoveredCell, selectedBuilding))
+                            {
+                                GD.Print("building building success");
+                            }
+                            else
+                            {
+                                GD.Print("building building failed");
+                            }
+                        }
+                        else if (selectedBuilding.SelectionMode == SelectionMode.Path) {
+                            this.SelectionPathStart = lastHoveredCell;
                         }
                         else
                         {
-                            GD.Print("building building failed");
+                            throw new System.Exception($"Selection mode {selectedBuilding.SelectionMode} is not implemented yet");
                         }
                     }
                 }

@@ -15,5 +15,6 @@ namespace SacaSimulationGame.scripts.buildings.dataObjects
         public abstract CellType[,] Shape { get; }
         public abstract float MaxSlopeAngle { get; }
         public bool RequiresBuilding = true;
+        public abstract SelectionMode SelectionMode { get; }
     }
 }

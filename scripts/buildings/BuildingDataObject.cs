@@ -25,6 +25,11 @@ namespace SacaSimulationGame.scripts.buildings
         private List<Unit> AssignedUnits { get; set; }
 
         /// <summary>
+        /// This counts the amount of times the building was unreachable for a unit, used to filter out unreachable buildings
+        /// </summary>
+        public int IsUnreachableCounter { get; set; } = 0;
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="unit"></param>

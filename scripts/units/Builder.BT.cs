@@ -24,7 +24,7 @@ namespace SacaSimulationGame.scripts.units
                 .Selector("root")
                     .Sequence("Move to and build building")
                         .Do("Find Building To Build", this.FindBuildingToBuild)
-                        .Do("Find path to building", this.FindPathToDestination)
+                        .Do("Find path to building", this.FindPathToBuilding)
                         .Do("Move To Building", this.MoveToDestination)
                         .Do("Build Building", this.BuildBuilding)
                     .End()
@@ -49,7 +49,8 @@ namespace SacaSimulationGame.scripts.units
         public BehaviourStatus FindBuildingToBuild(UnitBTContext context)
         {
             var buildingsOrdered = BuildingManager.GetBuildings().Where(b=>!b.Building.BuildingCompleted)
-                .OrderBy(b => b.Building.GlobalPosition.DistanceTo(GlobalPosition));
+                .OrderBy(b=>b.IsUnreachableCounter)
+                .ThenBy(b => b.Building.GlobalPosition.DistanceTo(GlobalPosition));
 
             BuildingDataObject targetBuilding = null;
             foreach (var building in buildingsOrdered) {
@@ -84,6 +85,17 @@ namespace SacaSimulationGame.scripts.units
             {
                 return BehaviourStatus.Running;
             }
+        }
+
+        public BehaviourStatus FindPathToBuilding(UnitBTContext context)
+        {
+            var result = FindPathToDestination(context);
+            if (result == BehaviourStatus.Failed)
+            {
+                context.Building.IsUnreachableCounter++;
+            }
+
+            return result;
         }
     }
 }

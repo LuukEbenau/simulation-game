@@ -6,7 +6,7 @@ namespace SacaSimulationGame.scripts.buildings
 {
     public partial class Road : Building
     {
-        public override SelectionMode SelectionMode => SelectionMode.Path;
+        
         public override int MaxBuilders => 1;
         public override double TotalBuildingProgressNeeded => 3;
 

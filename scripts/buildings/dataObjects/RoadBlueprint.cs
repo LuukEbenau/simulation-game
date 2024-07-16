@@ -12,6 +12,7 @@ namespace SacaSimulationGame.scripts.buildings.dataObjects
     {
         public override CellType[,] Shape { get; }
         public override float MaxSlopeAngle { get; }
+        public override SelectionMode SelectionMode => SelectionMode.Path;
         public RoadBlueprint()
         {
             Shape = new CellType[1, 1]

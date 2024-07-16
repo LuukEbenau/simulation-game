@@ -1,8 +1,10 @@
 ﻿using Godot;
 using SacaSimulationGame.scripts;
+using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.dataObjects;
 using SacaSimulationGame.scripts.map;
 using System.Collections.Generic;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SacaSimulationGame.scripts.managers
 {
@@ -13,11 +15,77 @@ namespace SacaSimulationGame.scripts.managers
         private double hoverIndicatorUpdateInterval = 1 / 60;
         private Vector2I lastHoveredCell = default;
 
-        private bool CheckBuildingBuildable(Vector2I cell, BuildingBlueprintBase blueprint, bool visualiseHover = false)
+        private void HandleHoverBehaviour(double delta)
+        {
+            if (selectedBuilding != null)
+            {
+                timeElapsedSinceLastHoverUpdate += delta;
+                if (timeElapsedSinceLastHoverUpdate > hoverIndicatorUpdateInterval)
+                {
+                    timeElapsedSinceLastHoverUpdate = 0;
+                    var cell = GetHoveredCell();
+                    if (cell == _defaultVec)
+                    {
+                        ClearHoverIndicator();
+                    }
+                    else if (lastHoveredCell == cell)
+                    {
+                        // nothing changes, hover stays
+                    }
+                    else
+                    {
+                        lastHoveredCell = cell;
+                        ClearHoverIndicator();
+
+                        if (selectedBuilding.SelectionMode == SelectionMode.Path)
+                        {
+                            if (SelectionPathStart != Vector2I.MaxValue)
+                            {
+                                //Find path with astar from start to destination, in found use this path to visualise
+                                SelectionPath = this.MapManager.Pathfinder.FindPath(SelectionPathStart, lastHoveredCell, maxIterationCount: 500);
+                                var cellsToVisualise = new List<(Vector2I cell, MapDataItem cellData, bool isBuildable)>();
+                                foreach (var pathCell in SelectionPath)
+                                {
+                                    cellsToVisualise.AddRange(CheckBuildingBuildable(pathCell, selectedBuilding, visualiseHover: true));
+                                }
+
+                                VisualiseBuildableCells(cellsToVisualise);
+
+                            }
+                            else
+                            {
+                                VisualiseBuildableCells(CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover: true));
+                            }
+                        }
+                        else if (selectedBuilding.SelectionMode == SelectionMode.Single)
+                        {
+                            VisualiseBuildableCells(CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover: true));
+                        }
+                        else
+                        {
+                            throw new System.Exception($"Selectionmode {selectedBuilding.SelectionMode} not implemented");
+                        }
+                    }
+                }
+            }
+        }
+
+        private void VisualiseBuildableCells(List<(Vector2I cell, MapDataItem cellData, bool isBuildable)> celldata)
+        {
+            for(int i = 0; i < celldata.Count;i++)
+            {
+                var c = celldata[i];
+                VisualizeCell(i, c.cell, c.cellData, c.isBuildable);
+            }
+        }
+
+        private List<(Vector2I cell, MapDataItem cellData, bool isBuildable)> CheckBuildingBuildable(Vector2I cell, BuildingBlueprintBase blueprint, bool visualiseHover = false)
         {
             bool buildingBuildable = true;
             int shapeWidth = blueprint.Shape.GetLength(0);
             int shapeLength = blueprint.Shape.GetLength(1);
+
+            List<(Vector2I cell, MapDataItem cellData, bool isBuildable)> celldata = [];
 
             for (int x = 0; x < shapeWidth; x++)
             {
@@ -30,13 +98,18 @@ namespace SacaSimulationGame.scripts.managers
                         bool cellBuildable = IsCellBuildable(data, blueprint.Shape[x, y], blueprint.MaxSlopeAngle, cellShifted);
                         buildingBuildable &= cellBuildable;
 
-                        if (visualiseHover) { 
-                            VisualizeCell(x, y, cellShifted, data, cellBuildable, shapeLength); 
+                        celldata.Add((cellShifted,data,cellBuildable));
+
+                        if (visualiseHover) {
+                            var meshInstanceIndex = y + x * shapeLength; //get the index based on the x+y
+                            VisualizeCell(meshInstanceIndex, cellShifted, data, cellBuildable); 
                         }
                     }
                 }
             }
-            return buildingBuildable;
+            return celldata;
+
+            //return buildingBuildable;
         }
 
         private bool IsCellBuildable(MapDataItem data, CellType buildingCellType, float maxSlopeAngle, Vector2I cell)
@@ -63,34 +136,6 @@ namespace SacaSimulationGame.scripts.managers
                 return false;
             }
         }
-
-        private void HandleHoverBehaviour(double delta)
-        {
-            if (selectedBuilding != null)
-            {
-                timeElapsedSinceLastHoverUpdate += delta;
-                if (timeElapsedSinceLastHoverUpdate > hoverIndicatorUpdateInterval)
-                {
-                    timeElapsedSinceLastHoverUpdate = 0;
-                    var cell = GetHoveredCell();
-                    if (cell == _defaultVec)
-                    {
-                        ClearHoverIndicator();
-                    }
-                    else if (lastHoveredCell == cell)
-                    {
-                        // nothing changes, hover stays
-                    }
-                    else
-                    {
-                        lastHoveredCell = cell;
-                        ClearHoverIndicator();
-                        bool buildingIsBuildable = CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover: true);
-                    }
-                }
-            }
-        }
-
         private Vector2I GetHoveredCell()
         {
             var mousePos = GetViewport().GetMousePosition();
@@ -166,9 +211,8 @@ namespace SacaSimulationGame.scripts.managers
                 indicator.Visible = false;
             }
         }
-        private void VisualizeCell(int x, int y, Vector2I cellShifted, MapDataItem data, bool cellBuildable, int shapeLength)
+        private void VisualizeCell(int meshInstanceIndex, Vector2I cellShifted, MapDataItem data, bool cellBuildable)
         {
-            var meshInstanceIndex = y + x * shapeLength;
             var color = cellBuildable ? new Color(0, 1, 0) : new Color(1, 0, 0);
             Vector3 worldPos3d = MapManager.CellToWorld(cellShifted, data.Height + 3f);
 

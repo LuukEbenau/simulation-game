@@ -10,6 +10,7 @@ namespace SacaSimulationGame.scripts.buildings.dataObjects
 {
     internal class FishingPostBlueprint : BuildingBlueprintBase
     {
+        public override SelectionMode SelectionMode => SelectionMode.Single;
         public override CellType[,] Shape { get; }
         public override float MaxSlopeAngle { get; }
 

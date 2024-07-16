@@ -12,7 +12,7 @@ namespace SacaSimulationGame.scripts.buildings.dataObjects
     {
         public override CellType[,] Shape { get; }
         public override float MaxSlopeAngle { get; }
-
+        public override SelectionMode SelectionMode => SelectionMode.Single;
         public HouseBlueprint()
         {
 

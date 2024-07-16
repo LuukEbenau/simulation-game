@@ -29,6 +29,12 @@ namespace SacaSimulationGame.scripts.units
             var startCell = MapManager.WorldToCell(GlobalPosition);
             var goalCell = MapManager.WorldToCell(context.Destination);
             var cellPath = MapManager.Pathfinder.FindPath(startCell, goalCell);
+
+            if (cellPath.Count == 0) {
+
+                return BehaviourStatus.Failed;
+            }
+
             context.Path = cellPath
                 .Select(c => MapManager.CellToWorld(c, height: MapManager.GetCell(c).Height + 0.2f, centered: true))
                 .ToList();

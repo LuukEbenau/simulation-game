@@ -17,7 +17,7 @@ namespace SacaSimulationGame.scripts.buildings
 
         public abstract int MaxBuilders { get; }
 
-        public abstract SelectionMode SelectionMode { get; }
+        
         public abstract double TotalBuildingProgressNeeded { get; }
         public bool BuildingCompleted { get; set; } = false;
         private float _currentBuildingProgress = 0;
