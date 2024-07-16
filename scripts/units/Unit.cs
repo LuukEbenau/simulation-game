@@ -13,8 +13,14 @@ using SacaSimulationGame.scripts.units.professions;
 
 namespace SacaSimulationGame.scripts.units
 {
-    public abstract partial class Unit : Node3D
+    public partial class Unit : Node3D
     {
+        [ExportCategory("Model References")]
+        [Export]
+        public PackedScene BuilderModel { get; set; }
+        [Export]
+        public PackedScene WorkerModel { get; set; }
+
         public Profession Profession { get; set; }
         public GameManager GameManager { get; set; }
         public BuildingManager BuildingManager => GameManager.BuildingManager;
@@ -27,6 +33,31 @@ namespace SacaSimulationGame.scripts.units
 
         protected UnitBTContext context;
 
+        private Node3D VisualModel { get; set; } = null;
+
+        public void ChangeProfession(ProfessionType professionType)
+        {
+            if (VisualModel != null) RemoveChild(VisualModel);
+            VisualModel = null;
+
+            if (professionType == ProfessionType.Worker)
+            {
+                this.Profession = new WorkerProfession(this);
+                VisualModel = WorkerModel.Instantiate<Node3D>();
+            }
+            else if(professionType == ProfessionType.Builder)
+            {
+                this.Profession = new BuilderProfession(this);
+                VisualModel = BuilderModel.Instantiate<Node3D>();
+            }
+            else
+            {
+                throw new Exception($"unknown profession type {professionType}");
+            }
+            //update visuals based on profession
+            
+            AddChild(VisualModel);
+        }
         public override void _Ready()
         {
             base._Ready();
