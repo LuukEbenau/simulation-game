@@ -60,7 +60,10 @@ namespace SacaSimulationGame.scripts.pathfinding
                     float cellSpeedMultiplier = 1.0f;
 
                     var cellObstacleType = gameManager.BuildingManager.OccupiedCells[neighbor.X, neighbor.Y];
-                    if(cellObstacleType.Type != BuildingType.None)
+                    //TODO: only apply speed bonus after road is finished
+                    //TODO: this is kind of inefficient, since we are calculating this multiple times for a neighbor. better would be to do this only once per neighbor.
+                    //TODO:
+                    if (cellObstacleType.Type != BuildingType.None)
                     {
                         if (BuildingType.ObstacleBuildings.HasFlag(cellObstacleType.Type)) { 
                             continue; 
@@ -68,6 +71,7 @@ namespace SacaSimulationGame.scripts.pathfinding
 
                         if (cellObstacleType.Type.HasFlag(BuildingType.Road))
                         {
+                            
                             cellSpeedMultiplier = roadSpeedMultiplier;
                             GD.Print($"setting coeffient to to road speed multiplier");
                         }

@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BehaviourTree;
 using BehaviourTree.FluentBuilder;
+using BehaviourTree;
 using Godot;
 
-namespace SacaSimulationGame.scripts.units
+namespace SacaSimulationGame.scripts.units.professions
 {
-    public partial class Worker: Unit
+    public class WorkerProfession(Unit unit) : Profession(unit)
     {
+        private readonly Random _rnd = new();
+
         protected override IBehaviour<UnitBTContext> GetBehaviourTree()
         {
             return FluentBuilder.Create<UnitBTContext>()
@@ -27,8 +29,8 @@ namespace SacaSimulationGame.scripts.units
 
         public BehaviourStatus FindDeliveryTarget(UnitBTContext context)
         {
-            Vector3 destination = new(_rnd.Next(-50, 50), GlobalPosition.Y, _rnd.Next(-50, 50));
-            context.Destination = GlobalPosition + destination;
+            Vector3 destination = new(_rnd.Next(-50, 50), Unit.GlobalPosition.Y, _rnd.Next(-50, 50));
+            context.Destination = Unit.GlobalPosition + destination;
 
             return BehaviourStatus.Succeeded;
         }

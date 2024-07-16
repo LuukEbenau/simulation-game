@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using BehaviourTree;
 using BehaviourTree.FluentBuilder;
 using SacaSimulationGame.scripts.buildings;
-using WinRT;
+using SacaSimulationGame.scripts.managers;
+using Windows.Services.Maps;
 
-namespace SacaSimulationGame.scripts.units
+namespace SacaSimulationGame.scripts.units.professions
 {
-    public partial class Builder : Unit
+    public class BuilderProfession(Unit unit) : Profession(unit)
     {
         protected override IBehaviour<UnitBTContext> GetBehaviourTree()
         {
@@ -35,9 +36,9 @@ namespace SacaSimulationGame.scripts.units
 
         private BehaviourStatus IsInBuildingDistance(UnitBTContext context)
         {
-            var buildingPos = GameManager.MapManager.CellToWorld(context.Building.Building.Cell, centered: true);
+            var buildingPos = Unit.GameManager.MapManager.CellToWorld(context.Building.Building.Cell, centered: true);
 
-            if (GlobalPosition.DistanceTo(buildingPos) <= 1.0)
+            if (Unit.GlobalPosition.DistanceTo(buildingPos) <= 1.0)
             {
                 return BehaviourStatus.Succeeded;
             }
@@ -48,26 +49,27 @@ namespace SacaSimulationGame.scripts.units
 
         public BehaviourStatus FindBuildingToBuild(UnitBTContext context)
         {
-            var buildingsOrdered = BuildingManager.GetBuildings().Where(b=>!b.Building.BuildingCompleted)
-                .OrderBy(b=>b.IsUnreachableCounter)
-                .ThenBy(b => b.Building.GlobalPosition.DistanceTo(GlobalPosition));
+            var buildingsOrdered = Unit.BuildingManager.GetBuildings().Where(b => !b.Building.BuildingCompleted)
+                .OrderBy(b => b.IsUnreachableCounter)
+                .ThenBy(b => b.Building.GlobalPosition.DistanceTo(Unit.GlobalPosition));
 
             BuildingDataObject targetBuilding = null;
-            foreach (var building in buildingsOrdered) {
-                if (building.AssignUnit(this))
+            foreach (var building in buildingsOrdered)
+            {
+                if (building.AssignUnit(Unit))
                 {
                     targetBuilding = building;
                     break;
                 }
             }
 
-            if(targetBuilding == null)
+            if (targetBuilding == null)
             {
                 return BehaviourStatus.Failed;
             }
 
             context.Building = targetBuilding;
-            context.Destination = MapManager.CellToWorld(context.Building.Building.Cell, centered: true);
+            context.Destination = Unit.MapManager.CellToWorld(context.Building.Building.Cell, centered: true);
 
             return BehaviourStatus.Succeeded;
         }
@@ -78,7 +80,7 @@ namespace SacaSimulationGame.scripts.units
 
             if (finished)
             {
-                context.Building.UnassignUnit(this); //TODO: what if the task gets canceled? i also want to it clear then.
+                context.Building.UnassignUnit(Unit); //TODO: what if the task gets canceled? i also want to it clear then.
                 return BehaviourStatus.Succeeded;
             }
             else

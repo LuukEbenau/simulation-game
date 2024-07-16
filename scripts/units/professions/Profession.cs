@@ -6,39 +6,51 @@ using System.Threading.Tasks;
 using BehaviourTree;
 using Godot;
 using SacaSimulationGame.scripts.pathfinding;
-using Windows.ApplicationModel.Background;
+using Windows.Services.Maps;
 
-namespace SacaSimulationGame.scripts.units
+namespace SacaSimulationGame.scripts.units.professions
 {
-    public partial class Unit : Node3D
+    public abstract class Profession
     {
+        public Unit Unit { get; }
+        public IBehaviour<UnitBTContext> BehaviourTree { get; }
+
         /// <summary>
-        /// Documentation: https://github.com/Eraclys/BehaviourTree/
+        /// 0 is novice, 1 is beginner, 2 is intermediate, 3 is educated, 4 is experienced, 5 is expert. Education brings all the way up to educated
         /// </summary>
-        /// <returns></returns>
+        public int SkillLevel { get; } = 0;
+
         protected abstract IBehaviour<UnitBTContext> GetBehaviourTree();
+
+        public Profession(Unit unit)
+        {
+            this.Unit = unit;
+            this.BehaviourTree = GetBehaviourTree();
+        }
 
         public BehaviourStatus DoNothingSequence(UnitBTContext context)
         {
             return BehaviourStatus.Succeeded;
         }
 
-        public BehaviourStatus FindPathToDestination(UnitBTContext context) {
+        public BehaviourStatus FindPathToDestination(UnitBTContext context)
+        {
             context.Path = null;
             context.CurrentPathIndex = 0;
 
-            var startCell = MapManager.WorldToCell(GlobalPosition);
-            var goalCell = MapManager.WorldToCell(context.Destination);
-            var cellPath = MapManager.Pathfinder.FindPath(startCell, goalCell);
+            var startCell = Unit.MapManager.WorldToCell(Unit.GlobalPosition);
+            var goalCell = Unit.MapManager.WorldToCell(context.Destination);
+            var cellPath = Unit.MapManager.Pathfinder.FindPath(startCell, goalCell);
 
-            if (cellPath.Count == 0) {
+            if (cellPath.Count == 0)
+            {
 
                 return BehaviourStatus.Failed;
             }
 
             context.Path = cellPath
                 .Select(node => new PathfindingNode3D(
-                    MapManager.CellToWorld(node.Cell, height: MapManager.GetCell(node.Cell).Height + 0.2f, centered: true),
+                    Unit.MapManager.CellToWorld(node.Cell, height: Unit.MapManager.GetCell(node.Cell).Height + 0.2f, centered: true),
                     node.SpeedMultiplier)
                 )
                 .ToList();
@@ -48,19 +60,19 @@ namespace SacaSimulationGame.scripts.units
 
         public BehaviourStatus MoveToDestination(UnitBTContext context)
         {
-            if(context.Destination == default)
+            if (context.Destination == default)
             {
                 GD.Print("No destination defined");
                 return BehaviourStatus.Failed;
             }
 
             PathfindingNode3D targetNode = context.Path[context.CurrentPathIndex];
-            var direction = (targetNode.Position - GlobalPosition).Normalized();
-            var movement = direction * speed * (float)context.Delta * targetNode.SpeedMultiplier;
+            var direction = (targetNode.Position - Unit.GlobalPosition).Normalized();
+            var movement = direction * Unit.speed * (float)context.Delta * targetNode.SpeedMultiplier;
 
-            if (GlobalPosition.DistanceTo(targetNode.Position) > movement.Length())
+            if (Unit.GlobalPosition.DistanceTo(targetNode.Position) > movement.Length())
             {
-                GlobalTranslate(movement);
+                Unit.GlobalTranslate(movement);
             }
             else
             {

@@ -12,15 +12,15 @@ using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.dataObjects;
 using SacaSimulationGame.scripts.map;
 using SacaSimulationGame.scripts.units.dataObjects;
+using SacaSimulationGame.scripts.units.professions;
 
 namespace SacaSimulationGame.scripts.units
 {
     public partial class Worker: Unit
     {
-        private Random _rnd;
         public Worker()
         {
-            _rnd = new Random();
+            this.Profession = new WorkerProfession(this);
         }
         public override void _Ready()
         {

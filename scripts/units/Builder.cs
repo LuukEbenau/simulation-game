@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.dataObjects;
 using SacaSimulationGame.scripts.units.dataObjects;
+using SacaSimulationGame.scripts.units.professions;
 
 namespace SacaSimulationGame.scripts.units
 {
@@ -20,6 +21,8 @@ namespace SacaSimulationGame.scripts.units
         public override void _Ready()
         {
             base._Ready();
+            this.Profession = new BuilderProfession(this);
+
             GD.Print("builder ready");
         }
         public override void _Process(double delta)
