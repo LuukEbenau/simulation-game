@@ -1,9 +1,0 @@
-[gd_scene load_steps=3 format=3 uid="uid://b22mfraw7krug"]
-
-[ext_resource type="Script" path="res://scripts/units/Builder.cs" id="1_g3qfg"]
-[ext_resource type="PackedScene" uid="uid://d3w18mflpbsr4" path="res://assets/units/builder.blend" id="2_kxww1"]
-
-[node name="Builder" type="Node3D"]
-script = ExtResource("1_g3qfg")
-
-[node name="builder" parent="." instance=ExtResource("2_kxww1")]

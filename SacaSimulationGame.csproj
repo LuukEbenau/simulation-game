@@ -9,4 +9,7 @@
     <PackageReference Include="BehaviourTree" Version="1.0.73" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="assets\" />
+  </ItemGroup>
 </Project>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Godot;
+using SacaSimulationGame.scripts.units.professions;
 
 namespace SacaSimulationGame.scripts.units.dataObjects
 {
@@ -15,7 +16,7 @@ namespace SacaSimulationGame.scripts.units.dataObjects
     }
     public abstract class UnitDataObject(UnitGender gender)
     {
-        public abstract UnitType Type { get; }
+        public abstract ProfessionType Profession { get; }
         public UnitGender Gender { get; } = gender;
     }
 }

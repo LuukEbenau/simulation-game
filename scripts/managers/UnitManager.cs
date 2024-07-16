@@ -1,6 +1,7 @@
 using Godot;
 using SacaSimulationGame.scripts.units;
 using SacaSimulationGame.scripts.units.dataObjects;
+using SacaSimulationGame.scripts.units.professions;
 using System;
 namespace SacaSimulationGame.scripts.managers
 {
@@ -8,9 +9,7 @@ namespace SacaSimulationGame.scripts.managers
     {
         [ExportCategory("Unit Scenes")]
         [Export]
-        public PackedScene BuilderScene { get; set; }
-        [Export]
-        public PackedScene WorkerScene { get; set; }
+        public PackedScene UnitScene { get; set; }
 
 
         private GameManager GameManager { get; set; }
@@ -28,19 +27,9 @@ namespace SacaSimulationGame.scripts.managers
 
         public bool SpawnUnit(Vector3 spawnLocation, UnitDataObject unit)
         {
-            Unit instance;
-            if (unit.Type == UnitType.WORKER)
-            {
-                instance = this.WorkerScene.Instantiate<Worker>();
-            }
-            else if (unit.Type == UnitType.BUILDER)
-            {
-                instance = this.BuilderScene.Instantiate<Builder>();
-            }
-            else
-            {
-                throw new Exception("undefined instance type");
-            }
+            Unit instance = this.UnitScene.Instantiate<Unit>();
+
+            instance.ChangeProfession(unit.Profession);
 
             instance.UnitData = unit;
             instance.GameManager = this.GameManager;

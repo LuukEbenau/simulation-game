@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SacaSimulationGame.scripts.units.professions;
 
 namespace SacaSimulationGame.scripts.units.dataObjects
 {
     public class BuilderDataObject(UnitGender gender): UnitDataObject(gender)
     {
-        public override UnitType Type { get; } = UnitType.BUILDER;
+        public override ProfessionType Profession { get; } = ProfessionType.Builder;
 
     }
 }
