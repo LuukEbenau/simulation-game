@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using SacaSimulationGame.scripts;
+using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.managers;
 using SacaSimulationGame.scripts.map;
 
@@ -10,6 +11,11 @@ namespace SacaSimulationGame.scripts.pathfinding
 {
     public class AstarPathfinder(GameManager gameManager)
     {
+        private readonly float roadSpeedMultiplier = 0.5f;
+
+        private readonly float heuristicCoefficient = 0.5f;
+        private readonly float pathScoreCoefficient = 1f;
+
         /// <summary>
         /// 
         /// </summary>
@@ -44,17 +50,32 @@ namespace SacaSimulationGame.scripts.pathfinding
                 {
                     if (!gameManager.MapManager.TryGetCell(neighbor, out var neighborData) || neighborData.CellType != traversableTerrainType)
                         continue;
-                    //TODO: obstacle check
-                    var cellOccupied = gameManager.BuildingManager.OccupiedCells[neighbor.X, neighbor.Y] > 0;
-                    if (cellOccupied) continue;
 
-                    float tentativeGScore = gScore[current] + Distance(current, neighbor);
+                    // low is good, big is bad
+                    float cellSpeedMultiplier = 1.0f;
+
+                    var cellObstacleType = gameManager.BuildingManager.OccupiedCells[neighbor.X, neighbor.Y];
+                    if(cellObstacleType.Type != BuildingType.None)
+                    {
+                        if (BuildingType.ObstacleBuildings.HasFlag(cellObstacleType.Type)) { 
+                            continue; 
+                        }
+
+                        if (cellObstacleType.Type.HasFlag(BuildingType.Road))
+                        {
+                            cellSpeedMultiplier = roadSpeedMultiplier;
+                            GD.Print($"setting coeffient to to road speed multiplier");
+                        }
+                    }
+
+
+                    float tentativeGScore = gScore[current] + (Distance(current, neighbor) * cellSpeedMultiplier * pathScoreCoefficient);
                     if (!gScore.TryGetValue(neighbor, out float value) || tentativeGScore < value)
                     {
                         cameFrom[neighbor] = current;
-                        value = tentativeGScore;
-                        gScore[neighbor] = value;
-                        fScore[neighbor] = tentativeGScore + Heuristic(neighbor, goal);
+                        //value = tentativeGScore;
+                        gScore[neighbor] = tentativeGScore; //originally value
+                        fScore[neighbor] = tentativeGScore + Heuristic(neighbor, goal) * heuristicCoefficient;
                         if (!openSet.Any(x => x.node == neighbor))
                             openSet.Add((fScore[neighbor], neighbor));
                     }

@@ -10,7 +10,7 @@ namespace SacaSimulationGame.scripts.buildings.dataObjects
 {
     public abstract class BuildingBlueprintBase
     {
-        //public Vector2I Cell { get; set; }
+        public abstract BuildingType Type { get; }
         public BuildingRotation Rotation { get; set; } = BuildingRotation.Bottom;
         public abstract CellType[,] Shape { get; }
         public abstract float MaxSlopeAngle { get; }

@@ -121,7 +121,7 @@ namespace SacaSimulationGame.scripts.managers
         private bool IsCellBuildable(MapDataItem data, CellType buildingCellType, float maxSlopeAngle, Vector2I cell)
         {
             // check for obstacles
-            var cellOccupied = this.OccupiedCells[cell.X, cell.Y] > 0;
+            var cellOccupied = this.OccupiedCells[cell.X, cell.Y].Id > 0;
             if (cellOccupied)
             {
                 return false;

@@ -10,6 +10,7 @@ namespace SacaSimulationGame.scripts.buildings.dataObjects
 {
     public class RoadBlueprint : BuildingBlueprintBase
     {
+        public override BuildingType Type => BuildingType.Road;
         public override CellType[,] Shape { get; }
         public override float MaxSlopeAngle { get; }
         public override SelectionMode SelectionMode => SelectionMode.Path;

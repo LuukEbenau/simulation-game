@@ -7,8 +7,15 @@ using System.Collections.Generic;
 using System.Linq;
 namespace SacaSimulationGame.scripts.managers
 {
+
     public partial class BuildingManager : Node3D
     {
+        public struct BuildingTypeIdPair(int id, BuildingType type)
+        {
+            public int Id = id;
+            public BuildingType Type = type;
+        }
+
         private readonly Vector2I _defaultVec = new(int.MinValue, int.MinValue);
 
         [Export]
@@ -44,7 +51,7 @@ namespace SacaSimulationGame.scripts.managers
 
 
         private BuildingBlueprintBase selectedBuilding = null;
-        public int[,] OccupiedCells { get; private set; }
+        public BuildingTypeIdPair[,] OccupiedCells { get; private set; }
 
         //TODO: i need to make the selectedbuilding a copy instead, otherwise they all share the same instance. Or, not use the blueprint anymore after building.
         public override void _Ready()
@@ -59,7 +66,7 @@ namespace SacaSimulationGame.scripts.managers
             dummyPlayer = new Player();
             buildingData.Add(dummyPlayer, []);
 
-            OccupiedCells = new int[MapManager.MapWidth, MapManager.MapHeight];
+            OccupiedCells = new BuildingTypeIdPair[MapManager.MapWidth, MapManager.MapHeight];
         }
 
 
@@ -250,7 +257,7 @@ namespace SacaSimulationGame.scripts.managers
                     //TODO: take into account rotation
                     occupiedCellsByBuilding.Add(new Vector2I(occXMap, occYMap));
 
-                    this.OccupiedCells[occXMap, occYMap] = buildingId;
+                    this.OccupiedCells[occXMap, occYMap] = new BuildingTypeIdPair(buildingId, building.Type);
                 }
             }
 
