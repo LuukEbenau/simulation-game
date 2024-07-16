@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BehaviourTree;
 using Godot;
+using SacaSimulationGame.scripts.pathfinding;
 using Windows.ApplicationModel.Background;
 
 namespace SacaSimulationGame.scripts.units
@@ -36,7 +37,10 @@ namespace SacaSimulationGame.scripts.units
             }
 
             context.Path = cellPath
-                .Select(c => MapManager.CellToWorld(c, height: MapManager.GetCell(c).Height + 0.2f, centered: true))
+                .Select(node => new PathfindingNode3D(
+                    MapManager.CellToWorld(node.Cell, height: MapManager.GetCell(node.Cell).Height + 0.2f, centered: true),
+                    node.SpeedMultiplier)
+                )
                 .ToList();
 
             return BehaviourStatus.Succeeded;
@@ -50,11 +54,11 @@ namespace SacaSimulationGame.scripts.units
                 return BehaviourStatus.Failed;
             }
 
-            Vector3 target = context.Path[context.CurrentPathIndex];
-            var direction = (target - GlobalPosition).Normalized();
-            var movement = direction * speed * (float)context.Delta;
+            PathfindingNode3D targetNode = context.Path[context.CurrentPathIndex];
+            var direction = (targetNode.Position - GlobalPosition).Normalized();
+            var movement = direction * speed * (float)context.Delta * targetNode.SpeedMultiplier;
 
-            if (GlobalPosition.DistanceTo(target) > movement.Length())
+            if (GlobalPosition.DistanceTo(targetNode.Position) > movement.Length())
             {
                 GlobalTranslate(movement);
             }

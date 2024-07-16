@@ -3,6 +3,7 @@ using SacaSimulationGame.scripts;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.dataObjects;
 using SacaSimulationGame.scripts.map;
+using SacaSimulationGame.scripts.pathfinding;
 using System.Collections.Generic;
 using System.Linq;
 namespace SacaSimulationGame.scripts.managers
@@ -47,7 +48,7 @@ namespace SacaSimulationGame.scripts.managers
         /// <summary>
         /// When using selectionmode.Path, this is used to store the path
         /// </summary>
-        private List<Vector2I> SelectionPath { get; set; } = null;
+        private List<PathfindingNodeGrid> SelectionPath { get; set; } = null;
 
 
         private BuildingBlueprintBase selectedBuilding = null;
@@ -133,14 +134,14 @@ namespace SacaSimulationGame.scripts.managers
                     }
                     else if (SelectionPath != null && SelectionPath.Count >= 1)
                     {
-                        bool isPathBuildable = SelectionPath.All(cell => CheckBuildingBuildable(cell, selectedBuilding).All(b=>b.isBuildable));
+                        bool isPathBuildable = SelectionPath.All(node => CheckBuildingBuildable(node.Cell, selectedBuilding).All(b=>b.isBuildable));
 
                         if (isPathBuildable)
                         {
-                            foreach (var cell in SelectionPath)
+                            foreach (var node in SelectionPath)
                             {
                                 //TODO: smart rotations of the building
-                                BuildBuilding(cell, selectedBuilding);
+                                BuildBuilding(node.Cell, selectedBuilding);
                             }
                         }
                     }

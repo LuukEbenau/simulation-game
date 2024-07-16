@@ -3,6 +3,7 @@ using SacaSimulationGame.scripts;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.dataObjects;
 using SacaSimulationGame.scripts.map;
+using SacaSimulationGame.scripts.pathfinding;
 using System.Collections.Generic;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -43,7 +44,7 @@ namespace SacaSimulationGame.scripts.managers
                             {
                                 //Find path with astar from start to destination, in found use this path to visualise
                                 if (SelectionPathStart == lastHoveredCell) { 
-                                    SelectionPath = [lastHoveredCell]; // also allow for just building a single cell
+                                    SelectionPath = [new PathfindingNodeGrid( lastHoveredCell,1.0f)]; // also allow for just building a single cell
                                 }
                                 else
                                 {
@@ -52,7 +53,7 @@ namespace SacaSimulationGame.scripts.managers
                                 var cellsToVisualise = new List<(Vector2I cell, MapDataItem cellData, bool isBuildable)>();
                                 foreach (var pathCell in SelectionPath)
                                 {
-                                    cellsToVisualise.AddRange(CheckBuildingBuildable(pathCell, selectedBuilding, visualiseHover: true));
+                                    cellsToVisualise.AddRange(CheckBuildingBuildable(pathCell.Cell, selectedBuilding, visualiseHover: true));
                                 }
 
                                 VisualiseBuildableCells(cellsToVisualise);

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.managers;
+using SacaSimulationGame.scripts.pathfinding;
 
 namespace SacaSimulationGame.scripts.units
 {
@@ -16,6 +17,6 @@ namespace SacaSimulationGame.scripts.units
         public BuildingDataObject Building { get; set; }
 
         public int CurrentPathIndex {  get; set; }
-        public List<Vector3> Path { get; set; }
+        public List<PathfindingNode3D> Path { get; set; }
     }
 }
