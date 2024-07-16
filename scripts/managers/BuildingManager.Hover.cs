@@ -42,7 +42,13 @@ namespace SacaSimulationGame.scripts.managers
                             if (SelectionPathStart != Vector2I.MaxValue)
                             {
                                 //Find path with astar from start to destination, in found use this path to visualise
-                                SelectionPath = this.MapManager.Pathfinder.FindPath(SelectionPathStart, lastHoveredCell, maxIterationCount: 500);
+                                if (SelectionPathStart == lastHoveredCell) { 
+                                    SelectionPath = [lastHoveredCell]; // also allow for just building a single cell
+                                }
+                                else
+                                {
+                                    SelectionPath = this.MapManager.Pathfinder.FindPath(SelectionPathStart, lastHoveredCell, maxIterationCount: 500);
+                                }
                                 var cellsToVisualise = new List<(Vector2I cell, MapDataItem cellData, bool isBuildable)>();
                                 foreach (var pathCell in SelectionPath)
                                 {
@@ -115,7 +121,7 @@ namespace SacaSimulationGame.scripts.managers
         private bool IsCellBuildable(MapDataItem data, CellType buildingCellType, float maxSlopeAngle, Vector2I cell)
         {
             // check for obstacles
-            var cellOccupied = this.occupiedCells[cell.X, cell.Y] > 0;
+            var cellOccupied = this.OccupiedCells[cell.X, cell.Y] > 0;
             if (cellOccupied)
             {
                 return false;

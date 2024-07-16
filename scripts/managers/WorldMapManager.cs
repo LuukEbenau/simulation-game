@@ -84,7 +84,8 @@ namespace SacaSimulationGame.scripts.managers
         }
         public int CellCount => MapData.Length;
 
-        public CustomAStarPathfinder Pathfinder { get; private set; }
+        public GameManager GameManager { get; private set; }
+        public AstarPathfinder Pathfinder { get; private set; }
 
 
         #region cell mapping to world
@@ -213,7 +214,9 @@ namespace SacaSimulationGame.scripts.managers
             GradientVisualizer.SetGradients(MapData, CellSize, this);
             GradientVisualizer.ShowSlopeGradients = ShowSlopeGradients;
 
-            this.Pathfinder = new CustomAStarPathfinder(this);
+
+            this.GameManager = this.GetParent<GameManager>();
+            this.Pathfinder = new AstarPathfinder(this.GameManager);
         }
     }
 }

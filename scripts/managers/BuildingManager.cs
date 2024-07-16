@@ -44,7 +44,7 @@ namespace SacaSimulationGame.scripts.managers
 
 
         private BuildingBlueprintBase selectedBuilding = null;
-        public int[,] occupiedCells;
+        public int[,] OccupiedCells { get; private set; }
 
         //TODO: i need to make the selectedbuilding a copy instead, otherwise they all share the same instance. Or, not use the blueprint anymore after building.
         public override void _Ready()
@@ -59,7 +59,7 @@ namespace SacaSimulationGame.scripts.managers
             dummyPlayer = new Player();
             buildingData.Add(dummyPlayer, []);
 
-            occupiedCells = new int[MapManager.MapWidth, MapManager.MapHeight];
+            OccupiedCells = new int[MapManager.MapWidth, MapManager.MapHeight];
         }
 
 
@@ -112,7 +112,19 @@ namespace SacaSimulationGame.scripts.managers
             {
                 if (selectedBuilding.SelectionMode == SelectionMode.Path)
                 {
-                    if (SelectionPath != null && SelectionPath.Count >= 1)
+                    if(lastHoveredCell == SelectionPathStart)
+                    {
+                        // just single building
+                        var cells = CheckBuildingBuildable(lastHoveredCell, selectedBuilding);
+                        if (cells.All(b=>b.isBuildable))
+                        {
+                            foreach (var cell in cells)
+                            {
+                                BuildBuilding(cell.cell, selectedBuilding);
+                            }
+                        }
+                    }
+                    else if (SelectionPath != null && SelectionPath.Count >= 1)
                     {
                         bool isPathBuildable = SelectionPath.All(cell => CheckBuildingBuildable(cell, selectedBuilding).All(b=>b.isBuildable));
 
@@ -197,7 +209,7 @@ namespace SacaSimulationGame.scripts.managers
             buildingInstance.Cell = cell;
             buildingInstance.Blueprint = buildingBlueprint;
 
-            Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + 0.01f, centered: true);
+            Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + 0.25f, centered: true);
             ApplyBuildingRotation(buildingInstance, buildingBlueprint.Rotation);
 
             var buildingDataObject = new BuildingDataObject(dummyPlayer, buildingInstance);
@@ -238,7 +250,7 @@ namespace SacaSimulationGame.scripts.managers
                     //TODO: take into account rotation
                     occupiedCellsByBuilding.Add(new Vector2I(occXMap, occYMap));
 
-                    this.occupiedCells[occXMap, occYMap] = buildingId;
+                    this.OccupiedCells[occXMap, occYMap] = buildingId;
                 }
             }
 

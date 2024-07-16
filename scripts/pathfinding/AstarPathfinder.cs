@@ -1,156 +1,116 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.ComponentModel.DataAnnotations;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-//using Godot;
-//using SacaSimulationGame.scripts.map;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Godot;
+using SacaSimulationGame.scripts;
+using SacaSimulationGame.scripts.managers;
+using SacaSimulationGame.scripts.map;
 
-//namespace SacaSimulationGame.scripts.pathfinding
-//{
-//    using System;
-//    using System.Collections.Generic;
-//    using Godot;
+namespace SacaSimulationGame.scripts.pathfinding
+{
+    public class AstarPathfinder(GameManager gameManager)
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="start">start position</param>
+        /// <param name="goal">goal position</param>
+        /// <param name="traversableTerrainType">the types of terrain which are traversable by this path</param>
+        /// <param name="maxIterationCount">maximum amount of explored cells before canceling</param>
+        /// <returns></returns>
+        public List<Vector2I> FindPath(Vector2I start, Vector2I goal, CellType traversableTerrainType = CellType.GROUND, int maxIterationCount = 500)
+        {
+            var openSet = new SortedSet<(float cost, Vector2I node)>(new NodeComparer());
+            var cameFrom = new Dictionary<Vector2I, Vector2I>();
+            var gScore = new Dictionary<Vector2I, float> { [start] = 0 };
+            var fScore = new Dictionary<Vector2I, float> { [start] = Heuristic(start, goal) };
 
-//    namespace SacaSimulationGame.scripts.pathfinding
-//    {
-//        public class AStarPathfinder
-//        {
-//            private readonly WorldMapManager _mapManager;
-//            private readonly CellType[,] _mapGrid;
-//            private readonly int _mapWidth;
-//            private readonly int _mapHeight;
-//            private readonly PriorityQueue<Node, float> _openSet;
-//            private readonly HashSet<Vector2I> _closedSet;
-//            private readonly Dictionary<Vector2I, Node> _allNodes;
-//            private readonly Vector2I[] _neighbors;
+            openSet.Add((fScore[start], start));
 
-//            public AStarPathfinder(WorldMapManager mapManager)
-//            {
-//                _mapManager = mapManager;
-//                _mapWidth = mapManager.MapWidth;
-//                _mapHeight = mapManager.MapHeight;
-//                _mapGrid = new CellType[_mapWidth, _mapHeight];
-//                _openSet = new PriorityQueue<Node, float>();
-//                _closedSet = new HashSet<Vector2I>();
-//                _allNodes = new Dictionary<Vector2I, Node>();
-//                _neighbors = new Vector2I[4];
+            int iCount = 0;
+            while (openSet.Count > 0)
+            {
+                iCount++;
+                if(iCount>= maxIterationCount)
+                {
+                    return [];
+                }
+                var current = openSet.Min.node;
+                if (current == goal)
+                    return ReconstructPath(cameFrom, current);
 
-//                // Populate the map grid
-//                for (int x = 0; x < _mapWidth; x++)
-//                {
-//                    for (int y = 0; y < _mapHeight; y++)
-//                    {
-//                        _mapGrid[x, y] = mapManager.GetCell(new Vector2I(x, y)).CellType;
-//                    }
-//                }
-//            }
+                openSet.Remove(openSet.Min);
+                foreach (var neighbor in GetNeighbors(current))
+                {
+                    if (!gameManager.MapManager.TryGetCell(neighbor, out var neighborData) || neighborData.CellType != traversableTerrainType)
+                        continue;
+                    //TODO: obstacle check
+                    var cellOccupied = gameManager.BuildingManager.OccupiedCells[neighbor.X, neighbor.Y] > 0;
+                    if (cellOccupied) continue;
 
-//            public List<Vector2I> FindPath(Vector2I start, Vector2I goal, CellType traversableTerrainType = CellType.GROUND, int maxIterationCount = 500)
-//            {
-//                _openSet.Clear();
-//                _closedSet.Clear();
-//                _allNodes.Clear();
+                    float tentativeGScore = gScore[current] + Distance(current, neighbor);
+                    if (!gScore.TryGetValue(neighbor, out float value) || tentativeGScore < value)
+                    {
+                        cameFrom[neighbor] = current;
+                        value = tentativeGScore;
+                        gScore[neighbor] = value;
+                        fScore[neighbor] = tentativeGScore + Heuristic(neighbor, goal);
+                        if (!openSet.Any(x => x.node == neighbor))
+                            openSet.Add((fScore[neighbor], neighbor));
+                    }
+                }
+            }
 
-//                var startNode = new Node(start, default, 0, Heuristic(start, goal));
-//                _openSet.Enqueue(startNode, startNode.FCost);
-//                _allNodes[start] = startNode;
+            return []; // Return empty list if no path found
+        }
 
-//                int iterationCount = 0;
-//                while (_openSet.Count > 0 && iterationCount < maxIterationCount)
-//                {
-//                    iterationCount++;
-//                    var current = _openSet.Dequeue();
+        private List<Vector2I> ReconstructPath(Dictionary<Vector2I, Vector2I> cameFrom, Vector2I current)
+        {
+            var path = new List<Vector2I> { current };
+            while (cameFrom.ContainsKey(current))
+            {
+                current = cameFrom[current];
+                path.Add(current);
+            }
+            path.Reverse();
+            return path;
+        }
 
-//                    if (current.Position == goal)
-//                        return ReconstructPath(current);
+        private float Heuristic(Vector2I a, Vector2I b)
+        {
+            return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y); // Manhattan distance for grid
+        }
 
-//                    _closedSet.Add(current.Position);
+        private float Distance(Vector2I a, Vector2I b)
+        {
+            return a.DistanceTo(b);
+        }
 
-//                    foreach (var neighbor in GetNeighbors(current.Position))
-//                    {
-//                        if (!IsValidPosition(neighbor) || _mapGrid[neighbor.X, neighbor.Y] != traversableTerrainType || _closedSet.Contains(neighbor))
-//                            continue;
+        private IEnumerable<Vector2I> GetNeighbors(Vector2I node)
+        {
+            return[
+                new(node.X + 1, node.Y),
+                new(node.X - 1, node.Y),
+                new(node.X, node.Y + 1),
+                new(node.X, node.Y - 1)
+            ];
+        }
 
-//                        float newGCost = current.GCost + Distance(current.Position, neighbor);
-
-//                        if (!_allNodes.TryGetValue(neighbor, out var neighborNode))
-//                        {
-//                            neighborNode = new Node(neighbor, current, newGCost, Heuristic(neighbor, goal));
-//                            _allNodes[neighbor] = neighborNode;
-//                            _openSet.Enqueue(neighborNode, neighborNode.FCost);
-//                        }
-//                        else if (newGCost < neighborNode.GCost)
-//                        {
-//                            neighborNode.Parent = current;
-//                            neighborNode.GCost = newGCost;
-//                            neighborNode.FCost = newGCost + neighborNode.HCost;
-//                            // Re-enqueue to update position in priority queue
-//                            _openSet.Enqueue(neighborNode, neighborNode.FCost);
-//                        }
-//                    }
-//                }
-
-//                return new List<Vector2I>(); // Return empty list if no path found
-//            }
-
-//            private List<Vector2I> ReconstructPath(Node endNode)
-//            {
-//                var path = new List<Vector2I>();
-//                var current = endNode;
-//                while (current != default)
-//                {
-//                    path.Add(current.Position);
-//                    current = current.Parent;
-//                }
-//                path.Reverse();
-//                return path;
-//            }
-
-//            private float Heuristic(Vector2I a, Vector2I b)
-//            {
-//                float dx = Math.Abs(a.X - b.X);
-//                float dy = Math.Abs(a.Y - b.Y);
-//                return 1.0f * (dx + dy) + (1.414f - 2 * 1.0f) * Math.Min(dx, dy); // Octile distance
-//            }
-
-//            private float Distance(Vector2I a, Vector2I b)
-//            {
-//                return a.DistanceTo(b);
-//            }
-
-//            private IEnumerable<Vector2I> GetNeighbors(Vector2I node)
-//            {
-//                _neighbors[0] = new Vector2I(node.X + 1, node.Y);
-//                _neighbors[1] = new Vector2I(node.X - 1, node.Y);
-//                _neighbors[2] = new Vector2I(node.X, node.Y + 1);
-//                _neighbors[3] = new Vector2I(node.X, node.Y - 1);
-//                return _neighbors;
-//            }
-
-//            private bool IsValidPosition(Vector2I position)
-//            {
-//                return position.X >= 0 && position.X < _mapWidth && position.Y >= 0 && position.Y < _mapHeight;
-//            }
-
-//            private struct Node
-//            {
-//                public Vector2I Position;
-//                public Node Parent;
-//                public float GCost;
-//                public float HCost;
-//                public float FCost;
-
-//                public Node(Vector2I position, Node parent, float gCost, float hCost)
-//                {
-//                    Position = position;
-//                    Parent = parent;
-//                    GCost = gCost;
-//                    HCost = hCost;
-//                    FCost = gCost + hCost;
-//                }
-//            }
-//        }
-//    }
-//}
+        private class NodeComparer : IComparer<(float cost, Vector2I node)>
+        {
+            public int Compare((float cost, Vector2I node) x, (float cost, Vector2I node) y)
+            {
+                int result = x.cost.CompareTo(y.cost);
+                if (result == 0)
+                {
+                    result = x.node.Y.CompareTo(y.node.Y);
+                    if (result == 0)
+                    {
+                        result = x.node.X.CompareTo(y.node.X);
+                    }
+                }
+                return result;
+            }
+        }
+    }
+}
