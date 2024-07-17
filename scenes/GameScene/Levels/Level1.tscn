@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://1pdv76fc2dve"]
+[gd_scene load_steps=31 format=3 uid="uid://1pdv76fc2dve"]
 
 [ext_resource type="Script" path="res://scripts/managers/GameManager.cs" id="1_jcks0"]
 [ext_resource type="Script" path="res://scripts/managers/WorldMapManager.cs" id="2_lea2q"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://cgg3hfpq62x27" path="res://assets/buildings/house.tscn" id="6_vphri"]
 [ext_resource type="PackedScene" uid="uid://b43ook8n7pytq" path="res://assets/buildings/road.tscn" id="7_fd4ej"]
 [ext_resource type="Script" path="res://addons/zylann.hterrain/hterrain_texture_set.gd" id="7_jcitx"]
+[ext_resource type="PackedScene" uid="uid://dld6b4f1nunh2" path="res://assets/buildings/fishingpost.tscn" id="8_stmox"]
 [ext_resource type="PackedScene" uid="uid://cqnighva7bclx" path="res://assets/units/unit.tscn" id="9_kadnj"]
 [ext_resource type="Texture2D" uid="uid://cjvjhaa5ta2w3" path="res://assets/TerrainData/Level1_slot0_albedo_bump.png" id="10_iah8u"]
 [ext_resource type="Texture2D" uid="uid://dwr5rscyhfdau" path="res://assets/TerrainData/Level1_slot1_albedo_bump.png" id="11_ovtdu"]
@@ -132,6 +133,7 @@ script = ExtResource("5_laoth")
 script = ExtResource("5_ssqwi")
 HouseBuilding = ExtResource("6_vphri")
 RoadBuilding = ExtResource("7_fd4ej")
+FishingpostBuilding = ExtResource("8_stmox")
 
 [node name="UnitManager" type="Node3D" parent="GameManager"]
 script = ExtResource("6_be53k")

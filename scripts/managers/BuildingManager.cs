@@ -11,6 +11,14 @@ namespace SacaSimulationGame.scripts.managers
 
     public partial class BuildingManager : Node3D
     {
+        [Export]
+        public PackedScene HouseBuilding { get; set; }
+        [Export]
+        public PackedScene RoadBuilding { get; set; }
+        [Export]
+        public PackedScene FishingpostBuilding { get; set; }
+
+
         public struct BuildingTypeIdPair(int id, BuildingType type)
         {
             public int Id = id;
@@ -19,10 +27,7 @@ namespace SacaSimulationGame.scripts.managers
 
         private readonly Vector2I _defaultVec = new(int.MinValue, int.MinValue);
 
-        [Export]
-        public PackedScene HouseBuilding { get; set; }
-        [Export]
-        public PackedScene RoadBuilding { get; set; }
+
 
         private WorldMapManager MapManager { get; set; }
         private Camera3D Camera { get; set; }
@@ -115,10 +120,11 @@ namespace SacaSimulationGame.scripts.managers
 
             if(@event.IsActionPressed("Rotate Building"))
             {
-                GD.Print("rotating building");
+                
                 if(selectedBuilding != null)
                 {
                     CycleRotation();
+                    GD.Print($"rotating building {selectedBuilding.Rotation}, {(int)selectedBuilding.Rotation}");
                 }
                 
             }
@@ -232,6 +238,10 @@ namespace SacaSimulationGame.scripts.managers
             {
                 scene = this.RoadBuilding;
             }
+            else if(buildingBlueprint is FishingPostBlueprint)
+            {
+                scene = this.FishingpostBuilding;
+            }
             else
             {
                 scene = this.HouseBuilding;
@@ -249,7 +259,8 @@ namespace SacaSimulationGame.scripts.managers
 
             Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + 0.25f, centered: false);
 
-            ApplyBuildingRotation(buildingInstance, buildingBlueprint.Rotation);
+            buildingInstance.RotateBuilding(buildingBlueprint.Rotation);
+            //ApplyBuildingRotation(buildingInstance, buildingBlueprint.Rotation);
 
             var buildingDataObject = new BuildingDataObject(dummyPlayer, buildingInstance);
             buildingDataObject.OccupiedCells = CalculateOccupiedCellsByBuilding(buildingBlueprint, cell, buildingDataObject.Id);
@@ -284,12 +295,17 @@ namespace SacaSimulationGame.scripts.managers
             {
                 for (var occY = 0; occY < building.Shape.GetLength(1); occY++)
                 {
-                    var occXMap = cell.X + occX;
-                    var occYMap = cell.Y + occY;
-                    //TODO: take into account rotation
-                    occupiedCellsByBuilding.Add(new Vector2I(occXMap, occYMap));
+                    var offset = new Vector2I(occX, occY);
+                    offset = offset.Rotate((int)building.Rotation);
 
-                    this.OccupiedCells[occXMap, occYMap] = new BuildingTypeIdPair(buildingId, building.Type);
+                    var cellPos = cell + offset;
+                    //var occXMap = cell.X + occX;
+                    //var occYMap = cell.Y + occY;
+                    ////TODO: take into account rotation
+
+                    occupiedCellsByBuilding.Add(cellPos);
+
+                    this.OccupiedCells[cellPos.X, cellPos.Y] = new BuildingTypeIdPair(buildingId, building.Type);
                 }
             }
 
@@ -317,28 +333,29 @@ namespace SacaSimulationGame.scripts.managers
             }
         }
 
-        private void ApplyBuildingRotation(Node3D buildingInstance, BuildingRotation rotation)
-        {
-            switch (rotation)
-            {
-                case BuildingRotation.Top:
-                    //buildingInstance.RotateY(0);
-                    buildingInstance.RotationDegrees = new Vector3(0, 0, 0);
-                    break;
-                case BuildingRotation.Right:
-                    //buildingInstance.RotateY(90);
-                    buildingInstance.RotationDegrees = new Vector3(0, -90, 0);
-                    break;
-                case BuildingRotation.Bottom:
-                    //buildingInstance.RotateY(180);
-                    buildingInstance.RotationDegrees = new Vector3(0, -180, 0);
-                    break;
-                case BuildingRotation.Left:
-                    //buildingInstance.RotateY(270);
-                    buildingInstance.RotationDegrees = new Vector3(0, -270, 0);
-                    break;
-            }
-        }
+        //private void ApplyBuildingRotation(Building buildingInstance, BuildingRotation rotation)
+        //{
+        //    buildingInstance.RotationDegrees = new Vector3(0, (float)rotation, 0);
+        //    //switch (rotation)
+        //    //{
+        //    //    case BuildingRotation.Top:
+        //    //        //buildingInstance.RotateY(0);
+        //    //        buildingInstance.RotationDegrees = new Vector3(0, 0, 0);
+        //    //        break;
+        //    //    case BuildingRotation.Right:
+        //    //        //buildingInstance.RotateY(90);
+        //    //        buildingInstance.RotationDegrees = new Vector3(0, -90, 0);
+        //    //        break;
+        //    //    case BuildingRotation.Bottom:
+        //    //        //buildingInstance.RotateY(180);
+        //    //        buildingInstance.RotationDegrees = new Vector3(0, -180, 0);
+        //    //        break;
+        //    //    case BuildingRotation.Left:
+        //    //        //buildingInstance.RotateY(270);
+        //    //        buildingInstance.RotationDegrees = new Vector3(0, -270, 0);
+        //    //        break;
+        //    //}
+        //}
 
         #endregion
     }

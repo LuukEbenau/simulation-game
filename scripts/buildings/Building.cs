@@ -27,6 +27,14 @@ namespace SacaSimulationGame.scripts.buildings
         public Vector2I Cell { get; set; }
 
         public abstract BuildingType Type { get; }
+
+        public void RotateBuilding(BuildingRotation rotation)
+        {
+
+
+            this.RotationDegrees = new Vector3(0, -(float)rotation, 0);
+        }
+
         public override void _Ready()
         {
             base._Ready();

@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://dld6b4f1nunh2"]
+
+[ext_resource type="Script" path="res://scripts/buildings/Fishingpost.cs" id="1_2jl4h"]
+[ext_resource type="PackedScene" uid="uid://btygq765vnhwp" path="res://assets/buildings/fishingpost.blend" id="1_v16jd"]
+
+[node name="Fishingpost" type="Node3D"]
+script = ExtResource("1_2jl4h")
+
+[node name="fishingpost" parent="." instance=ExtResource("1_v16jd")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)

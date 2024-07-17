@@ -1,7 +1,6 @@
 using Godot;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.dataObjects;
-using SacaSimulationGame.scripts.map;
 using SacaSimulationGame.scripts.units;
 using SacaSimulationGame.scripts.units.dataObjects;
 using System;
