@@ -73,7 +73,6 @@ namespace SacaSimulationGame.scripts.pathfinding
                         {
                             
                             cellSpeedMultiplier = roadSpeedMultiplier;
-                            GD.Print($"setting coeffient to to road speed multiplier");
                         }
                     }
 

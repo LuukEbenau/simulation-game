@@ -221,7 +221,7 @@ namespace SacaSimulationGame.scripts.managers
         private void VisualizeCell(int meshInstanceIndex, Vector2I cellShifted, MapDataItem data, bool cellBuildable)
         {
             var color = cellBuildable ? new Color(0, 1, 0) : new Color(1, 0, 0);
-            Vector3 worldPos3d = MapManager.CellToWorld(cellShifted, data.Height + 3f);
+            Vector3 worldPos3d = MapManager.CellToWorld(cellShifted, data.Height + 0.4f, centered:true);
 
             var hoverIndicatorMesh = GetHoverIndicator(meshInstanceIndex, MapManager.CellSize);
             VisualiseHover(hoverIndicatorMesh, worldPos3d, color);

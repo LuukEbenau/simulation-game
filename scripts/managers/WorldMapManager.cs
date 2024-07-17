@@ -4,6 +4,7 @@ using SacaSimulationGame.scripts.pathfinding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Windows.Services.Maps;
 namespace SacaSimulationGame.scripts.managers
 {
     public partial class WorldMapManager : Node3D
@@ -98,11 +99,15 @@ namespace SacaSimulationGame.scripts.managers
             cell += new Vector2I(MinX, MinY);
 
             var worldPos = new Vector3(origin.X + cell.X * CellSize.X, height, origin.Z + cell.Y * CellSize.Z);
+
+            worldPos += new Vector3(CellSize.X, 0, CellSize.Z);
             if (centered)
             {
-                worldPos.X += CellSize.X / 2f;
-                worldPos.Z += CellSize.Z / 2f;
+                worldPos.X -= CellSize.X / 2f;
+                worldPos.Z -= CellSize.Z / 2f;
             }
+
+            
 
             return worldPos;
         }
@@ -120,7 +125,13 @@ namespace SacaSimulationGame.scripts.managers
 
             cell += new Vector2I(MinX, MinY);
 
-            var worldPos = new Vector3(origin.X + cell.X * CellSize.X, height, origin.Z + cell.Y * CellSize.Z);
+            var worldPos = new Vector3(
+                origin.X + cell.X * CellSize.X, 
+                height, 
+                origin.Z + cell.Y * CellSize.Z
+            );
+
+
 
             return worldPos;
         }
@@ -142,9 +153,11 @@ namespace SacaSimulationGame.scripts.managers
             var cellX = Mathf.FloorToInt(relativePos.X / CellSize.X);
             var cellY = Mathf.FloorToInt(relativePos.Y / CellSize.Z);
 
-            // Since we removed this when calculating cellnumbers, now we have to add them
+            // Since we added this when calculating cellnumbers, now we have to remove them
             cellX -= this.MinX;
             cellY -= this.MinY;
+
+
 
             return new Vector2I(cellX, cellY);
         }

@@ -165,7 +165,7 @@ namespace SacaSimulationGame.scripts.map
             while (toCheck.Count > 0)
             {
                 var currentCell = toCheck.Dequeue();
-                Vector3 currentGlobalPos = MapManager.CellToWorld(currentCell);
+                Vector3 currentGlobalPos = MapManager.CellToWorld(currentCell,centered:false);
 
                 if (!mappedCells.ContainsKey(currentCell))
                 {
@@ -221,14 +221,12 @@ namespace SacaSimulationGame.scripts.map
                 }
                 Vector3 position = _position.AsVector3();
 
-                //GD.Print($"collider name: {collider}");
                 if (collider.AsGodotObject() != null)
                 {
                     if (collider.AsGodotObject() is Node3D colliderNode)
                     {
                         if (colliderNode.Name == MapManager.RiverCollider.Name)
                         {
-                            //GD.Print("river");
                             return (CellType.WATER, position.Y);
                         }
                         if (colliderNode.Name == MapManager.Terrain.Name)

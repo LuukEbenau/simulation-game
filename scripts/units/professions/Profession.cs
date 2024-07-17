@@ -48,9 +48,10 @@ namespace SacaSimulationGame.scripts.units.professions
                 return BehaviourStatus.Failed;
             }
 
+            //var halfCell = new Vector2(0.5f, 0.5f);
             context.Path = cellPath
                 .Select(node => new PathfindingNode3D(
-                    Unit.MapManager.CellToWorld(node.Cell, height: Unit.MapManager.GetCell(node.Cell).Height + 0.2f, centered: true),
+                    Unit.MapManager.CellToWorld(node.Cell, height: Unit.MapManager.GetCell(node.Cell).Height + 0.2f, centered:true),
                     node.SpeedMultiplier)
                 )
                 .ToList();

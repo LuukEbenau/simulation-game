@@ -217,7 +217,8 @@ namespace SacaSimulationGame.scripts.managers
             buildingInstance.Cell = cell;
             buildingInstance.Blueprint = buildingBlueprint;
 
-            Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + 0.25f, centered: true);
+            Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + 0.25f, centered: false);
+
             ApplyBuildingRotation(buildingInstance, buildingBlueprint.Rotation);
 
             var buildingDataObject = new BuildingDataObject(dummyPlayer, buildingInstance);
