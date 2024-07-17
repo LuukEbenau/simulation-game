@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BehaviourTree;
 using BehaviourTree.FluentBuilder;
+using Godot;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.managers;
 using Windows.Services.Maps;
@@ -13,14 +14,9 @@ namespace SacaSimulationGame.scripts.units.professions
 {
     public class BuilderProfession(Unit unit) : Profession(unit)
     {
+        private readonly float _waittimeUntilBuildingTimeout = 15;
         protected override IBehaviour<UnitBTContext> GetBehaviourTree()
         {
-            var idleTree = FluentBuilder.Create<UnitBTContext>()
-                .Sequence("Idle Sequence")
-                    .Do("Idle", this.DoNothingSequence)
-                .End()
-                .Build();
-
             return FluentBuilder.Create<UnitBTContext>()
                 .Selector("root")
                     .Sequence("Move to and build building")
@@ -29,35 +25,26 @@ namespace SacaSimulationGame.scripts.units.professions
                         .Do("Move To Building", this.MoveToDestination)
                         .Do("Build Building", this.BuildBuilding)
                     .End()
-                    .Subtree(idleTree)
+                    .Subtree(this.IdleBehaviourTree)
                 .End()
                 .Build();
         }
 
-        private BehaviourStatus IsInBuildingDistance(UnitBTContext context)
-        {
-            var buildingPos = Unit.GameManager.MapManager.CellToWorld(context.Building.Building.Cell, centered: true);
-
-            if (Unit.GlobalPosition.DistanceTo(buildingPos) <= 1.0)
-            {
-                return BehaviourStatus.Succeeded;
-            }
-
-            return BehaviourStatus.Failed;
-        }
-
-
         public BehaviourStatus FindBuildingToBuild(UnitBTContext context)
         {
-            var buildingsOrdered = Unit.BuildingManager.GetBuildings().Where(b => !b.Building.BuildingCompleted)
-                .OrderBy(b => b.IsUnreachableCounter)
-                .ThenBy(b => b.Building.GlobalPosition.DistanceTo(Unit.GlobalPosition));
+            var buildingsOrdered = from b in Unit.BuildingManager.GetBuildings()
+                    where !b.Building.BuildingCompleted
+                    orderby b.IsUnreachableCounter ascending,
+                            b.Building.BuildingResources.PercentageResourcesAquired - b.Building.BuildingPercentageComplete descending,
+                            b.Building.GlobalPosition.DistanceTo(Unit.GlobalPosition) ascending
+                    select b;
 
             BuildingDataObject targetBuilding = null;
             foreach (var building in buildingsOrdered)
             {
                 if (building.AssignUnit(Unit))
                 {
+                    GD.Print($"found target building to build {targetBuilding}");
                     targetBuilding = building;
                     break;
                 }
@@ -71,21 +58,41 @@ namespace SacaSimulationGame.scripts.units.professions
             context.Building = targetBuilding;
             context.Destination = Unit.MapManager.CellToWorld(context.Building.Building.Cell, centered: true);
 
+            GD.Print($"target building is located at {context.Destination}");
+
             return BehaviourStatus.Succeeded;
         }
-
+        
         public BehaviourStatus BuildBuilding(UnitBTContext context)
         {
-            var finished = context.Building.Building.AddBuildingProgress(context.Delta);
-
-            if (finished)
+            if(context.Building.Building.BuildingPercentageComplete >= context.Building.Building.BuildingResources.PercentageResourcesAquired)
             {
-                context.Building.UnassignUnit(Unit); //TODO: what if the task gets canceled? i also want to it clear then.
-                return BehaviourStatus.Succeeded;
+                //waiting for resources
+                context.WaitingTime += context.Delta;
+                if (context.WaitingTime > _waittimeUntilBuildingTimeout)
+                {
+                    context.Building.UnassignUnit(Unit);
+                    return BehaviourStatus.Failed;
+                }
+                else
+                {
+                    return BehaviourStatus.Running;
+                }
             }
             else
             {
-                return BehaviourStatus.Running;
+                context.WaitingTime = 0;
+                var finished = context.Building.Building.AddBuildingProgress(context.Delta);
+
+                if (finished)
+                {
+                    context.Building.UnassignUnit(Unit); //TODO: what if the task gets canceled? i also want to it clear then.
+                    return BehaviourStatus.Succeeded;
+                }
+                else
+                {
+                    return BehaviourStatus.Running;
+                }
             }
         }
 

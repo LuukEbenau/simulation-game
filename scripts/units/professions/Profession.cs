@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BehaviourTree;
+using BehaviourTree.FluentBuilder;
 using Godot;
 using SacaSimulationGame.scripts.pathfinding;
 using Windows.Services.Maps;
@@ -21,6 +22,20 @@ namespace SacaSimulationGame.scripts.units.professions
         public int SkillLevel { get; } = 0;
 
         protected abstract IBehaviour<UnitBTContext> GetBehaviourTree();
+
+        private IBehaviour<UnitBTContext> _idleBehaviourTree;
+
+        public IBehaviour<UnitBTContext> IdleBehaviourTree { 
+            get {
+                _idleBehaviourTree ??= FluentBuilder.Create<UnitBTContext>()
+                    .Sequence("Idle Sequence")
+                        .Do("Idle", this.DoNothingSequence)
+                    .End()
+                .Build();
+
+                return _idleBehaviourTree;
+            }
+        } 
 
         public Profession(Unit unit)
         {
@@ -48,7 +63,6 @@ namespace SacaSimulationGame.scripts.units.professions
                 return BehaviourStatus.Failed;
             }
 
-            //var halfCell = new Vector2(0.5f, 0.5f);
             context.Path = cellPath
                 .Select(node => new PathfindingNode3D(
                     Unit.MapManager.CellToWorld(node.Cell, height: Unit.MapManager.GetCell(node.Cell).Height + 0.2f, centered:true),
@@ -69,7 +83,7 @@ namespace SacaSimulationGame.scripts.units.professions
 
             PathfindingNode3D targetNode = context.Path[context.CurrentPathIndex];
             var direction = (targetNode.Position - Unit.GlobalPosition).Normalized();
-            var movement = direction * Unit.speed * (float)context.Delta * targetNode.SpeedMultiplier;
+            var movement = direction * Unit.Stats.Speed * (float)context.Delta * targetNode.SpeedMultiplier;
 
             if (Unit.GlobalPosition.DistanceTo(targetNode.Position) > movement.Length())
             {
@@ -81,12 +95,23 @@ namespace SacaSimulationGame.scripts.units.professions
 
                 if (context.CurrentPathIndex >= context.Path.Count)
                 {
-                    GD.Print("Arrived at destination");
                     return BehaviourStatus.Succeeded;
                 }
             }
 
             return BehaviourStatus.Running;
+        }
+
+        private BehaviourStatus IsInBuildingDistance(UnitBTContext context)
+        {
+            var buildingPos = Unit.GameManager.MapManager.CellToWorld(context.Building.Building.Cell, centered: true);
+
+            if (Unit.GlobalPosition.DistanceTo(buildingPos) <= 1.0)
+            {
+                return BehaviourStatus.Succeeded;
+            }
+
+            return BehaviourStatus.Failed;
         }
     }
 }

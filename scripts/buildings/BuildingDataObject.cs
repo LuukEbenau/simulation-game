@@ -29,6 +29,8 @@ namespace SacaSimulationGame.scripts.buildings
         /// </summary>
         public int IsUnreachableCounter { get; set; } = 0;
 
+        public int GetNrOfAssignedUnits => AssignedUnits.Count;
+
         /// <summary>
         /// 
         /// </summary>

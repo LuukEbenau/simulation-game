@@ -18,5 +18,7 @@ namespace SacaSimulationGame.scripts.units
 
         public int CurrentPathIndex {  get; set; }
         public List<PathfindingNode3D> Path { get; set; }
+
+        public double WaitingTime { get; set; } = 0;
     }
 }

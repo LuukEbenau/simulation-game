@@ -17,7 +17,8 @@ namespace SacaSimulationGame.scripts.buildings
 
         public abstract int MaxBuilders { get; }
 
-        
+        public BuildingResources BuildingResources { get; protected set; }
+
         public abstract double TotalBuildingProgressNeeded { get; }
         public bool BuildingCompleted { get; set; } = false;
         private float _currentBuildingProgress = 0;
@@ -25,6 +26,7 @@ namespace SacaSimulationGame.scripts.buildings
 
         public Vector2I Cell { get; set; }
 
+        public abstract BuildingType Type { get; }
         public override void _Ready()
         {
             base._Ready();
@@ -41,6 +43,24 @@ namespace SacaSimulationGame.scripts.buildings
         }
 
         #region progress tracking
+
+        /// <summary>
+        /// Whether buildings can continue working or have to wait for resources
+        /// </summary>
+        /// <returns></returns>
+        public bool CanBuild()
+        {
+            var percentageBuildingComplete =  this.CurrentBuildingProgress / this.TotalBuildingProgressNeeded;
+            if(percentageBuildingComplete <= BuildingResources.PercentageResourcesAquired)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>

@@ -53,11 +53,24 @@ namespace SacaSimulationGame.scripts.pathfinding
                 openSet.Remove(openSet.Min);
                 foreach (var neighbor in GetNeighbors(current.Cell))
                 {
-                    if (!gameManager.MapManager.TryGetCell(neighbor, out var neighborData) || neighborData.CellType != traversableTerrainType)
-                        continue;
-
                     // low is good, big is bad
                     float cellSpeedMultiplier = 1.0f;
+
+                    // if neighbor is the destination, we can exit
+                    if (neighbor == goal)
+                    {
+                        //if its the goal, we exit directly. Otherwise, pathfinding will never find a path since the building is considered a obstacle
+                        //TODO: this is a hacky approach, we need to find something better in the future. For example, if a building would be 3x3 and the target cell coordinate is the middle one, it will still crash in this case
+                        //TODO: we might be able to make a* with a collection of goal cells, so that it stops if it hits any of the building cells
+                        //TODO: make building blueprints passable until its actually being build.
+                        var neighborNode = new PathfindingNodeGrid(neighbor, 1f / cellSpeedMultiplier);
+                        cameFrom[neighborNode] = current;
+                        return ReconstructPath(cameFrom, neighborNode);
+                    }
+                    else if (!gameManager.MapManager.TryGetCell(neighbor, out var neighborData) || neighborData.CellType != traversableTerrainType)
+                        continue;
+
+
 
                     var cellObstacleType = gameManager.BuildingManager.OccupiedCells[neighbor.X, neighbor.Y];
                     //TODO: only apply speed bonus after road is finished

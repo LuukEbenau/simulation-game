@@ -53,6 +53,17 @@ namespace SacaSimulationGame.scripts.managers
                                 var cellsToVisualise = new List<(Vector2I cell, MapDataItem cellData, bool isBuildable)>();
                                 foreach (var pathCell in SelectionPath)
                                 {
+                                    // If type of building is the same, and selectionType is not Single, instead of coloring red we are just going to skip the building
+                                    //if(pathCell.)
+                                    var building = GetBuildingAtCell(pathCell.Cell);
+                                    if (building != null)
+                                    {
+                                        if(building.Building.Type == selectedBuilding.Type)
+                                        {
+                                            //same type, we can skip it
+                                            continue;
+                                        }
+                                    }
                                     cellsToVisualise.AddRange(CheckBuildingBuildable(pathCell.Cell, selectedBuilding, visualiseHover: true));
                                 }
 

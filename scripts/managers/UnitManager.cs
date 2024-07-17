@@ -31,11 +31,11 @@ namespace SacaSimulationGame.scripts.managers
 
             instance.ChangeProfession(unit.Profession);
 
-            instance.UnitData = unit;
+            //instance.UnitData = unit;
             instance.GameManager = this.GameManager;
-            instance.GlobalPosition = spawnLocation;
 
             AddChild(instance);
+            instance.GlobalPosition = spawnLocation;
 
             return true;
         }

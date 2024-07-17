@@ -14,7 +14,7 @@ namespace SacaSimulationGame.scripts.buildings.dataObjects
         public BuildingRotation Rotation { get; set; } = BuildingRotation.Bottom;
         public abstract CellType[,] Shape { get; }
         public abstract float MaxSlopeAngle { get; }
-        public bool RequiresBuilding = true;
+        public bool RequiresBuilding { get; set; } = true;
         public abstract SelectionMode SelectionMode { get; }
     }
 }

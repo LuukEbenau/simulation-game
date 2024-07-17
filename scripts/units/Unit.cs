@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using BehaviourTree;
 using Godot;
 using Newtonsoft.Json;
+using SacaSimulationGame.scripts;
 using SacaSimulationGame.scripts.managers;
 using SacaSimulationGame.scripts.units;
 using SacaSimulationGame.scripts.units.dataObjects;
@@ -20,15 +21,20 @@ public partial class Unit : Node3D
     [Export]
     public PackedScene WorkerModel { get; set; }
 
-    public Profession Profession { get; set; }
+    public Profession Profession { get; private set; }
+    public UnitStats Stats { get; private set; } = new UnitStats { Speed = 5 };
+    public UnitInventory Inventory { get; private set; } = new UnitInventory();
+
+
     public GameManager GameManager { get; set; }
     public BuildingManager BuildingManager => GameManager.BuildingManager;
     public UnitManager UnitManager => GameManager.UnitManager;
     public WorldMapManager MapManager => GameManager.MapManager;
 
-    public UnitDataObject UnitData { get; set; }
 
-    public readonly float speed = 5;
+    //public UnitDataObject UnitData { get; set; }
+
+    //public readonly float speed = 5;
 
     protected UnitBTContext context;
 
@@ -42,6 +48,11 @@ public partial class Unit : Node3D
         if (professionType == ProfessionType.Worker)
         {
             this.Profession = new WorkerProfession(this);
+
+            //NOTE: temporary for testing
+            this.Inventory.AddResource(ResourceType.Wood, 100);
+            this.Inventory.AddResource(ResourceType.Stone, 100);
+
             VisualModel = WorkerModel.Instantiate<Node3D>();
         }
         else if (professionType == ProfessionType.Builder)

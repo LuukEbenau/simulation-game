@@ -54,6 +54,14 @@ namespace SacaSimulationGame.scripts.managers
         private BuildingBlueprintBase selectedBuilding = null;
         public BuildingTypeIdPair[,] OccupiedCells { get; private set; }
 
+        public BuildingDataObject GetBuildingAtCell(Vector2I cell)
+        {
+            var pair = OccupiedCells[cell.X, cell.Y];
+            if (pair.Id == 0) return null;
+            //TODO: this is very inefficient, probably a dictionary/hashmap will be a lot more efficient
+            return GetBuildings().FirstOrDefault(b => b.Id == pair.Id);
+        }
+
         //TODO: i need to make the selectedbuilding a copy instead, otherwise they all share the same instance. Or, not use the blueprint anymore after building.
         public override void _Ready()
         {
@@ -134,11 +142,33 @@ namespace SacaSimulationGame.scripts.managers
                     }
                     else if (SelectionPath != null && SelectionPath.Count >= 1)
                     {
-                        bool isPathBuildable = SelectionPath.All(node => CheckBuildingBuildable(node.Cell, selectedBuilding).All(b=>b.isBuildable));
+                        bool isPathBuildable = true;
+                        List<PathfindingNodeGrid> pathToBuild = [];
+                        foreach(var pathCell in SelectionPath)
+                        {
+                            var building = GetBuildingAtCell(pathCell.Cell);
+                            if (building != null)
+                            {
+                                if (building.Building.Type == selectedBuilding.Type)
+                                {
+                                    continue;//same type, we can skip it since it already exists
+                                }
+                            }
+                            //if any of the cells in the path is obstructed, the path is not possible
+                            if (!CheckBuildingBuildable(pathCell.Cell, selectedBuilding).All(b => b.isBuildable))
+                            {
+                                isPathBuildable = false;
+                            }
+                            else
+                            {
+                                pathToBuild.Add(pathCell);
+                            }
+
+                        }
 
                         if (isPathBuildable)
                         {
-                            foreach (var node in SelectionPath)
+                            foreach (var node in pathToBuild)
                             {
                                 //TODO: smart rotations of the building
                                 BuildBuilding(node.Cell, selectedBuilding);
@@ -150,6 +180,7 @@ namespace SacaSimulationGame.scripts.managers
                 //always reset back to max, regardless mode
                 SelectionPathStart = Vector2I.MaxValue;
                 SelectionPath = null;
+                ClearHoverIndicator();
             }
             
 
@@ -157,21 +188,20 @@ namespace SacaSimulationGame.scripts.managers
             {
                 if (@event.IsActionPressed("Build"))
                 {
-                    GD.Print("check building buildable");
                     if (CheckBuildingBuildable(lastHoveredCell, selectedBuilding).All(b=>b.isBuildable))
                     {
                         // Build building
-                        GD.Print("start building");
                         if (selectedBuilding.SelectionMode == SelectionMode.Single)
                         {
                             if (BuildBuilding(lastHoveredCell, selectedBuilding))
                             {
-                                GD.Print("building building success");
+                                ClearHoverIndicator();
                             }
                             else
                             {
                                 GD.Print("building building failed");
                             }
+
                         }
                         else if (selectedBuilding.SelectionMode == SelectionMode.Path) {
                             this.SelectionPathStart = lastHoveredCell;
