@@ -22,7 +22,7 @@ namespace SacaSimulationGame.scripts.units.professions
                     .Sequence("Move to and build building")
                         .Do("Find Building To Build", this.FindBuildingToBuild)
                         .Do("Find path to building", this.FindPathToBuilding)
-                        .Do("Move To Building", this.MoveToDestination)
+                        .Do("Move To Building", this.FollowPath)
                         .Do("Build Building", this.BuildBuilding)
                     .End()
                     .Subtree(this.IdleBehaviourTree)
@@ -33,10 +33,10 @@ namespace SacaSimulationGame.scripts.units.professions
         public BehaviourStatus FindBuildingToBuild(UnitBTContext context)
         {
             var buildingsOrdered = from b in Unit.BuildingManager.GetBuildings()
-                    where !b.Building.BuildingCompleted
+                    where !b.Instance.BuildingCompleted
                     orderby b.IsUnreachableCounter ascending,
-                            b.Building.BuildingResources.PercentageResourcesAquired - b.Building.BuildingPercentageComplete descending,
-                            b.Building.GlobalPosition.DistanceTo(Unit.GlobalPosition) ascending
+                            b.Instance.ResourcesRequiredForBuilding.PercentageResourcesAquired - b.Instance.BuildingPercentageComplete descending,
+                            b.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition) ascending
                     select b;
 
             BuildingDataObject targetBuilding = null;
@@ -56,7 +56,7 @@ namespace SacaSimulationGame.scripts.units.professions
             }
 
             context.Building = targetBuilding;
-            context.Destination = Unit.MapManager.CellToWorld(context.Building.Building.Cell, centered: true);
+            context.Destination = Unit.MapManager.CellToWorld(context.Building.Instance.Cell, centered: true);
 
             GD.Print($"target building is located at {context.Destination}");
 
@@ -65,7 +65,7 @@ namespace SacaSimulationGame.scripts.units.professions
         
         public BehaviourStatus BuildBuilding(UnitBTContext context)
         {
-            if(context.Building.Building.BuildingPercentageComplete >= context.Building.Building.BuildingResources.PercentageResourcesAquired)
+            if(context.Building.Instance.BuildingPercentageComplete >= context.Building.Instance.ResourcesRequiredForBuilding.PercentageResourcesAquired)
             {
                 //waiting for resources
                 context.WaitingTime += context.Delta;
@@ -82,7 +82,7 @@ namespace SacaSimulationGame.scripts.units.professions
             else
             {
                 context.WaitingTime = 0;
-                var finished = context.Building.Building.AddBuildingProgress(context.Delta);
+                var finished = context.Building.Instance.AddBuildingProgress(context.Delta);
 
                 if (finished)
                 {

@@ -20,5 +20,7 @@ namespace SacaSimulationGame.scripts.units
         public List<PathfindingNode3D> Path { get; set; }
 
         public double WaitingTime { get; set; } = 0;
+
+        public StorageBuildingBase ResourcePickupBuilding { get; set; }
     }
 }

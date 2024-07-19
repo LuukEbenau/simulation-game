@@ -11,7 +11,7 @@ namespace SacaSimulationGame.scripts.buildings
     public class BuildingDataObject
     {
         private static int buildingIndexCounter = 1; //reserve id 0 for empty tiles
-        public Building Building { get; set; }
+        public Building Instance { get; set; }
         public int Id { get; }
         public List<Vector2I> OccupiedCells { get; set; }
         public Player Player { get; set; }
@@ -19,7 +19,7 @@ namespace SacaSimulationGame.scripts.buildings
         {
             this.Id = buildingIndexCounter++;
             this.Player = player;
-            this.Building = building;
+            this.Instance = building;
             this.AssignedUnits = [];
         }
         private List<Unit> AssignedUnits { get; set; }
@@ -38,7 +38,7 @@ namespace SacaSimulationGame.scripts.buildings
         /// <returns>assigning succes or not</returns>
         public bool AssignUnit(Unit unit)
         {
-            if(AssignedUnits.Count >= Building.MaxBuilders)
+            if(AssignedUnits.Count >= Instance.MaxBuilders)
             {
                 return false;
             }

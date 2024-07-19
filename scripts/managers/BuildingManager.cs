@@ -155,7 +155,7 @@ namespace SacaSimulationGame.scripts.managers
                             var building = GetBuildingAtCell(pathCell.Cell);
                             if (building != null)
                             {
-                                if (building.Building.Type == selectedBuilding.Type)
+                                if (building.Instance.Type == selectedBuilding.Type)
                                 {
                                     continue;//same type, we can skip it since it already exists
                                 }
@@ -266,7 +266,7 @@ namespace SacaSimulationGame.scripts.managers
             buildingDataObject.OccupiedCells = CalculateOccupiedCellsByBuilding(buildingBlueprint, cell, buildingDataObject.Id);
 
             if (!buildingBlueprint.RequiresBuilding) {
-                buildingDataObject.Building.CompleteBuilding();
+                buildingDataObject.Instance.CompleteBuilding();
             }
 
             this.buildingData[dummyPlayer]

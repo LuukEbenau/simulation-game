@@ -13,6 +13,7 @@ namespace SacaSimulationGame.scripts.buildings
         Road = 1,
         House = 2,
         FishingPost = 4,
+        Stockpile = 8,
 
         //groups can be defined here
         ObstacleBuildings = House | FishingPost

@@ -13,11 +13,11 @@ namespace SacaSimulationGame.scripts.buildings
     {
         public BuildingBlueprintBase Blueprint { get; set; }
 
-        protected Node3D BuildingVisual { get; private set; }
+        protected Node3D BuildingVisual { get; set; }
 
         public abstract int MaxBuilders { get; }
 
-        public BuildingResources BuildingResources { get; protected set; }
+        public BuildingResources ResourcesRequiredForBuilding { get; protected set; }
 
         public abstract double TotalBuildingProgressNeeded { get; }
         public bool BuildingCompleted { get; set; } = false;
@@ -27,11 +27,9 @@ namespace SacaSimulationGame.scripts.buildings
         public Vector2I Cell { get; set; }
 
         public abstract BuildingType Type { get; }
-
+        public abstract bool IsResourceStorage { get;  }
         public void RotateBuilding(BuildingRotation rotation)
         {
-
-
             this.RotationDegrees = new Vector3(0, -(float)rotation, 0);
         }
 
@@ -59,7 +57,7 @@ namespace SacaSimulationGame.scripts.buildings
         public bool CanBuild()
         {
             var percentageBuildingComplete =  this.CurrentBuildingProgress / this.TotalBuildingProgressNeeded;
-            if(percentageBuildingComplete <= BuildingResources.PercentageResourcesAquired)
+            if(percentageBuildingComplete <= ResourcesRequiredForBuilding.PercentageResourcesAquired)
             {
                 return true;
             }

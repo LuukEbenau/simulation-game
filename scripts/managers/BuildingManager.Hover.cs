@@ -58,7 +58,7 @@ namespace SacaSimulationGame.scripts.managers
                                     var building = GetBuildingAtCell(pathCell.Cell);
                                     if (building != null)
                                     {
-                                        if(building.Building.Type == selectedBuilding.Type)
+                                        if(building.Instance.Type == selectedBuilding.Type)
                                         {
                                             //same type, we can skip it
                                             continue;

@@ -8,14 +8,25 @@ using SacaSimulationGame.scripts.units;
 
 namespace SacaSimulationGame.scripts.buildings
 {
-    public class BuildingResources(float wood, float stone)
+    public class BuildingResources
     {
         public float PercentageResourcesAquired => (CurrentWood + CurrentStone) / (Wood + Stone);
         public bool RequiresResources => PercentageResourcesAquired < 1;
-        public float Wood { get; } = wood;
+        public float Wood { get; }
         public float CurrentWood { get; private set; }
-        public float Stone { get; } = stone;
+        public float Stone { get; }
         public float CurrentStone { get; private set; }
+
+        public BuildingResources(float wood, float stone)
+        {
+            this.Wood = wood;
+            this.Stone = stone;
+
+            if (wood > 0) TypesOfResourcesRequired |= ResourceType.Wood;
+            if (stone > 0) TypesOfResourcesRequired |= ResourceType.Stone;
+        }
+
+        public ResourceType TypesOfResourcesRequired { get; set; }
 
         public float RequiresOfResource(ResourceType resourceType)
         {
@@ -33,7 +44,7 @@ namespace SacaSimulationGame.scripts.buildings
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="resourceType"></param>
+        /// <param name="resourceType">1 single resource type</param>
         /// <param name="amount"></param>
         /// <returns>Amount of leftover of the resource</returns>
         public float Deposit(ResourceType resourceType, float amount)
@@ -49,6 +60,10 @@ namespace SacaSimulationGame.scripts.buildings
                 {
                     var leftover = amount - spaceLeft;
                     CurrentWood += spaceLeft;
+
+                    // we can remove this resource from the building requirements
+                    TypesOfResourcesRequired ^= resourceType;
+
                     return leftover;
                 }
             }
@@ -66,6 +81,10 @@ namespace SacaSimulationGame.scripts.buildings
 
                     return leftover;
                 }
+            }
+            else
+            {
+                throw new Exception($"unknown resource type {resourceType}");
             }
 
             return 0;

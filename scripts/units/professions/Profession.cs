@@ -73,9 +73,9 @@ namespace SacaSimulationGame.scripts.units.professions
             return BehaviourStatus.Succeeded;
         }
 
-        public BehaviourStatus MoveToDestination(UnitBTContext context)
+        public BehaviourStatus FollowPath(UnitBTContext context)
         {
-            if (context.Destination == default)
+            if (context.Path == default || context.Path.Count == 0)
             {
                 GD.Print("No destination defined");
                 return BehaviourStatus.Failed;
@@ -104,7 +104,7 @@ namespace SacaSimulationGame.scripts.units.professions
 
         private BehaviourStatus IsInBuildingDistance(UnitBTContext context)
         {
-            var buildingPos = Unit.GameManager.MapManager.CellToWorld(context.Building.Building.Cell, centered: true);
+            var buildingPos = Unit.GameManager.MapManager.CellToWorld(context.Building.Instance.Cell, centered: true);
 
             if (Unit.GlobalPosition.DistanceTo(buildingPos) <= 1.0)
             {
