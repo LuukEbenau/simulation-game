@@ -58,7 +58,6 @@ directory = "res://scenes/GameScene/Levels"
 
 [node name="BackgroundMusicPlayer" parent="." instance=ExtResource("7_aibl4")]
 stream = SubResource("AudioStreamRandomizer_sv60v")
-autoplay = false
 
 [node name="LoadingScreen" parent="." instance=ExtResource("8_elxsf")]
 visible = false

@@ -13,4 +13,7 @@
     <Folder Include="assets\" />
     <Folder Include="assets\buildings\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
 </Project>

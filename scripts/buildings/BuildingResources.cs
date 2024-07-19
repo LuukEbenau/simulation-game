@@ -52,7 +52,7 @@ namespace SacaSimulationGame.scripts.buildings
             if (resourceType == ResourceType.Wood)
             {
                 var spaceLeft = Wood - CurrentWood;
-                if (amount <= spaceLeft)
+                if (amount < spaceLeft)
                 {
                     CurrentWood += amount;
                 }
@@ -70,7 +70,7 @@ namespace SacaSimulationGame.scripts.buildings
             else if (resourceType == ResourceType.Stone)
             {
                 var spaceLeft = Stone - CurrentStone;
-                if (amount <= spaceLeft)
+                if (amount < spaceLeft)
                 {
                     CurrentStone += amount;
                 }
@@ -78,6 +78,8 @@ namespace SacaSimulationGame.scripts.buildings
                 {
                     var leftover = amount - spaceLeft;
                     CurrentStone += spaceLeft;
+
+                    TypesOfResourcesRequired ^= resourceType;
 
                     return leftover;
                 }

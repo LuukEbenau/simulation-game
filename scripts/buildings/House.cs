@@ -22,5 +22,4 @@ namespace SacaSimulationGame.scripts.buildings
             base._Process(delta);
         }
     }
-
 }

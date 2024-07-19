@@ -23,7 +23,7 @@ public partial class Unit : Node3D
 
     public Profession Profession { get; private set; }
     public UnitStats Stats { get; private set; } = new UnitStats { Speed = 5 };
-    public UnitInventory Inventory { get; private set; } = new UnitInventory();
+    public UnitInventory Inventory { get; private set; } = new UnitInventory(50);
 
 
     public GameManager GameManager { get; set; }
@@ -50,8 +50,8 @@ public partial class Unit : Node3D
             this.Profession = new WorkerProfession(this);
 
             //NOTE: temporary for testing
-            this.Inventory.AddResource(ResourceType.Wood, 100);
-            this.Inventory.AddResource(ResourceType.Stone, 100);
+            //this.Inventory.AddResource(ResourceType.Wood, 100);
+            this.Inventory.AddResource(ResourceType.Stone, 20);
 
             VisualModel = WorkerModel.Instantiate<Node3D>();
         }

@@ -14,6 +14,7 @@ namespace SacaSimulationGame.scripts.units
         /// In kilos
         /// </summary>
         public float MaxCapacity => maxCapacity;
+        public float StorageSpaceLeft => MaxCapacity - CurrentCapacity;
         public float CurrentCapacity => Wood + Stone;
         public float Wood { get; private set; } = 0;
         public float Stone { get; private set; } = 0;
@@ -61,7 +62,7 @@ namespace SacaSimulationGame.scripts.units
         public bool AddResource(ResourceType resourceType, float amount)
         {
             if (CurrentCapacity + amount > MaxCapacity) {
-                return false;
+                return false; //TODO: can't we just store it and return back the resources which couldnt be picked up?
             }
             switch (resourceType)
             {

@@ -11,8 +11,11 @@ namespace SacaSimulationGame.scripts.buildings
 {
     public abstract partial class Building: Node3D
     {
-        public BuildingBlueprintBase Blueprint { get; set; }
+        [Export] public PackedScene ModelCompleted { get; set; }
+        [Export] public PackedScene ModelConstruction { get; set; }
 
+        public BuildingBlueprintBase Blueprint { get; set; }
+        public double BuildingPercentageComplete => this.CurrentBuildingProgress == 0 ? 0 : this.CurrentBuildingProgress / this.TotalBuildingProgressNeeded;
         protected Node3D BuildingVisual { get; set; }
 
         public abstract int MaxBuilders { get; }
@@ -30,14 +33,29 @@ namespace SacaSimulationGame.scripts.buildings
         public abstract bool IsResourceStorage { get;  }
         public void RotateBuilding(BuildingRotation rotation)
         {
-            this.RotationDegrees = new Vector3(0, -(float)rotation, 0);
+            Quaternion rot = new Quaternion(
+                new Vector3(0, 1, 0), 
+                Mathf.DegToRad(-(float)rotation)
+            );
+            this.VisualWrap.Basis = new Basis(rot);
+            //this.VisualWrap.RotationDegrees = new Vector3(0, -(float)rotation, 0);
         }
+
+        
+
+        /// <summary>
+        /// Element that wraps the visual
+        /// </summary>
+        protected Node3D VisualWrap => _visualWrap ??= GetChild<Node3D>(0);
+        private Node3D _visualWrap;
 
         public override void _Ready()
         {
             base._Ready();
+            //VisualWrap = GetChild<Node3D>(0);
 
-            this.BuildingVisual = GetChild<Node3D>(0);
+            UpdateBuildingProgress();
+
             if(this.BuildingVisual == null)
             {
                 GD.Print($"WARNING: building node not found. Make sure the building scene contains a child node of type Node3D");
@@ -97,72 +115,35 @@ namespace SacaSimulationGame.scripts.buildings
         {
             this.CurrentBuildingProgress = this.TotalBuildingProgressNeeded;
             this.BuildingCompleted = true;
-            UpdateBuildingProgress();
+            //UpdateBuildingProgress();
         }
 
-        private void UpdateBuildingProgress()
+        //protected abstract void UpdateBuildingProgress();
+        private PackedScene __lastShownVisual = null;
+        protected void UpdateBuildingProgress()
         {
-            if (BuildingVisual == null) return;
-
-            // Find all MeshInstance3D children
-            //var meshInstances = BuildingVisual.FindChildren("*", "MeshInstance3D", true, false).OfType<MeshInstance3D>().ToList();
-
-            //if (meshInstances.Count == 0)
-            //{
-            //    GD.Print("No MeshInstance3D found in the building hierarchy");
-            //    return;
-            //}
-
-            //if (this.BuildingCompleted)
-            //{
-            //    foreach (var meshInstance in meshInstances)
-            //    {
-            //        SetMeshInstanceTransparency(meshInstance, 1.0f);
-            //    }
-            //    GD.Print("Building completed, original material restored");
-            //    return;
-            //}
-
-            //// Calculate the alpha (transparency) value
-            //float baseAlpha = 0.1f;
-            //float maxAlpha = 0.8f;
-            //float alpha = (float)(baseAlpha + (maxAlpha - baseAlpha) * BuildingPercentageComplete);
-
-            //foreach (var meshInstance in meshInstances)
-            //{
-            //    SetMeshInstanceTransparency(meshInstance, alpha);
-            //}
-        }
-
-        private void SetMeshInstanceTransparency(MeshInstance3D meshInstance, float alpha)
-        {
-            // Get the current material
-            Material material = meshInstance.GetActiveMaterial(0);
-
-            if (material is StandardMaterial3D standardMaterial)
+            PackedScene visual;
+            if (!this.BuildingCompleted)
             {
-                // If it's already a StandardMaterial3D, just modify it
-                standardMaterial.AlbedoColor = new Color(
-                    standardMaterial.AlbedoColor.R,
-                    standardMaterial.AlbedoColor.G,
-                    standardMaterial.AlbedoColor.B,
-                    alpha
-                );
-                standardMaterial.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
+                visual = this.ModelConstruction;
             }
             else
             {
-                // If it's not a StandardMaterial3D, create a new one based on the existing material
-                StandardMaterial3D newMaterial = new StandardMaterial3D();
-                newMaterial.AlbedoColor = new Color(1, 1, 1, alpha);
-                newMaterial.AlbedoTexture = (material as BaseMaterial3D)?.AlbedoTexture;
-                newMaterial.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
+                visual = this.ModelCompleted;
+            }
 
-                meshInstance.MaterialOverride = newMaterial;
+            if (visual != this.__lastShownVisual)
+            {
+                this.__lastShownVisual = visual;
+
+                if (BuildingVisual != null) VisualWrap.RemoveChild(BuildingVisual);
+                BuildingVisual = visual.Instantiate<Node3D>();
+
+                VisualWrap.AddChild(BuildingVisual);
             }
         }
 
-        public double BuildingPercentageComplete => this.CurrentBuildingProgress == 0 ? 0 : this.CurrentBuildingProgress / this.TotalBuildingProgressNeeded;
+        
         #endregion
     }
 }

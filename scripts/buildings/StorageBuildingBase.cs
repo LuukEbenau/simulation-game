@@ -9,7 +9,7 @@ namespace SacaSimulationGame.scripts.buildings
 {
     public abstract partial class StorageBuildingBase : Building
     {
-        public UnitInventory StoredResources { get; set; } = new UnitInventory(maxCapacity: 250);
+        protected UnitInventory StoredResources { get; set; } = new UnitInventory(maxCapacity: 100);
         public ResourceType CurrentResourceStored { get; protected set; } = ResourceType.None;
 
         protected abstract void UpdateVisualBasedOnResources();
@@ -22,10 +22,10 @@ namespace SacaSimulationGame.scripts.buildings
         /// <returns>Number of resources which could not be stored</returns>
         public float StoreResource(ResourceType resourceType, float amount)
         {
-            if (resourceType == ResourceType.None || resourceType == CurrentResourceStored)
+            if (CurrentResourceStored == ResourceType.None || resourceType == CurrentResourceStored)
             {
                 CurrentResourceStored = resourceType;
-                if (amount < StoredResources.CurrentCapacity)
+                if (amount < StoredResources.StorageSpaceLeft)
                 {
                     StoredResources.AddResource(resourceType, amount);
 
@@ -34,8 +34,8 @@ namespace SacaSimulationGame.scripts.buildings
                 }
                 else
                 {
-                    StoredResources.AddResource(resourceType, StoredResources.CurrentCapacity);
-                    var leftover = StoredResources.CurrentCapacity - amount;
+                    StoredResources.AddResource(resourceType, StoredResources.StorageSpaceLeft);
+                    var leftover = amount - StoredResources.StorageSpaceLeft;
 
                     UpdateVisualBasedOnResources();
                     return leftover;

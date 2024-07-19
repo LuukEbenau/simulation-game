@@ -14,7 +14,7 @@ namespace SacaSimulationGame.scripts.units.professions
 {
     public class BuilderProfession(Unit unit) : Profession(unit)
     {
-        private readonly float _waittimeUntilBuildingTimeout = 15;
+        private readonly float _waittimeUntilBuildingTimeout = 8;
         protected override IBehaviour<UnitBTContext> GetBehaviourTree()
         {
             return FluentBuilder.Create<UnitBTContext>()
@@ -71,6 +71,7 @@ namespace SacaSimulationGame.scripts.units.professions
                 context.WaitingTime += context.Delta;
                 if (context.WaitingTime > _waittimeUntilBuildingTimeout)
                 {
+                    context.Building.IsUnreachableCounter++;
                     context.Building.UnassignUnit(Unit);
                     return BehaviourStatus.Failed;
                 }

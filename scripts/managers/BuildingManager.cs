@@ -11,13 +11,12 @@ namespace SacaSimulationGame.scripts.managers
 
     public partial class BuildingManager : Node3D
     {
-        [Export]
-        public PackedScene HouseBuilding { get; set; }
-        [Export]
-        public PackedScene RoadBuilding { get; set; }
-        [Export]
-        public PackedScene FishingpostBuilding { get; set; }
+        [Export] public PackedScene HouseBuilding { get; set; }
+        [Export] public PackedScene RoadBuilding { get; set; }
+        [Export] public PackedScene FishingpostBuilding { get; set; }
+        [Export] public PackedScene StockpileBuilding { get; set; }
 
+        private readonly float _buildingHeight = 0.25f;
 
         public struct BuildingTypeIdPair(int id, BuildingType type)
         {
@@ -92,6 +91,7 @@ namespace SacaSimulationGame.scripts.managers
         private void ChangeBuildingSelection(BuildingBlueprintBase blueprint)
         {
             this.selectedBuilding = blueprint;
+            VisualizeBuildingBlueprint();
         }
 
         public override void _Input(InputEvent @event)
@@ -110,7 +110,7 @@ namespace SacaSimulationGame.scripts.managers
             }
             else if (@event.IsActionPressed("Building Slot 4"))
             {
-                ChangeBuildingSelection(new HouseBlueprint());
+                ChangeBuildingSelection(new StockpileBlueprint());
             }
             else if (@event.IsActionPressed("Cancel Selection"))
             {
@@ -125,6 +125,7 @@ namespace SacaSimulationGame.scripts.managers
                 {
                     CycleRotation();
                     GD.Print($"rotating building {selectedBuilding.Rotation}, {(int)selectedBuilding.Rotation}");
+                    VisualizeBuildingBlueprint();
                 }
                 
             }
@@ -242,10 +243,15 @@ namespace SacaSimulationGame.scripts.managers
             {
                 scene = this.FishingpostBuilding;
             }
+            else if(buildingBlueprint is StockpileBlueprint)
+            {
+                scene = this.StockpileBuilding;
+            }
             else
             {
-                scene = this.HouseBuilding;
+                throw new System.Exception($"Unknown building type {buildingBlueprint}");
             }
+
             Building buildingInstance = scene.Instantiate<Building>();
 
             if (buildingInstance == null)
@@ -257,7 +263,7 @@ namespace SacaSimulationGame.scripts.managers
             buildingInstance.Cell = cell;
             buildingInstance.Blueprint = buildingBlueprint;
 
-            Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + 0.25f, centered: false);
+            Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + _buildingHeight, centered: false);
 
             buildingInstance.RotateBuilding(buildingBlueprint.Rotation);
             //ApplyBuildingRotation(buildingInstance, buildingBlueprint.Rotation);
@@ -332,30 +338,6 @@ namespace SacaSimulationGame.scripts.managers
 
             }
         }
-
-        //private void ApplyBuildingRotation(Building buildingInstance, BuildingRotation rotation)
-        //{
-        //    buildingInstance.RotationDegrees = new Vector3(0, (float)rotation, 0);
-        //    //switch (rotation)
-        //    //{
-        //    //    case BuildingRotation.Top:
-        //    //        //buildingInstance.RotateY(0);
-        //    //        buildingInstance.RotationDegrees = new Vector3(0, 0, 0);
-        //    //        break;
-        //    //    case BuildingRotation.Right:
-        //    //        //buildingInstance.RotateY(90);
-        //    //        buildingInstance.RotationDegrees = new Vector3(0, -90, 0);
-        //    //        break;
-        //    //    case BuildingRotation.Bottom:
-        //    //        //buildingInstance.RotateY(180);
-        //    //        buildingInstance.RotationDegrees = new Vector3(0, -180, 0);
-        //    //        break;
-        //    //    case BuildingRotation.Left:
-        //    //        //buildingInstance.RotateY(270);
-        //    //        buildingInstance.RotationDegrees = new Vector3(0, -270, 0);
-        //    //        break;
-        //    //}
-        //}
 
         #endregion
     }

@@ -16,6 +16,8 @@ namespace SacaSimulationGame.scripts.managers
         private double hoverIndicatorUpdateInterval = 1 / 60;
         private Vector2I lastHoveredCell = default;
 
+
+
         private void HandleHoverBehaviour(double delta)
         {
             if (selectedBuilding != null)
@@ -77,7 +79,7 @@ namespace SacaSimulationGame.scripts.managers
                         }
                         else if (selectedBuilding.SelectionMode == SelectionMode.Single)
                         {
-                            VisualiseBuildableCells(CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover: true));
+                            VisualizeBuildingBlueprint();
                         }
                         else
                         {
@@ -86,6 +88,12 @@ namespace SacaSimulationGame.scripts.managers
                     }
                 }
             }
+        }
+
+        private void VisualizeBuildingBlueprint()
+        {
+            ClearHoverIndicator();
+            VisualiseBuildableCells(CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover: true));
         }
 
         private void VisualiseBuildableCells(List<(Vector2I cell, MapDataItem cellData, bool isBuildable)> celldata)
@@ -191,6 +199,7 @@ namespace SacaSimulationGame.scripts.managers
                     if (collider.AsGodotObject() is Node3D colliderNode)
                     {
                         var cell = MapManager.WorldToCell(position);
+
                         return cell;
 
                     }

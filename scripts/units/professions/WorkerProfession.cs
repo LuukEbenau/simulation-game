@@ -31,11 +31,13 @@ namespace SacaSimulationGame.scripts.units.professions
                     .Sequence("Deliver resources to Building")
                         .Do("Find Delivery Target", this.FindDeliveryTarget)
                         .Selector("Get resources if needed")
-                            .Invert("Unit doesn't have resource").Condition("Unit has resources", this.UnitHasResourcesForBuilding).End()
-                            .Do("Find Resource Pickup Point", FindResourcePickupPoint)
-                            .Do("Find Path To Resource Pickup Point", this.FindPathToResourcePickupPoint)
-                            .Do("Move To ResourcePickupPoint",this.FollowPath)
-                            .Do("Pick Up Resources", this.PickUpResources) //todo, if still has space, check if any other resources are also needed?
+                            .Condition("Unit has resources", this.UnitHasResourcesForBuilding)
+                            .Sequence("Pick up resources")
+                                .Do("Find Resource Pickup Point", FindResourcePickupPoint)
+                                .Do("Find Path To Resource Pickup Point", this.FindPathToResourcePickupPoint)
+                                .Do("Move To ResourcePickupPoint",this.FollowPath)
+                                .Do("Pick Up Resources", this.PickUpResources) //todo, if still has space, check if any other resources are also needed?
+                            .End()
                         .End()
                         
                         .Do("Find path to target", this.FindPathToDestination)
@@ -55,11 +57,9 @@ namespace SacaSimulationGame.scripts.units.professions
             {
                 var amountRequired = context.Building.Instance.ResourcesRequiredForBuilding.RequiresOfResource(context.ResourcePickupBuilding.CurrentResourceStored);
 
-                var inventorySpace = Unit.Inventory.MaxCapacity - Unit.Inventory.CurrentCapacity;
+                var amountToPickup = Mathf.Min(amountRequired, Unit.Inventory.StorageSpaceLeft);
 
-                var amountToPickup = Mathf.Min(amountRequired, inventorySpace);
-
-                var amountTaken = context.ResourcePickupBuilding.StoredResources.RemoveResource(context.ResourcePickupBuilding.CurrentResourceStored, amountToPickup);
+                var amountTaken = context.ResourcePickupBuilding.TakeResource(context.ResourcePickupBuilding.CurrentResourceStored, amountToPickup);
 
                 Unit.Inventory.AddResource(context.ResourcePickupBuilding.CurrentResourceStored, amountTaken);
 
@@ -102,12 +102,15 @@ namespace SacaSimulationGame.scripts.units.professions
         {
             var closestResourceDeposit = this.Unit.BuildingManager.GetBuildings()
                 .Where(b => b.Instance.IsResourceStorage)
-                .Where(b => ((b.Instance as StorageBuildingBase).StoredResources.TypesOfResourcesStored & context.Building.Instance.ResourcesRequiredForBuilding.TypesOfResourcesRequired) > 0)
+                .Where(b => ((b.Instance as StorageBuildingBase).CurrentResourceStored & context.Building.Instance.ResourcesRequiredForBuilding.TypesOfResourcesRequired) > 0)
                 .OrderBy(b => b.IsUnreachableCounter)
                 .ThenBy(b => b.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition))
                 .FirstOrDefault();
 
-            if (closestResourceDeposit == null) return BehaviourStatus.Failed;
+            if (closestResourceDeposit == null) {
+       
+                return BehaviourStatus.Failed; 
+            }
 
             context.ResourcePickupBuilding = (StorageBuildingBase)closestResourceDeposit.Instance;
 
@@ -121,25 +124,10 @@ namespace SacaSimulationGame.scripts.units.professions
                 return true;
             }
             return false;
-
-            //context.Building.Building.BuildingResources.TypesOfResourcesRequired
-            //Unit.Inventory.
-            
-            //var building = context.Building.Building;
-            //if (building.BuildingResources.RequiresOfResource(ResourceType.Wood)>0 && Unit.Inventory.Wood > 0)
-            //{
-            //    return true;
-            //}
-            //if (building.BuildingResources.RequiresOfResource(ResourceType.Stone)>0 && Unit.Inventory.Stone > 0)
-            //{
-            //    return true;
-            //}
-
-            //return false;
         }
 
 
-        private static readonly ResourceType[] _possibleResourceTypes = Enum.GetValues(typeof(ResourceType)).Cast<ResourceType>().ToArray();
+        private static readonly ResourceType[] _possibleResourceTypes = [ResourceType.Wood, ResourceType.Stone];//Enum.GetValues(typeof(ResourceType)).Cast<ResourceType>().Where(r=>r != ResourceType.None).ToArray();
 
         public BehaviourStatus DepositResources(UnitBTContext context)
         {

@@ -93,14 +93,13 @@ namespace SacaSimulationGame.scripts.managers
         public Vector3 CellToWorld(Vector2I cell, float height = 0, bool centered = false)
         {
             var origin = Terrain.GlobalPosition;
-            //var worldPos = origin + cell * CellSize;
-
             // Since we removed this when calculating cellnumbers, now we have to add them
             cell += new Vector2I(MinX, MinY);
 
             var worldPos = new Vector3(origin.X + cell.X * CellSize.X, height, origin.Z + cell.Y * CellSize.Z);
 
-            worldPos += new Vector3(CellSize.X, 0, CellSize.Z);
+            worldPos += new Vector3(CellSize.X, 0, CellSize.Z); //is this a hack?
+
             if (centered)
             {
                 worldPos.X -= CellSize.X / 2f;
@@ -132,6 +131,7 @@ namespace SacaSimulationGame.scripts.managers
             );
 
 
+            worldPos += new Vector3(CellSize.X, 0, CellSize.Z); //is this a hack?
 
             return worldPos;
         }

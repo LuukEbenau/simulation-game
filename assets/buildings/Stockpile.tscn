@@ -1,11 +1,15 @@
 [gd_scene load_steps=4 format=3 uid="uid://bhiw5grenhi2c"]
 
 [ext_resource type="Script" path="res://scripts/buildings/Stockpile.cs" id="1_06tiq"]
-[ext_resource type="PackedScene" uid="uid://b8ue5gm3vf18u" path="res://assets/buildings/woodpile_100.blend" id="2_yo5oq"]
 [ext_resource type="PackedScene" uid="uid://c88tae8mj4l7r" path="res://assets/buildings/woodpile.blend" id="3_11hi5"]
+[ext_resource type="PackedScene" uid="uid://cpbdkd4h2fkyb" path="res://assets/buildings/stockpile_empty.blend" id="3_vgyox"]
 
 [node name="Stockpile" type="Node3D"]
 script = ExtResource("1_06tiq")
-ModelWood = ExtResource("2_yo5oq")
+ModelWood = ExtResource("3_11hi5")
+ModelEmpty = ExtResource("3_vgyox")
+ModelCompleted = ExtResource("3_vgyox")
+ModelConstruction = ExtResource("3_vgyox")
 
-[node name="woodpile" parent="." instance=ExtResource("3_11hi5")]
+[node name="VisualWrap" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, -0.5)
