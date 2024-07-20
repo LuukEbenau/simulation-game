@@ -14,6 +14,7 @@ namespace SacaSimulationGame.scripts.buildings
         [Export] public PackedScene ModelCompleted { get; set; }
         [Export] public PackedScene ModelConstruction { get; set; }
 
+        public bool HasResourcesToPickup { get; set; } = false;
         public BuildingBlueprintBase Blueprint { get; set; }
         public double BuildingPercentageComplete => this.CurrentBuildingProgress == 0 ? 0 : this.CurrentBuildingProgress / this.TotalBuildingProgressNeeded;
         protected Node3D BuildingVisual { get; set; }

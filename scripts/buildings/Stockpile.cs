@@ -58,6 +58,7 @@ public partial class Stockpile : StorageBuildingBase
         UpdateResourceAmountIndicator();
     }
 
+    private int lastNrOfIndicators = -1;
     private void UpdateResourceAmountIndicator() {
         var itemPrefix = "item";
 
@@ -73,17 +74,15 @@ public partial class Stockpile : StorageBuildingBase
             var percentageFull = this.StoredResources.CurrentCapacity / this.StoredResources.MaxCapacity;
 
             var nrOfIndicatorsShown = Mathf.RoundToInt(percentageFull * nrOfIndicators);
-
-            for (int i = 0; i < nrOfIndicators; i++)
+            if (nrOfIndicatorsShown != lastNrOfIndicators)
             {
-                var indicator = IndicatorChildren[i];
-                indicator.Visible = i < nrOfIndicatorsShown;
+                for (int i = 0; i < nrOfIndicators; i++)
+                {
+                    var indicator = IndicatorChildren[i];
+                    indicator.Visible = i < nrOfIndicatorsShown;
+                }
+                lastNrOfIndicators = nrOfIndicatorsShown;
             }
-            //GD.Print($"Nr of Indicators: {nrOfIndicators}, shown: {nrOfIndicatorsShown}, resource count: {percentageFull}");
-        }
-        else
-        {
-            //GD.Print("no indicators found");
         }
     }
 
@@ -93,10 +92,6 @@ public partial class Stockpile : StorageBuildingBase
     {
         ResourcesRequiredForBuilding = new BuildingResources(0, 0);
         base._Ready();
-
-        //UpdateVisualBasedOnResources();
-        
-        
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -115,7 +110,6 @@ public partial class Stockpile : StorageBuildingBase
                 if (randNumber == 1) currentResource = ResourceType.Wood;
             }
             StoreResource(currentResource, (float)delta);
-            //this.UpdateVisualBasedOnResources();
         }
     }
 }

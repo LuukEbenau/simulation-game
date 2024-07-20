@@ -96,21 +96,25 @@ namespace SacaSimulationGame.scripts.managers
 
         public override void _Input(InputEvent @event)
         {
-            if (@event.IsActionPressed("Building Slot 1"))
+            if (@event.IsActionPressed("Action Slot 1"))
             {
                 ChangeBuildingSelection(new HouseBlueprint());
             }
-            else if (@event.IsActionPressed("Building Slot 2"))
+            else if (@event.IsActionPressed("Action Slot 2"))
             {
                 ChangeBuildingSelection(new RoadBlueprint());
             }
-            else if (@event.IsActionPressed("Building Slot 3"))
+            else if (@event.IsActionPressed("Action Slot 3"))
             {
                 ChangeBuildingSelection(new FishingPostBlueprint());
             }
-            else if (@event.IsActionPressed("Building Slot 4"))
+            else if (@event.IsActionPressed("Action Slot 4"))
             {
                 ChangeBuildingSelection(new StockpileBlueprint());
+            }
+            else if(@event.IsActionPressed("Action Slot 5"))
+            {
+                ChangeBuildingSelection(new LumberjackBlueprint());
             }
             else if (@event.IsActionPressed("Cancel Selection"))
             {
@@ -126,8 +130,7 @@ namespace SacaSimulationGame.scripts.managers
                     CycleRotation();
                     GD.Print($"rotating building {selectedBuilding.Rotation}, {(int)selectedBuilding.Rotation}");
                     VisualizeBuildingBlueprint();
-                }
-                
+                } 
             }
 
             // For path/area selection
