@@ -1,13 +1,15 @@
-[gd_scene load_steps=4 format=3 uid="uid://bhiw5grenhi2c"]
+[gd_scene load_steps=5 format=3 uid="uid://bhiw5grenhi2c"]
 
 [ext_resource type="Script" path="res://scripts/buildings/Stockpile.cs" id="1_06tiq"]
-[ext_resource type="PackedScene" uid="uid://c88tae8mj4l7r" path="res://assets/buildings/woodpile.blend" id="3_11hi5"]
+[ext_resource type="PackedScene" uid="uid://ctn6xisxkibvl" path="res://assets/buildings/woodpile.blend" id="3_11hi5"]
 [ext_resource type="PackedScene" uid="uid://cpbdkd4h2fkyb" path="res://assets/buildings/stockpile_empty.blend" id="3_vgyox"]
+[ext_resource type="PackedScene" uid="uid://xn6ckji1r8bx" path="res://assets/buildings/stonepile.blend" id="4_3e1h1"]
 
 [node name="Stockpile" type="Node3D"]
 script = ExtResource("1_06tiq")
 ModelWood = ExtResource("3_11hi5")
 ModelEmpty = ExtResource("3_vgyox")
+ModelStone = ExtResource("4_3e1h1")
 ModelCompleted = ExtResource("3_vgyox")
 ModelConstruction = ExtResource("3_vgyox")
 

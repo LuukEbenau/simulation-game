@@ -48,11 +48,6 @@ public partial class Unit : Node3D
         if (professionType == ProfessionType.Worker)
         {
             this.Profession = new WorkerProfession(this);
-
-            //NOTE: temporary for testing
-            //this.Inventory.AddResource(ResourceType.Wood, 100);
-            this.Inventory.AddResource(ResourceType.Stone, 20);
-
             VisualModel = WorkerModel.Instantiate<Node3D>();
         }
         else if (professionType == ProfessionType.Builder)

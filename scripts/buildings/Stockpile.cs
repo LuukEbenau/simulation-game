@@ -11,7 +11,7 @@ public partial class Stockpile : StorageBuildingBase
 {
     [Export] public PackedScene ModelWood { get; set; }
     [Export] public PackedScene ModelEmpty { get; set; }
-
+    [Export] public PackedScene ModelStone { get; set; }
     public override int MaxBuilders => 1;
    
     public override double TotalBuildingProgressNeeded => 2;
@@ -34,6 +34,10 @@ public partial class Stockpile : StorageBuildingBase
             if (CurrentResourceStored == ResourceType.Wood)
             {
                 visual = ModelWood;
+            }
+            else if(CurrentResourceStored == ResourceType.Stone)
+            {
+                visual = ModelStone;
             }
             else
             {
@@ -104,7 +108,12 @@ public partial class Stockpile : StorageBuildingBase
         {
             //temporary: passive income
             var currentResource = StoredResources.TypesOfResourcesStored;
-            if (currentResource == ResourceType.None) currentResource = ResourceType.Wood; //default;
+
+            if (currentResource == ResourceType.None) {
+                var randNumber = new Random().Next(0, 2);
+                if(randNumber == 0) currentResource = ResourceType.Stone;
+                if (randNumber == 1) currentResource = ResourceType.Wood;
+            }
             StoreResource(currentResource, (float)delta);
             //this.UpdateVisualBasedOnResources();
         }
