@@ -18,7 +18,7 @@ namespace SacaSimulationGame.scripts.units.professions
         //TODO: FindBuildingWithUnitsResources
         //TODO: DropOfResourcesAtDropoffPoint
         //TODO: PickUpResources
-
+        //TODO: if building requires more of the resource, and inventory is not full, repeat by going to next pickup point
         private readonly Random _rnd = new();
 
         protected override IBehaviour<UnitBTContext> GetBehaviourTree()
@@ -52,16 +52,17 @@ namespace SacaSimulationGame.scripts.units.professions
 
         public BehaviourStatus PickUpResources(UnitBTContext context) {
             //TODO: this is only when building a building right now, it would be better to make it generic by keeping track of an instance of what the unit is picking up, and how much
-
-            if (context.Building.Instance.ResourcesRequiredForBuilding.TypesOfResourcesRequired.HasFlag(context.ResourcePickupBuilding.CurrentResourceStored))
+            var buildingStoredResourceType = context.ResourcePickupBuilding.StoredResources.TypesOfResourcesStored;
+            
+            if (context.Building.Instance.ResourcesRequiredForBuilding.TypesOfResourcesRequired.HasFlag(buildingStoredResourceType))
             {
-                var amountRequired = context.Building.Instance.ResourcesRequiredForBuilding.RequiresOfResource(context.ResourcePickupBuilding.CurrentResourceStored);
+                var amountRequired = context.Building.Instance.ResourcesRequiredForBuilding.RequiresOfResource(buildingStoredResourceType);
 
-                var amountToPickup = Mathf.Min(amountRequired, Unit.Inventory.StorageSpaceLeft);
+                var amountToPickup = Mathf.Min(amountRequired, Unit.Inventory.GetStorageSpaceLeft(buildingStoredResourceType));
 
-                var amountTaken = context.ResourcePickupBuilding.TakeResource(context.ResourcePickupBuilding.CurrentResourceStored, amountToPickup);
+                var amountTaken = context.ResourcePickupBuilding.TakeResource(buildingStoredResourceType, amountToPickup);
 
-                Unit.Inventory.AddResource(context.ResourcePickupBuilding.CurrentResourceStored, amountTaken);
+                Unit.Inventory.AddResource(buildingStoredResourceType, amountTaken);
 
                 return BehaviourStatus.Succeeded;
             }
@@ -102,7 +103,7 @@ namespace SacaSimulationGame.scripts.units.professions
         {
             var closestResourceDeposit = this.Unit.BuildingManager.GetBuildings()
                 .Where(b => b.Instance.IsResourceStorage)
-                .Where(b => ((b.Instance as StorageBuildingBase).CurrentResourceStored & context.Building.Instance.ResourcesRequiredForBuilding.TypesOfResourcesRequired) > 0)
+                .Where(b => ((b.Instance as StorageBuildingBase).StoredResources.TypesOfResourcesStored & context.Building.Instance.ResourcesRequiredForBuilding.TypesOfResourcesRequired) > 0)
                 .OrderBy(b => b.IsUnreachableCounter)
                 .ThenBy(b => b.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition))
                 .FirstOrDefault();
@@ -121,6 +122,7 @@ namespace SacaSimulationGame.scripts.units.professions
             ResourceType unitHasResourcesForBuilding = (context.Building.Instance.ResourcesRequiredForBuilding.TypesOfResourcesRequired & Unit.Inventory.TypesOfResourcesStored);
             if(unitHasResourcesForBuilding > 0)
             {
+                GD.Print("unit has resources for building");
                 return true;
             }
             return false;

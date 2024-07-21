@@ -1,0 +1,73 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Godot;
+
+namespace SacaSimulationGame.scripts.buildings.storages
+{
+    /// <summary>
+    /// Resource storage which can only hold 1 single resource at the same time
+    /// </summary>
+    public partial class SingleResourceStorage() : StorageBase
+    {
+        [Export] public ResourceType StorableResources { get; set; } = ResourceType.AllResources;
+        public bool HasResourcesToPickup { get; set; } = false;
+        public ResourceType CurrentResourceStored { get; protected set; } = ResourceType.None;
+        public override ResourceType InputResourceTypes { get; }
+
+        public override ResourceType OutputResourceTypes { get; }
+
+        
+
+        public override float AddResource(ResourceType resourceType, float amount)
+        {
+            HasResourcesToPickup = true;
+
+            if (CurrentResourceStored == ResourceType.None || resourceType == CurrentResourceStored)
+            {
+                CurrentResourceStored = resourceType;
+                if (amount < GetStorageSpaceLeft(resourceType))
+                {
+                    base.AddResource(resourceType, amount);
+
+                    return 0;
+                }
+                else
+                {
+                    base.AddResource(resourceType, GetStorageSpaceLeft(resourceType));
+                    var leftover = amount - GetStorageSpaceLeft(resourceType);
+
+                    return leftover;
+                }
+            }
+
+            return amount;
+        }
+
+        public override float GetStorageSpaceLeft(ResourceType type)
+        {
+            return MaxCapacity - CurrentCapacity;
+        }
+
+        public override float RemoveResource(ResourceType resourceType, float amount)
+        {
+            float nrOfResourcesTaken = 0;
+
+            if (CurrentResourceStored.HasFlag(resourceType))
+            {
+
+                nrOfResourcesTaken = base.RemoveResource(resourceType, amount);
+
+                if (GetResourcesOfType(resourceType) == 0)
+                {
+                    HasResourcesToPickup = false;
+                    CurrentResourceStored ^= resourceType;
+                }
+            }
+
+            return nrOfResourcesTaken;
+        }
+    }
+}

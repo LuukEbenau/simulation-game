@@ -15,6 +15,7 @@ namespace SacaSimulationGame.scripts.managers
         [Export] public PackedScene RoadBuilding { get; set; }
         [Export] public PackedScene FishingpostBuilding { get; set; }
         [Export] public PackedScene StockpileBuilding { get; set; }
+        [Export] public PackedScene LumberjackBuilding { get; set; }
 
         private readonly float _buildingHeight = 0.25f;
 
@@ -173,7 +174,6 @@ namespace SacaSimulationGame.scripts.managers
                             {
                                 pathToBuild.Add(pathCell);
                             }
-
                         }
 
                         if (isPathBuildable)
@@ -250,6 +250,10 @@ namespace SacaSimulationGame.scripts.managers
             {
                 scene = this.StockpileBuilding;
             }
+            else if (buildingBlueprint is LumberjackBlueprint)
+            {
+                scene = this.LumberjackBuilding;
+            }
             else
             {
                 throw new System.Exception($"Unknown building type {buildingBlueprint}");
@@ -268,7 +272,7 @@ namespace SacaSimulationGame.scripts.managers
 
             Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + _buildingHeight, centered: false);
 
-            buildingInstance.RotateBuilding(buildingBlueprint.Rotation);
+            
             //ApplyBuildingRotation(buildingInstance, buildingBlueprint.Rotation);
 
             var buildingDataObject = new BuildingDataObject(dummyPlayer, buildingInstance);
@@ -285,6 +289,8 @@ namespace SacaSimulationGame.scripts.managers
             AddChild(buildingInstance);
             buildingInstance.GlobalPosition = worldPosition;
             buildingInstance.Scale = MapManager.CellSize;
+
+            buildingInstance.RotateBuilding(buildingBlueprint.Rotation);
 
             GD.Print($"Building building at coordinate {worldPosition}. Total building count: {this.buildingData[dummyPlayer].Count}");
             return true;

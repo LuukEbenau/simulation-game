@@ -14,46 +14,48 @@ namespace SacaSimulationGame.scripts.buildings
         [Export] public PackedScene ModelCompleted { get; set; }
         [Export] public PackedScene ModelConstruction { get; set; }
 
-        public bool HasResourcesToPickup { get; set; } = false;
-        public BuildingBlueprintBase Blueprint { get; set; }
-        public double BuildingPercentageComplete => this.CurrentBuildingProgress == 0 ? 0 : this.CurrentBuildingProgress / this.TotalBuildingProgressNeeded;
         protected Node3D BuildingVisual { get; set; }
 
+        public BuildingBlueprintBase Blueprint { get; set; }
+
+
         public abstract int MaxBuilders { get; }
+        public abstract BuildingType Type { get; }
+        public abstract bool IsResourceStorage { get; }
 
-        public BuildingResources ResourcesRequiredForBuilding { get; protected set; }
+        /// <summary>
+        /// The cell where the building is located
+        /// </summary>
+        public Vector2I Cell { get; set; }
 
+        // Building of the building
+        public double BuildingPercentageComplete => this.CurrentBuildingProgress == 0 ? 0 : this.CurrentBuildingProgress / this.TotalBuildingProgressNeeded;
         public abstract double TotalBuildingProgressNeeded { get; }
         public bool BuildingCompleted { get; set; } = false;
         private float _currentBuildingProgress = 0;
         public double CurrentBuildingProgress { get; set; }
+        public BuildingResources ResourcesRequiredForBuilding { get; protected set; }
 
-        public Vector2I Cell { get; set; }
-
-        public abstract BuildingType Type { get; }
-        public abstract bool IsResourceStorage { get;  }
         public void RotateBuilding(BuildingRotation rotation)
         {
-            Quaternion rot = new Quaternion(
+            Quaternion rot = new(
                 new Vector3(0, 1, 0), 
                 Mathf.DegToRad(-(float)rotation)
             );
-            this.VisualWrap.Basis = new Basis(rot);
-            //this.VisualWrap.RotationDegrees = new Vector3(0, -(float)rotation, 0);
-        }
 
-        
+            this.VisualWrap.Basis = new Basis(rot);
+        }
 
         /// <summary>
         /// Element that wraps the visual
         /// </summary>
-        protected Node3D VisualWrap => _visualWrap ??= GetChild<Node3D>(0);
-        private Node3D _visualWrap;
+        protected Node3D VisualWrap { get; private set; }
 
         public override void _Ready()
         {
             base._Ready();
-            //VisualWrap = GetChild<Node3D>(0);
+
+            this.VisualWrap = GetNode<Node3D>("VisualWrap");
 
             UpdateBuildingProgress();
 
@@ -93,11 +95,14 @@ namespace SacaSimulationGame.scripts.buildings
         /// <returns>finished or not</returns>
         public bool AddBuildingProgress(double progress)
         {
+            
             var newProgress = this.CurrentBuildingProgress + progress;
             if (newProgress >= this.TotalBuildingProgressNeeded)
             {
                 this.CurrentBuildingProgress = this.TotalBuildingProgressNeeded;
                 this.BuildingCompleted = true;
+
+                GD.Print("building completed");
                 UpdateBuildingProgress();
                 return true;
             }
@@ -116,10 +121,8 @@ namespace SacaSimulationGame.scripts.buildings
         {
             this.CurrentBuildingProgress = this.TotalBuildingProgressNeeded;
             this.BuildingCompleted = true;
-            //UpdateBuildingProgress();
         }
 
-        //protected abstract void UpdateBuildingProgress();
         private PackedScene __lastShownVisual = null;
         protected void UpdateBuildingProgress()
         {
@@ -137,14 +140,19 @@ namespace SacaSimulationGame.scripts.buildings
             {
                 this.__lastShownVisual = visual;
 
-                if (BuildingVisual != null) VisualWrap.RemoveChild(BuildingVisual);
+                if (BuildingVisual != null){ 
+                    foreach (var child in VisualWrap.GetChildren())
+                    {
+                        VisualWrap.RemoveChild(child);
+                        child.QueueFree();
+                    }
+                }
                 BuildingVisual = visual.Instantiate<Node3D>();
 
                 VisualWrap.AddChild(BuildingVisual);
             }
         }
-
-        
+      
         #endregion
     }
 }

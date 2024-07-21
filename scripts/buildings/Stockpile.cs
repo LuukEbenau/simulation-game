@@ -10,7 +10,7 @@ using System.Linq;
 public partial class Stockpile : StorageBuildingBase
 {
     [Export] public PackedScene ModelWood { get; set; }
-    [Export] public PackedScene ModelEmpty { get; set; }
+
     [Export] public PackedScene ModelStone { get; set; }
     public override int MaxBuilders => 1;
    
@@ -19,56 +19,96 @@ public partial class Stockpile : StorageBuildingBase
     public override BuildingType Type => BuildingType.Stockpile;
 
     private PackedScene _lastShownVisual;
+
+    public override void _Ready()
+    {
+        ResourcesRequiredForBuilding = new BuildingResources(0, 0);
+        base._Ready();
+    }
+
+    public override void _Process(double delta)
+    {
+        base._Process(delta);
+
+        if (this.BuildingCompleted)
+        {
+            
+            //temporary: passive income
+            var currentResource = StoredResources.TypesOfResourcesStored;
+
+            if (currentResource == ResourceType.None)
+            {
+                var randNumber = new Random().Next(0, 2);
+                if (randNumber == 0) currentResource = ResourceType.Stone;
+                if (randNumber == 1) currentResource = ResourceType.Wood;
+            }
+            StoreResource(currentResource, (float)delta);
+        }
+    }
+
     protected override void UpdateVisualBasedOnResources()
     {
-        //TODO: only update if the visual has changed
-
         PackedScene visual;
         if (!BuildingCompleted)
         {
-            // building in progress visual
-            visual = ModelEmpty;
+            visual = ModelConstruction;
         }
         else
         {
-            if (CurrentResourceStored == ResourceType.Wood)
+            if (StoredResources.TypesOfResourcesStored == ResourceType.Wood)
             {
                 visual = ModelWood;
             }
-            else if(CurrentResourceStored == ResourceType.Stone)
+            else if(StoredResources.TypesOfResourcesStored == ResourceType.Stone)
             {
                 visual = ModelStone;
             }
             else
             {
-                visual = ModelEmpty; //TODO: modelstone
+                visual = ModelCompleted;
             }
         }
-        //TODO: show percantage stored
 
         // only update if it changed
         if (visual != _lastShownVisual)
         {
-            //TODO: different types of visuals?
-            if (BuildingVisual != null) VisualWrap.RemoveChild(BuildingVisual);
+            if (BuildingVisual != null) {
+                foreach (var child in VisualWrap.GetChildren())
+                {
+                    VisualWrap.RemoveChild(child);
+                    //child.QueueFree();
+                }
+            } 
+
             BuildingVisual = visual.Instantiate<Node3D>();
 
             VisualWrap.AddChild(BuildingVisual);
+            _lastShownVisual = visual;
         }
+
         UpdateResourceAmountIndicator();
     }
 
     private int lastNrOfIndicators = -1;
+    List<Node3D> indicators = new();
+    private Node3D lastIndicator;
     private void UpdateResourceAmountIndicator() {
         var itemPrefix = "item";
 
-        var IndicatorChildren = BuildingVisual.GetChildren()
-            .Where(c => c.Name.ToString().StartsWith(itemPrefix))
-            .OrderBy(c => int.Parse(c.Name.ToString()[itemPrefix.Length..]))
-            .Select(c => c as Node3D)
-            .ToList();
+        // only load indicators if resource type changes
+        if(StoredResources.TypesOfResourcesStored == ResourceType.None){
+            return;
+        }
+        if(BuildingVisual != lastIndicator){
+            lastIndicator = BuildingVisual;
+            indicators = BuildingVisual.GetChildren()
+                .Where(c => c.Name.ToString().StartsWith(itemPrefix))
+                .OrderBy(c => int.Parse(c.Name.ToString()[itemPrefix.Length..]))
+                .Select(c => c as Node3D)
+                .ToList();
+        }
 
-        int nrOfIndicators = IndicatorChildren.Count;
+        int nrOfIndicators = indicators.Count;
         if (nrOfIndicators > 0)
         {
             var percentageFull = this.StoredResources.CurrentCapacity / this.StoredResources.MaxCapacity;
@@ -78,7 +118,7 @@ public partial class Stockpile : StorageBuildingBase
             {
                 for (int i = 0; i < nrOfIndicators; i++)
                 {
-                    var indicator = IndicatorChildren[i];
+                    var indicator = indicators[i];
                     indicator.Visible = i < nrOfIndicatorsShown;
                 }
                 lastNrOfIndicators = nrOfIndicatorsShown;
@@ -87,29 +127,4 @@ public partial class Stockpile : StorageBuildingBase
     }
 
 
-    // Called when the node enters the scene tree for the first time.
-    public override void _Ready()
-    {
-        ResourcesRequiredForBuilding = new BuildingResources(0, 0);
-        base._Ready();
-    }
-
-    // Called every frame. 'delta' is the elapsed time since the previous frame.
-    public override void _Process(double delta)
-    {
-        base._Process(delta);
-
-        if (this.BuildingCompleted)
-        {
-            //temporary: passive income
-            var currentResource = StoredResources.TypesOfResourcesStored;
-
-            if (currentResource == ResourceType.None) {
-                var randNumber = new Random().Next(0, 2);
-                if(randNumber == 0) currentResource = ResourceType.Stone;
-                if (randNumber == 1) currentResource = ResourceType.Wood;
-            }
-            StoreResource(currentResource, (float)delta);
-        }
-    }
 }

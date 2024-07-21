@@ -1,0 +1,6 @@
+addons/
+.godot/
+.vs/
+assets/
+Properties/
+scenes/

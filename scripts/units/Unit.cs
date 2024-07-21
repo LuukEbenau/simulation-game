@@ -8,6 +8,7 @@ using BehaviourTree;
 using Godot;
 using Newtonsoft.Json;
 using SacaSimulationGame.scripts;
+using SacaSimulationGame.scripts.buildings.storages;
 using SacaSimulationGame.scripts.managers;
 using SacaSimulationGame.scripts.units;
 using SacaSimulationGame.scripts.units.dataObjects;
@@ -23,7 +24,7 @@ public partial class Unit : Node3D
 
     public Profession Profession { get; private set; }
     public UnitStats Stats { get; private set; } = new UnitStats { Speed = 5 };
-    public UnitInventory Inventory { get; private set; } = new UnitInventory(50);
+    public StorageBase Inventory { get; private set; }
 
 
     public GameManager GameManager { get; set; }
@@ -31,6 +32,7 @@ public partial class Unit : Node3D
     public UnitManager UnitManager => GameManager.UnitManager;
     public WorldMapManager MapManager => GameManager.MapManager;
 
+ 
 
     //public UnitDataObject UnitData { get; set; }
 
@@ -66,6 +68,8 @@ public partial class Unit : Node3D
     public override void _Ready()
     {
         base._Ready();
+        this.Inventory = GetNode<GeneralStorage>("Inventory");
+        //new GeneralStorage(50, ResourceType.AllResources)
     }
 
     public override void _Process(double delta)

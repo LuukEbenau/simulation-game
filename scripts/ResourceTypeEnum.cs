@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 
 namespace SacaSimulationGame.scripts
 {
+    [Flags]
     public enum ResourceType
     {
-        None=0,
+        AllResources = Wood | Stone | Fish,
+        StockpileResources = Wood | Stone,
+        None = 0,
         Wood = 1,
-        Stone = 2
+        Stone = 2,
+        Fish = 4,
+
     }
 }

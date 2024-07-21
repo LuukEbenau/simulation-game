@@ -11,3 +11,5 @@ ModelConstruction = ExtResource("3_1ic5w")
 
 [node name="VisualWrap" type="Node3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+
+[node name="Storage" type="Node3D" parent="."]
