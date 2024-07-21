@@ -13,7 +13,11 @@ namespace SacaSimulationGame.scripts.buildings.storages
     /// </summary>
     public partial class ResourceCappedStorage : StorageBase
     {
-        [Export] public Godot.Collections.Dictionary<string, float> StorageCapacity { get; set; }
+        //[Export] public Godot.Collections.Dictionary<string, float> StorageCapacity { get; set; }
+
+        [Export] public float WoodCapacity { get; set; }
+        [Export] public float StoneCapacity { get; set; }
+        [Export] public float FishCapacity { get; set; }
 
         [Export] public ResourceType InputResources { get; set; }
         [Export] public ResourceType OutputResources { get; set; }
@@ -44,19 +48,27 @@ namespace SacaSimulationGame.scripts.buildings.storages
             }
         }
 
+        private float GetResourceCapacity(ResourceType resourceType)
+        {
+            return resourceType switch
+            {
+                ResourceType.Wood => WoodCapacity,
+                ResourceType.Stone => StoneCapacity,
+                ResourceType.Fish => FishCapacity,
+                _ => throw new Exception($"Resource type {resourceType} not defined"),
+            };
+        }
+
+
         public override float GetStorageSpaceLeft(ResourceType type)
         {
             ValidateResourceTypeIsPure(type);
 
             var currentResources = GetResourcesOfType(type);
-            if(StorageCapacity.TryGetValue(type.ToString(), out var storageSpace))
-            {
-                return storageSpace - currentResources;
-            }
-            else
-            {
-                throw new Exception($"No storage capacity defined for resource {type} on building {nameof(ResourceCappedStorage)}");
-            }
+            var capacity = GetResourceCapacity(type);
+
+            return capacity - currentResources;
+
         }
     }
 }

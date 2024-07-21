@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Godot;
 using SacaSimulationGame.scripts.buildings.dataObjects;
+using SacaSimulationGame.scripts.managers;
 
 
 namespace SacaSimulationGame.scripts.buildings
@@ -18,10 +19,14 @@ namespace SacaSimulationGame.scripts.buildings
 
         public BuildingBlueprintBase Blueprint { get; set; }
 
+        public GameManager GameManager { get; set; }
 
         public abstract int MaxBuilders { get; }
         public abstract BuildingType Type { get; }
         public abstract bool IsResourceStorage { get; }
+
+        [Signal]
+        public delegate void OnBuildingCompletedEventHandler();
 
         /// <summary>
         /// The cell where the building is located
@@ -104,6 +109,8 @@ namespace SacaSimulationGame.scripts.buildings
 
                 GD.Print("building completed");
                 UpdateBuildingProgress();
+
+                this.EmitSignal(SignalName.OnBuildingCompleted);
                 return true;
             }
             else
@@ -121,6 +128,8 @@ namespace SacaSimulationGame.scripts.buildings
         {
             this.CurrentBuildingProgress = this.TotalBuildingProgressNeeded;
             this.BuildingCompleted = true;
+            UpdateBuildingProgress();
+            this.EmitSignal(SignalName.OnBuildingCompleted);
         }
 
         private PackedScene __lastShownVisual = null;

@@ -16,6 +16,8 @@ namespace SacaSimulationGame.scripts.units.professions
         public Unit Unit { get; }
         public IBehaviour<UnitBTContext> BehaviourTree { get; }
 
+        private float idleBehaviourDuration = 2;
+
         /// <summary>
         /// 0 is novice, 1 is beginner, 2 is intermediate, 3 is educated, 4 is experienced, 5 is expert. Education brings all the way up to educated
         /// </summary>
@@ -29,6 +31,9 @@ namespace SacaSimulationGame.scripts.units.professions
             get {
                 _idleBehaviourTree ??= FluentBuilder.Create<UnitBTContext>()
                     .Sequence("Idle Sequence")
+                        .Do("Get random position to move to", this.GetRandomNearbyLocation)
+                        .Do("Find Path to nearby position", this.FindPathToDestination)
+                        .Do("follow path", this.FollowPath)
                         .Do("Idle", this.DoNothingSequence)
                     .End()
                 .Build();
@@ -37,15 +42,41 @@ namespace SacaSimulationGame.scripts.units.professions
             }
         } 
 
+        public BehaviourStatus GetRandomNearbyLocation(UnitBTContext context)
+        {
+            var rand = new Random();
+
+            var dir = new Vector3(rand.Next(-5, 5), 0, rand.Next(-5, 5));
+
+            var newPos = Unit.GlobalPosition + dir;
+
+            context.Destination = newPos;
+            return BehaviourStatus.Succeeded;
+        }
+
         public Profession(Unit unit)
         {
             this.Unit = unit;
             this.BehaviourTree = GetBehaviourTree();
         }
 
+        /// <summary>
+        /// do nothing for a few seconds
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public BehaviourStatus DoNothingSequence(UnitBTContext context)
         {
-            return BehaviourStatus.Succeeded;
+            context.WaitingTime += context.Delta;
+
+            
+
+            if(context.WaitingTime > idleBehaviourDuration)
+            {
+                context.WaitingTime = 0;
+                return BehaviourStatus.Succeeded;
+            }
+            return BehaviourStatus.Running;
         }
 
         public BehaviourStatus FindPathToDestination(UnitBTContext context)

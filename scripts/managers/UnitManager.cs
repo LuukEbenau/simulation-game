@@ -5,7 +5,7 @@ using SacaSimulationGame.scripts.units.professions;
 using System;
 namespace SacaSimulationGame.scripts.managers
 {
-    public partial class UnitManager : Node3D
+    public partial class UnitManager : Node3D, IUnitManager
     {
         [ExportCategory("Unit Scenes")]
         [Export]

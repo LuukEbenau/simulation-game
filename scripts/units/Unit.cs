@@ -28,9 +28,9 @@ public partial class Unit : Node3D
 
 
     public GameManager GameManager { get; set; }
-    public BuildingManager BuildingManager => GameManager.BuildingManager;
-    public UnitManager UnitManager => GameManager.UnitManager;
-    public WorldMapManager MapManager => GameManager.MapManager;
+    public IBuildingManager BuildingManager => GameManager.BuildingManager;
+    public IUnitManager UnitManager => GameManager.UnitManager;
+    public IWorldMapManager MapManager => GameManager.MapManager;
 
  
 

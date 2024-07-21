@@ -15,5 +15,6 @@ transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 
 
 [node name="Storage" type="Node3D" parent="."]
 script = ExtResource("4_gotd7")
-StorageCapacity = {}
+FishCapacity = 20.0
+InputResources = 4
 OutputResources = 4

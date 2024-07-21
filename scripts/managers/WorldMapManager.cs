@@ -7,7 +7,7 @@ using System.Linq;
 using Windows.Services.Maps;
 namespace SacaSimulationGame.scripts.managers
 {
-    public partial class WorldMapManager : Node3D
+    public partial class WorldMapManager : Node3D, IWorldMapManager
     {
         [Export]
         public Vector3I CellSize { get; set; } = new Vector3I(4, 4, 4);
@@ -42,14 +42,15 @@ namespace SacaSimulationGame.scripts.managers
         public int MaxX { get; private set; }
         public int MaxY { get; private set; }
         public int MapWidth { get; private set; }
-        public int MapHeight {  get; private set; }
-        private Dictionary<Vector2I, MapDataItem> MapData2 { get; set; } 
+        public int MapHeight { get; private set; }
+        private Dictionary<Vector2I, MapDataItem> MapData2 { get; set; }
         private MapDataItem[,] MapData { get; set; }
 
         public MapDataItem GetCell(Vector2I cell)
         {
 
-            if (!CellInsideBounds(cell)) {
+            if (!CellInsideBounds(cell))
+            {
                 GD.Print("coordinate outside bounds");
                 return null;
             }
@@ -76,7 +77,8 @@ namespace SacaSimulationGame.scripts.managers
         public bool TryGetCell(Vector2I cell, out MapDataItem item)
         {
             var data = GetCell(cell);
-            if (data != null) {
+            if (data != null)
+            {
                 item = data;
                 return true;
             }
@@ -106,7 +108,7 @@ namespace SacaSimulationGame.scripts.managers
                 worldPos.Z -= CellSize.Z / 2f;
             }
 
-            
+
 
             return worldPos;
         }
@@ -125,8 +127,8 @@ namespace SacaSimulationGame.scripts.managers
             cell += new Vector2I(MinX, MinY);
 
             var worldPos = new Vector3(
-                origin.X + cell.X * CellSize.X, 
-                height, 
+                origin.X + cell.X * CellSize.X,
+                height,
                 origin.Z + cell.Y * CellSize.Z
             );
 
@@ -164,7 +166,7 @@ namespace SacaSimulationGame.scripts.managers
 
         #endregion
 
-        private (int minX, int minY, int maxX, int maxY) GetMapDimensions(Dictionary<Vector2I,MapDataItem> mapData) 
+        private (int minX, int minY, int maxX, int maxY) GetMapDimensions(Dictionary<Vector2I, MapDataItem> mapData)
         {
             var minX = mapData.Keys.Min(k => k.X);
             var minY = mapData.Keys.Min(k => k.Y);
@@ -185,7 +187,7 @@ namespace SacaSimulationGame.scripts.managers
 
                 int arrayX = position.X - MinX;
                 int arrayY = position.Y - MinY;
-                if(item == null)
+                if (item == null)
                 {
                     GD.Print($"WARNING: item is set to null at {position}");
                 }

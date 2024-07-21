@@ -26,6 +26,8 @@ public partial class Stockpile : StorageBuildingBase
         base._Ready();
     }
 
+
+    private ResourceType _randomlyDecidedResource { get; set; }
     public override void _Process(double delta)
     {
         base._Process(delta);
@@ -38,9 +40,17 @@ public partial class Stockpile : StorageBuildingBase
 
             if (currentResource == 0)
             {
-                var randNumber = new Random().Next(0, 2);
-                if (randNumber == 0) currentResource = ResourceType.Stone;
-                if (randNumber == 1) currentResource = ResourceType.Wood;
+                if(_randomlyDecidedResource == 0)
+                {
+                    var randNumber = new Random().Next(0, 2);
+                    if (randNumber == 0) currentResource = ResourceType.Stone;
+                    if (randNumber == 1) currentResource = ResourceType.Wood;
+                    _randomlyDecidedResource = currentResource;
+                }
+                else
+                {
+                    currentResource = _randomlyDecidedResource;
+                }
             }
             StoredResources.AddResource(currentResource, (float)delta);
         }
@@ -114,7 +124,8 @@ public partial class Stockpile : StorageBuildingBase
             var currentStoredResources = StoredResources.GetResourcesOfType(StoredResources.TypesOfResourcesStored);
             var maxStoredResources = StoredResources.GetStorageSpaceLeft(StoredResources.TypesOfResourcesStored);
 
-            var percentageFull = currentStoredResources / (maxStoredResources + currentStoredResources);
+            
+            var percentageFull = (currentStoredResources <= 0) ? 0 : currentStoredResources / (maxStoredResources + currentStoredResources);
 
             var nrOfIndicatorsShown = Mathf.RoundToInt(percentageFull * nrOfIndicators);
             if (nrOfIndicatorsShown != lastNrOfIndicators)

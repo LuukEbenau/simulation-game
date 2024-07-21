@@ -14,5 +14,5 @@ ModelConstruction = ExtResource("3_0fcq7")
 
 [node name="Storage" type="Node3D" parent="."]
 script = ExtResource("4_tvt17")
-StorageCapacity = {}
+WoodCapacity = 20.0
 OutputResources = 1
