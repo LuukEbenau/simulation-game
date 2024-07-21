@@ -9,6 +9,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
 {
     public partial class GeneralStorage : StorageBase
     {
+        [Export] public float MaxCapacity { get; set; }
         [Export] public ResourceType StorableResources { get; set; } = ResourceType.AllResources;
     
 

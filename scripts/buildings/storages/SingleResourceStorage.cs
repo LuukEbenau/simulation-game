@@ -12,9 +12,10 @@ namespace SacaSimulationGame.scripts.buildings.storages
     /// </summary>
     public partial class SingleResourceStorage() : StorageBase
     {
+        [Export] public float MaxCapacity { get; set; }
         [Export] public ResourceType StorableResources { get; set; } = ResourceType.AllResources;
         public bool HasResourcesToPickup { get; set; } = false;
-        public ResourceType CurrentResourceStored { get; protected set; } = ResourceType.None;
+        public ResourceType CurrentResourceStored { get; protected set; } = 0;
         public override ResourceType InputResourceTypes { get; }
 
         public override ResourceType OutputResourceTypes { get; }
@@ -25,7 +26,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
         {
             HasResourcesToPickup = true;
 
-            if (CurrentResourceStored == ResourceType.None || resourceType == CurrentResourceStored)
+            if (CurrentResourceStored == 0 || resourceType == CurrentResourceStored)
             {
                 CurrentResourceStored = resourceType;
                 if (amount < GetStorageSpaceLeft(resourceType))
@@ -63,7 +64,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
                 if (GetResourcesOfType(resourceType) == 0)
                 {
                     HasResourcesToPickup = false;
-                    CurrentResourceStored ^= resourceType;
+                    CurrentResourceStored &= ~resourceType;
                 }
             }
 

@@ -22,20 +22,5 @@ namespace SacaSimulationGame.scripts.buildings
 
         protected abstract void UpdateVisualBasedOnResources();
         public override bool IsResourceStorage => true;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="resourceType"></param>
-        /// <param name="amount"></param>
-        /// <returns>Number of resources which could not be stored</returns>
-        public float StoreResource(ResourceType resourceType, float amount)
-        {
-            return StoredResources.AddResource(resourceType, amount);
-        }
-
-        public float TakeResource(ResourceType resourceType, float amount)
-        {
-            return StoredResources.RemoveResource(resourceType, amount);
-        }
     }
 }

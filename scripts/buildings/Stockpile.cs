@@ -36,13 +36,13 @@ public partial class Stockpile : StorageBuildingBase
             //temporary: passive income
             var currentResource = StoredResources.TypesOfResourcesStored;
 
-            if (currentResource == ResourceType.None)
+            if (currentResource == 0)
             {
                 var randNumber = new Random().Next(0, 2);
                 if (randNumber == 0) currentResource = ResourceType.Stone;
                 if (randNumber == 1) currentResource = ResourceType.Wood;
             }
-            StoreResource(currentResource, (float)delta);
+            StoredResources.AddResource(currentResource, (float)delta);
         }
     }
 
@@ -96,7 +96,7 @@ public partial class Stockpile : StorageBuildingBase
         var itemPrefix = "item";
 
         // only load indicators if resource type changes
-        if(StoredResources.TypesOfResourcesStored == ResourceType.None){
+        if(StoredResources.TypesOfResourcesStored == 0){
             return;
         }
         if(BuildingVisual != lastIndicator){
@@ -111,7 +111,10 @@ public partial class Stockpile : StorageBuildingBase
         int nrOfIndicators = indicators.Count;
         if (nrOfIndicators > 0)
         {
-            var percentageFull = this.StoredResources.CurrentCapacity / this.StoredResources.MaxCapacity;
+            var currentStoredResources = StoredResources.GetResourcesOfType(StoredResources.TypesOfResourcesStored);
+            var maxStoredResources = StoredResources.GetStorageSpaceLeft(StoredResources.TypesOfResourcesStored);
+
+            var percentageFull = currentStoredResources / (maxStoredResources + currentStoredResources);
 
             var nrOfIndicatorsShown = Mathf.RoundToInt(percentageFull * nrOfIndicators);
             if (nrOfIndicatorsShown != lastNrOfIndicators)

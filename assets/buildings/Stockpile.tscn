@@ -19,3 +19,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, -0.5)
 [node name="Storage" type="Node3D" parent="."]
 script = ExtResource("5_43f8r")
 MaxCapacity = 100.0
+StorableResources = 3

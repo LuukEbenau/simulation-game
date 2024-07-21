@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://dld6b4f1nunh2"]
+[gd_scene load_steps=5 format=3 uid="uid://dld6b4f1nunh2"]
 
 [ext_resource type="Script" path="res://scripts/buildings/Fishingpost.cs" id="1_2jl4h"]
 [ext_resource type="PackedScene" uid="uid://btygq765vnhwp" path="res://assets/buildings/fishingpost.blend" id="1_v16jd"]
 [ext_resource type="PackedScene" uid="uid://bpa62u8lr2lys" path="res://assets/buildings/fishingpost_construction.blend" id="3_1ic5w"]
+[ext_resource type="Script" path="res://scripts/buildings/storages/ResourceCappedStorage.cs" id="4_gotd7"]
 
 [node name="Fishingpost" type="Node3D"]
 script = ExtResource("1_2jl4h")
@@ -13,3 +14,6 @@ ModelConstruction = ExtResource("3_1ic5w")
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
 
 [node name="Storage" type="Node3D" parent="."]
+script = ExtResource("4_gotd7")
+StorageCapacity = {}
+OutputResources = 4

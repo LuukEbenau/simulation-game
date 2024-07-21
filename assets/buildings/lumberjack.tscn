@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/buildings/Lumberjack.cs" id="1_0hcmf"]
 [ext_resource type="PackedScene" uid="uid://gl3ieqj7onkj" path="res://assets/buildings/lumberjack.blend" id="2_ql7he"]
 [ext_resource type="PackedScene" uid="uid://b33s076b0a6ov" path="res://assets/buildings/house_construction.blend" id="3_0fcq7"]
-[ext_resource type="Script" path="res://scripts/buildings/storages/SingleResourceStorage.cs" id="4_0f13x"]
+[ext_resource type="Script" path="res://scripts/buildings/storages/ResourceCappedStorage.cs" id="4_tvt17"]
 
 [node name="Lumberjack" type="Node3D"]
 script = ExtResource("1_0hcmf")
@@ -13,5 +13,6 @@ ModelConstruction = ExtResource("3_0fcq7")
 [node name="VisualWrap" type="Node3D" parent="."]
 
 [node name="Storage" type="Node3D" parent="."]
-script = ExtResource("4_0f13x")
-MaxCapacity = 50.0
+script = ExtResource("4_tvt17")
+StorageCapacity = {}
+OutputResources = 1

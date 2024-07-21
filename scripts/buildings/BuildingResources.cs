@@ -62,7 +62,7 @@ namespace SacaSimulationGame.scripts.buildings
                     CurrentWood += spaceLeft;
 
                     // we can remove this resource from the building requirements
-                    TypesOfResourcesRequired ^= resourceType;
+                    TypesOfResourcesRequired &= ~resourceType;
 
                     return leftover;
                 }
@@ -79,7 +79,7 @@ namespace SacaSimulationGame.scripts.buildings
                     var leftover = amount - spaceLeft;
                     CurrentStone += spaceLeft;
 
-                    TypesOfResourcesRequired ^= resourceType;
+                    TypesOfResourcesRequired &= ~resourceType;
 
                     return leftover;
                 }

@@ -11,7 +11,7 @@ namespace SacaSimulationGame.scripts
     {
         AllResources = Wood | Stone | Fish,
         StockpileResources = Wood | Stone,
-        None = 0,
+        //None = 0,
         Wood = 1,
         Stone = 2,
         Fish = 4,

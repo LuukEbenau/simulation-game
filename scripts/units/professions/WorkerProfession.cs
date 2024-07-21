@@ -53,14 +53,16 @@ namespace SacaSimulationGame.scripts.units.professions
         public BehaviourStatus PickUpResources(UnitBTContext context) {
             //TODO: this is only when building a building right now, it would be better to make it generic by keeping track of an instance of what the unit is picking up, and how much
             var buildingStoredResourceType = context.ResourcePickupBuilding.StoredResources.TypesOfResourcesStored;
-            
-            if (context.Building.Instance.ResourcesRequiredForBuilding.TypesOfResourcesRequired.HasFlag(buildingStoredResourceType))
+
+            var requiredResourcesForBuilding = context.Building.Instance.ResourcesRequiredForBuilding.TypesOfResourcesRequired;
+
+            if (requiredResourcesForBuilding.HasFlag(buildingStoredResourceType))
             {
                 var amountRequired = context.Building.Instance.ResourcesRequiredForBuilding.RequiresOfResource(buildingStoredResourceType);
 
                 var amountToPickup = Mathf.Min(amountRequired, Unit.Inventory.GetStorageSpaceLeft(buildingStoredResourceType));
 
-                var amountTaken = context.ResourcePickupBuilding.TakeResource(buildingStoredResourceType, amountToPickup);
+                var amountTaken = context.ResourcePickupBuilding.StoredResources.RemoveResource(buildingStoredResourceType, amountToPickup);
 
                 Unit.Inventory.AddResource(buildingStoredResourceType, amountTaken);
 
@@ -122,7 +124,8 @@ namespace SacaSimulationGame.scripts.units.professions
             ResourceType unitHasResourcesForBuilding = (context.Building.Instance.ResourcesRequiredForBuilding.TypesOfResourcesRequired & Unit.Inventory.TypesOfResourcesStored);
             if(unitHasResourcesForBuilding > 0)
             {
-                GD.Print("unit has resources for building");
+                GD.Print($"unit has resources for building of type {unitHasResourcesForBuilding}, inventory is: {Unit.Inventory.TypesOfResourcesStored}, wood:{Unit.Inventory.Wood}, stone: {Unit.Inventory.Stone}");
+                
                 return true;
             }
             return false;

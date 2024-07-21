@@ -55,7 +55,7 @@ namespace SacaSimulationGame.scripts.units
             }
 
             // remove flag if the resource is empty
-            if (GetResourcesOfType(resourceType) == 0) TypesOfResourcesStored ^= resourceType;
+            if (GetResourcesOfType(resourceType) == 0) TypesOfResourcesStored &= ~resourceType;
 
             return removedAmount;
         }

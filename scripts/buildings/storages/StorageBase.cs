@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using Godot;
@@ -9,7 +10,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
 {
     public abstract partial class StorageBase : Node3D
     {
-        [Export] public float MaxCapacity { get; set; }
+        //[Export] public float MaxCapacity { get; set; }
 
         [Signal]
         public delegate void StoredResourcesChangedEventHandler();
@@ -34,11 +35,21 @@ namespace SacaSimulationGame.scripts.buildings.storages
         public float Wood { get; private set; } = 0;
         public float Stone { get; private set; } = 0;
 
-
-        public float GetResourcesOfType(ResourceType type)
+        protected bool ValidateResourceTypeIsPure(ResourceType resourceType)
         {
-            if (type == ResourceType.Wood) return Wood;
-            if (type == ResourceType.Stone) return Stone;
+            if ((resourceType & (resourceType - 1)) != 0)
+            {
+                throw new Exception($"More than 1 resource selected {resourceType}");
+            }
+            return true;
+        }
+
+        public float GetResourcesOfType(ResourceType resourceType)
+        {
+            ValidateResourceTypeIsPure(resourceType);
+
+            if (resourceType == ResourceType.Wood) return Wood;
+            if (resourceType == ResourceType.Stone) return Stone;
 
             throw new Exception("Resource type not implemented yet");
             //return 0;
@@ -53,6 +64,8 @@ namespace SacaSimulationGame.scripts.buildings.storages
         /// <exception cref="ArgumentException"></exception>
         public virtual float RemoveResource(ResourceType resourceType, float amount)
         {
+            ValidateResourceTypeIsPure(resourceType);
+
             float removedAmount;
             switch (resourceType)
             {
@@ -69,19 +82,12 @@ namespace SacaSimulationGame.scripts.buildings.storages
             }
 
             // remove flag if the resource is empty
-            if (GetResourcesOfType(resourceType) == 0) TypesOfResourcesStored ^= resourceType;
+            if (GetResourcesOfType(resourceType) == 0) TypesOfResourcesStored &= ~resourceType;
 
             if (removedAmount > 0)
             {
-                var result = EmitSignal(SignalName.StoredResourcesChanged);
-                if (result == Error.Ok)
-                {
-                    GD.Print("signal succes");
-                }
-                else
-                {
-                    GD.Print("signal failed");
-                }
+                EmitSignal(SignalName.StoredResourcesChanged);
+
             }
 
             return removedAmount;
@@ -95,9 +101,11 @@ namespace SacaSimulationGame.scripts.buildings.storages
         /// <returns>Amount of resources which could not be stored</returns>
         public virtual float AddResource(ResourceType resourceType, float amount)
         {
+            ValidateResourceTypeIsPure(resourceType);
+
             if (GetStorageSpaceLeft(resourceType) <= amount)
             {
-                GD.Print($"could not store {amount} resources of type {resourceType}");
+                //GD.Print($"could not store {amount} resources of type {resourceType}");
                 return amount; //TODO: can't we just store it and return back the resources which couldnt be picked up?
             }
             switch (resourceType)
@@ -113,15 +121,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
             TypesOfResourcesStored |= resourceType; // add flag
 
             
-            var result = EmitSignal(SignalName.StoredResourcesChanged);
-            if (result == Error.Ok)
-            {
-                GD.Print("signal succes");
-            }
-            else
-            {
-                GD.Print("signal failed");
-            }
+            EmitSignal(SignalName.StoredResourcesChanged);
             return 0;
         }
     }

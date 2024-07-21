@@ -30,12 +30,7 @@ namespace SacaSimulationGame.scripts.buildings
                 //temporary: passive income
                 var currentResource = ResourceType.Wood;
 
-                if (currentResource == ResourceType.None)
-                {
-                    var randNumber = new Random().Next(0, 2);
-                    currentResource = ResourceType.Wood;
-                }
-                StoreResource(currentResource, (float)delta);
+                StoredResources.AddResource(currentResource, (float)delta);
             }
         }
 
