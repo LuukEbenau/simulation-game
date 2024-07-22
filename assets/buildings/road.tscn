@@ -1,8 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://b43ook8n7pytq"]
+[gd_scene load_steps=6 format=3 uid="uid://b43ook8n7pytq"]
 
 [ext_resource type="PackedScene" uid="uid://dyxy1khb2gub7" path="res://assets/buildings/road.blend" id="1_evxki"]
 [ext_resource type="Script" path="res://scripts/buildings/Road.cs" id="2_h0376"]
 [ext_resource type="PackedScene" uid="uid://df3p0tymkhbso" path="res://assets/buildings/road_construction.blend" id="3_ur5gm"]
+[ext_resource type="Script" path="res://scripts/buildings/BuildingResources.cs" id="4_pdg5d"]
+[ext_resource type="PackedScene" uid="uid://nenblraswqky" path="res://assets/buildings/resourcemodels/stone.blend" id="5_erodt"]
 
 [node name="Road" type="Node3D"]
 script = ExtResource("2_h0376")
@@ -11,3 +13,22 @@ ModelConstruction = ExtResource("3_ur5gm")
 
 [node name="VisualWrap" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, -0.5)
+
+[node name="BuildingResources" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.946, 0.03, -0.089)
+script = ExtResource("4_pdg5d")
+RequiredStone = 5.0
+
+[node name="Stone" type="Node3D" parent="BuildingResources"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.848008, -0.057, -0.0268531)
+
+[node name="stone" parent="BuildingResources/Stone" instance=ExtResource("5_erodt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.101705, 0, 0)
+visible = false
+
+[node name="stone2" parent="BuildingResources/Stone" instance=ExtResource("5_erodt")]
+visible = false
+
+[node name="stone3" parent="BuildingResources/Stone" instance=ExtResource("5_erodt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0572047, 0.0690357, 0)
+visible = false

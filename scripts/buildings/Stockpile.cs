@@ -22,7 +22,6 @@ public partial class Stockpile : StorageBuildingBase
 
     public override void _Ready()
     {
-        ResourcesRequiredForBuilding = new BuildingResources(0, 0);
         base._Ready();
     }
 

@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://cgg3hfpq62x27"]
+[gd_scene load_steps=7 format=3 uid="uid://cgg3hfpq62x27"]
 
 [ext_resource type="Script" path="res://scripts/buildings/House.cs" id="1_nlq14"]
 [ext_resource type="PackedScene" uid="uid://bs0ilcslgtmej" path="res://assets/buildings/house.blend" id="1_yydhl"]
 [ext_resource type="PackedScene" uid="uid://b33s076b0a6ov" path="res://assets/buildings/house_construction.blend" id="3_0mssf"]
+[ext_resource type="PackedScene" uid="uid://xsy5g1dm82qa" path="res://assets/buildings/resourcemodels/wood.blend" id="4_gakp3"]
+[ext_resource type="Script" path="res://scripts/buildings/BuildingResources.cs" id="4_tyx0v"]
+[ext_resource type="PackedScene" uid="uid://nenblraswqky" path="res://assets/buildings/resourcemodels/stone.blend" id="5_es7ob"]
 
 [node name="House" type="Node3D"]
 script = ExtResource("1_nlq14")
@@ -10,3 +13,37 @@ ModelCompleted = ExtResource("1_yydhl")
 ModelConstruction = ExtResource("3_0mssf")
 
 [node name="VisualWrap" type="Node3D" parent="."]
+
+[node name="BuildingResources" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0.873)
+script = ExtResource("4_tyx0v")
+RequiredWood = 30.0
+RequiredStone = 5.0
+
+[node name="Wood" type="Node3D" parent="BuildingResources"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0.848501, 0, 0)
+
+[node name="wood" parent="BuildingResources/Wood" instance=ExtResource("4_gakp3")]
+visible = false
+
+[node name="wood2" parent="BuildingResources/Wood" instance=ExtResource("4_gakp3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.0979589)
+visible = false
+
+[node name="wood3" parent="BuildingResources/Wood" instance=ExtResource("4_gakp3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0876288, 0.0497224)
+visible = false
+
+[node name="Stone" type="Node3D" parent="BuildingResources"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.706041, -0.057, -0.0268531)
+
+[node name="stone" parent="BuildingResources/Stone" instance=ExtResource("5_es7ob")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.101705, 0, 0)
+visible = false
+
+[node name="stone2" parent="BuildingResources/Stone" instance=ExtResource("5_es7ob")]
+visible = false
+
+[node name="stone3" parent="BuildingResources/Stone" instance=ExtResource("5_es7ob")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0572047, 0.0690357, 0)
+visible = false

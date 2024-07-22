@@ -15,7 +15,6 @@ namespace SacaSimulationGame.scripts.buildings
         public override void _Ready()
         {
             base._Ready();
-            ResourcesRequiredForBuilding = new BuildingResources(0, 5);
         }
 
         // Called every frame. 'delta' is the elapsed time since the previous frame.

@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://wgp8mplor3b4"]
+[gd_scene load_steps=7 format=3 uid="uid://wgp8mplor3b4"]
 
 [ext_resource type="Script" path="res://scripts/buildings/Lumberjack.cs" id="1_0hcmf"]
 [ext_resource type="PackedScene" uid="uid://gl3ieqj7onkj" path="res://assets/buildings/lumberjack.blend" id="2_ql7he"]
 [ext_resource type="PackedScene" uid="uid://b33s076b0a6ov" path="res://assets/buildings/house_construction.blend" id="3_0fcq7"]
 [ext_resource type="Script" path="res://scripts/buildings/storages/ResourceCappedStorage.cs" id="4_tvt17"]
+[ext_resource type="Script" path="res://scripts/buildings/BuildingResources.cs" id="5_f0g2c"]
+[ext_resource type="PackedScene" uid="uid://xsy5g1dm82qa" path="res://assets/buildings/resourcemodels/wood.blend" id="6_srx71"]
 
 [node name="Lumberjack" type="Node3D"]
 script = ExtResource("1_0hcmf")
@@ -16,3 +18,22 @@ ModelConstruction = ExtResource("3_0fcq7")
 script = ExtResource("4_tvt17")
 WoodCapacity = 20.0
 OutputResources = 1
+
+[node name="BuildingResources" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0.873)
+script = ExtResource("5_f0g2c")
+RequiredWood = 30.0
+
+[node name="Wood" type="Node3D" parent="BuildingResources"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0.848501, 0, 0)
+
+[node name="wood" parent="BuildingResources/Wood" instance=ExtResource("6_srx71")]
+visible = false
+
+[node name="wood2" parent="BuildingResources/Wood" instance=ExtResource("6_srx71")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.0979589)
+visible = false
+
+[node name="wood3" parent="BuildingResources/Wood" instance=ExtResource("6_srx71")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0876288, 0.0497224)
+visible = false

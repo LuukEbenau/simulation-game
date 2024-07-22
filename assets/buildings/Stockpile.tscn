@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://bhiw5grenhi2c"]
+[gd_scene load_steps=7 format=3 uid="uid://bhiw5grenhi2c"]
 
 [ext_resource type="Script" path="res://scripts/buildings/Stockpile.cs" id="1_06tiq"]
 [ext_resource type="PackedScene" uid="uid://ctn6xisxkibvl" path="res://assets/buildings/woodpile.blend" id="3_11hi5"]
 [ext_resource type="PackedScene" uid="uid://cpbdkd4h2fkyb" path="res://assets/buildings/stockpile_empty.blend" id="3_vgyox"]
 [ext_resource type="PackedScene" uid="uid://xn6ckji1r8bx" path="res://assets/buildings/stonepile.blend" id="4_3e1h1"]
 [ext_resource type="Script" path="res://scripts/buildings/storages/SingleResourceStorage.cs" id="5_43f8r"]
+[ext_resource type="Script" path="res://scripts/buildings/BuildingResources.cs" id="6_asmqj"]
 
 [node name="Stockpile" type="Node3D"]
 script = ExtResource("1_06tiq")
@@ -20,3 +21,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, -0.5)
 script = ExtResource("5_43f8r")
 MaxCapacity = 100.0
 StorableResources = 3
+
+[node name="BuildingResources" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0.873)
+script = ExtResource("6_asmqj")

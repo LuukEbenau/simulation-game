@@ -12,7 +12,7 @@ public partial class Fishingpost : Building
     public override void _Ready()
     {
         base._Ready();
-        ResourcesRequiredForBuilding = new BuildingResources(50, 10);
+        // new BuildingResources(50, 10);
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.

@@ -17,7 +17,6 @@ namespace SacaSimulationGame.scripts.buildings
         public override void _Ready()
         {
             base._Ready();
-            ResourcesRequiredForBuilding = new BuildingResources(30, 10);
             OnBuildingCompleted += House_OnBuildingCompleted;
         }
 

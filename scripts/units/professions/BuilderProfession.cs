@@ -35,7 +35,7 @@ namespace SacaSimulationGame.scripts.units.professions
             var buildingsOrdered = from b in Unit.BuildingManager.GetBuildings()
                     where !b.Instance.BuildingCompleted
                     orderby b.IsUnreachableCounter ascending,
-                            b.Instance.ResourcesRequiredForBuilding.PercentageResourcesAquired - b.Instance.BuildingPercentageComplete descending,
+                            b.Instance.BuildingResources.PercentageResourcesAquired - b.Instance.BuildingPercentageComplete descending,
                             b.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition) ascending
                     select b;
 
@@ -65,7 +65,7 @@ namespace SacaSimulationGame.scripts.units.professions
         
         public BehaviourStatus BuildBuilding(UnitBTContext context)
         {
-            if(context.Building.Instance.BuildingPercentageComplete >= context.Building.Instance.ResourcesRequiredForBuilding.PercentageResourcesAquired)
+            if(context.Building.Instance.BuildingPercentageComplete >= context.Building.Instance.BuildingResources.PercentageResourcesAquired)
             {
                 //waiting for resources
                 context.WaitingTime += context.Delta;

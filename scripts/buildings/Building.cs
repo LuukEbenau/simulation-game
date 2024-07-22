@@ -39,7 +39,7 @@ namespace SacaSimulationGame.scripts.buildings
         public bool BuildingCompleted { get; set; } = false;
         private float _currentBuildingProgress = 0;
         public double CurrentBuildingProgress { get; set; }
-        public BuildingResources ResourcesRequiredForBuilding { get; protected set; }
+        public BuildingResources BuildingResources { get; protected set; }
 
         public void RotateBuilding(BuildingRotation rotation)
         {
@@ -61,6 +61,9 @@ namespace SacaSimulationGame.scripts.buildings
             base._Ready();
 
             this.VisualWrap = GetNode<Node3D>("VisualWrap");
+            this.BuildingResources = GetNode<BuildingResources>("BuildingResources");
+
+            OnBuildingCompleted += Building_OnBuildingCompleted;
 
             UpdateBuildingProgress();
 
@@ -74,6 +77,11 @@ namespace SacaSimulationGame.scripts.buildings
             AddBuildingProgress(0);
         }
 
+        private void Building_OnBuildingCompleted()
+        {
+            this.BuildingResources.ShowResources(false);
+        }
+
         #region progress tracking
 
         /// <summary>
@@ -83,7 +91,7 @@ namespace SacaSimulationGame.scripts.buildings
         public bool CanBuild()
         {
             var percentageBuildingComplete =  this.CurrentBuildingProgress / this.TotalBuildingProgressNeeded;
-            if(percentageBuildingComplete <= ResourcesRequiredForBuilding.PercentageResourcesAquired)
+            if(percentageBuildingComplete <= BuildingResources.PercentageResourcesAquired)
             {
                 return true;
             }

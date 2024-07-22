@@ -32,12 +32,6 @@ public partial class Unit : Node3D
     public IUnitManager UnitManager => GameManager.UnitManager;
     public IWorldMapManager MapManager => GameManager.MapManager;
 
- 
-
-    //public UnitDataObject UnitData { get; set; }
-
-    //public readonly float speed = 5;
-
     protected UnitBTContext context;
 
     private Node3D VisualModel { get; set; } = null;
@@ -65,11 +59,24 @@ public partial class Unit : Node3D
 
         AddChild(VisualModel);
     }
+
+    private Node3D ResourceIndicator { get; set; }
     public override void _Ready()
     {
         base._Ready();
         this.Inventory = GetNode<GeneralStorage>("Inventory");
-        //new GeneralStorage(50, ResourceType.AllResources)
+        this.ResourceIndicator = GetNode<Node3D>("ResourceIndicator");
+
+        this.Inventory.StoredResourcesChanged += Inventory_StoredResourcesChanged;
+    }
+
+    private void Inventory_StoredResourcesChanged()
+    {
+        var woodIndicator = ResourceIndicator.GetNode<Node3D>("Wood");
+        var stoneIndicator = ResourceIndicator.GetNode<Node3D>("Stone");
+
+        woodIndicator.Visible = this.Inventory.TypesOfResourcesStored.HasFlag(ResourceType.Wood);
+        stoneIndicator.Visible = this.Inventory.TypesOfResourcesStored.HasFlag(ResourceType.Stone);
     }
 
     public override void _Process(double delta)
