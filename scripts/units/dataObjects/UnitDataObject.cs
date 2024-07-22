@@ -14,9 +14,9 @@ namespace SacaSimulationGame.scripts.units.dataObjects
         MALE = 1,
         FEMALE = 2
     }
-    public abstract class UnitDataObject(UnitGender gender)
+    public class UnitDataObject(UnitGender gender,  ProfessionType profession)
     {
-        public abstract ProfessionType Profession { get; }
+        public ProfessionType Profession { get; } = profession;
         public UnitGender Gender { get; } = gender;
     }
 }

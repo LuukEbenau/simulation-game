@@ -3,6 +3,7 @@ using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.dataObjects;
 using SacaSimulationGame.scripts.units;
 using SacaSimulationGame.scripts.units.dataObjects;
+using SacaSimulationGame.scripts.units.professions;
 using System;
 using System.Linq;
 
@@ -13,6 +14,7 @@ namespace SacaSimulationGame.scripts.managers
         public IUnitManager UnitManager { get; set; }
         public IWorldMapManager MapManager { get; set; }
         public IBuildingManager BuildingManager { get; set; }
+        public NaturalResourceManager NaturalResourceManager { get; set; }
         private Node3D SpawnLocation { get; set; }
         // Called when the node enters the scene tree for the first time.
         public override void _Ready()
@@ -20,6 +22,7 @@ namespace SacaSimulationGame.scripts.managers
             UnitManager = GetNode<UnitManager>("UnitManager");
             MapManager = GetNode<WorldMapManager>("MapManager");
             BuildingManager = GetNode<BuildingManager>("BuildingManager");
+            NaturalResourceManager = GetNode<NaturalResourceManager>("NaturalResourceManager");
             this.SpawnLocation = GetNode<Node3D>("SpawnLocation");
             SpawnInitialVillage();
         }
@@ -56,10 +59,10 @@ namespace SacaSimulationGame.scripts.managers
             }
 
             (UnitDataObject unit, Vector2I offset)[] unitsToSpawn = [
-                (new BuilderDataObject(gender: UnitGender.MALE), new Vector2I(2,2)),
-            (new WorkerDataObject(gender: UnitGender.FEMALE), new Vector2I(2,3)),
-            (new BuilderDataObject(gender: UnitGender.FEMALE), new Vector2I(2,-2)),
-            (new WorkerDataObject(gender: UnitGender.MALE), new Vector2I(2,-3))
+                (new UnitDataObject(UnitGender.MALE,   ProfessionType.Worker ), new Vector2I(2, 2)),
+                (new UnitDataObject(UnitGender.FEMALE, ProfessionType.Builder), new Vector2I(2, 3)),
+                (new UnitDataObject(UnitGender.FEMALE, ProfessionType.Builder), new Vector2I(2,-2)),
+                (new UnitDataObject(UnitGender.MALE,   ProfessionType.Worker ), new Vector2I(2,-3))
             ];
             foreach (var (unit, offset) in unitsToSpawn)
             {

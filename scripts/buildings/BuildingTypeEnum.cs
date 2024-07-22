@@ -14,6 +14,8 @@ namespace SacaSimulationGame.scripts.buildings
         House = 2,
         FishingPost = 4,
         Stockpile = 8,
+        Lumberjack = 16,
+
 
         //groups can be defined here
         ObstacleBuildings = House | FishingPost

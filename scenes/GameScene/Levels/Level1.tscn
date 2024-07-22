@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://1pdv76fc2dve"]
+[gd_scene load_steps=35 format=3 uid="uid://1pdv76fc2dve"]
 
 [ext_resource type="Script" path="res://scripts/managers/GameManager.cs" id="1_jcks0"]
 [ext_resource type="Script" path="res://scripts/managers/WorldMapManager.cs" id="2_lea2q"]
@@ -18,7 +18,9 @@
 [ext_resource type="Texture2D" uid="uid://cjvjhaa5ta2w3" path="res://assets/TerrainData/Level1_slot0_albedo_bump.png" id="10_iah8u"]
 [ext_resource type="Texture2D" uid="uid://dwr5rscyhfdau" path="res://assets/TerrainData/Level1_slot1_albedo_bump.png" id="11_ovtdu"]
 [ext_resource type="Texture2D" uid="uid://md6s1dhjxc6i" path="res://assets/TerrainData/Level1_slot2_albedo_bump.png" id="12_is0kv"]
+[ext_resource type="Script" path="res://scripts/managers/NaturalResourceManager.cs" id="13_078rw"]
 [ext_resource type="Texture2D" uid="uid://v45mx0ysfpoc" path="res://assets/TerrainData/Level1_slot0_normal_roughness.png" id="13_li7dd"]
+[ext_resource type="PackedScene" uid="uid://b7d7d88eq1lv4" path="res://assets/naturalResources/treeResource.tscn" id="14_p0mtc"]
 [ext_resource type="Texture2D" uid="uid://vr3r2jnpbgql" path="res://assets/TerrainData/Level1_slot1_normal_roughness.png" id="14_smaa8"]
 [ext_resource type="Script" path="res://addons/waterways_net/RiverManager.cs" id="14_w7lxc"]
 [ext_resource type="Texture2D" uid="uid://b85tlq8wcklbo" path="res://addons/waterways_net/Textures/water_normal_bump.png" id="15_845nl"]
@@ -145,6 +147,10 @@ UnitScene = ExtResource("9_kadnj")
 
 [node name="SpawnLocation" type="Node3D" parent="GameManager"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -68, 0, 36)
+
+[node name="NaturalResourceManager" type="Node3D" parent="GameManager"]
+script = ExtResource("13_078rw")
+TreeModel = ExtResource("14_p0mtc")
 
 [node name="Map" type="Node3D" parent="."]
 script = ExtResource("5_vpyhk")

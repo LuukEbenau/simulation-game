@@ -8,6 +8,7 @@ using BehaviourTree;
 using Godot;
 using Newtonsoft.Json;
 using SacaSimulationGame.scripts;
+using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.storages;
 using SacaSimulationGame.scripts.managers;
 using SacaSimulationGame.scripts.units;
@@ -21,10 +22,12 @@ public partial class Unit : Node3D
     public PackedScene BuilderModel { get; set; }
     [Export]
     public PackedScene WorkerModel { get; set; }
+    [Export] PackedScene LumberjackModel { get; set; }
 
     public Profession Profession { get; private set; }
     public UnitStats Stats { get; private set; } = new UnitStats { Speed = 5 };
     public StorageBase Inventory { get; private set; }
+
 
 
     public GameManager GameManager { get; set; }
@@ -50,6 +53,11 @@ public partial class Unit : Node3D
         {
             this.Profession = new BuilderProfession(this);
             VisualModel = BuilderModel.Instantiate<Node3D>();
+        }
+        else if (professionType == ProfessionType.Lumberjack)
+        {
+            this.Profession = new LumberjackProfession(this);
+            this.VisualModel = LumberjackModel.Instantiate<Node3D>();
         }
         else
         {

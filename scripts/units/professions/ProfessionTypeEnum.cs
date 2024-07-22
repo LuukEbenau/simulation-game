@@ -9,6 +9,7 @@ namespace SacaSimulationGame.scripts.units.professions
     public enum ProfessionType
     {
         Worker = 0,
-        Builder = 1
+        Builder = 1,
+        Lumberjack = 4
     }
 }

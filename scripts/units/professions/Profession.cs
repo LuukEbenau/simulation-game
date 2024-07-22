@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BehaviourTree;
 using BehaviourTree.FluentBuilder;
 using Godot;
+using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.pathfinding;
 using Windows.Services.Maps;
 
@@ -14,6 +15,12 @@ namespace SacaSimulationGame.scripts.units.professions
     public abstract class Profession
     {
         public Unit Unit { get; }
+
+        /// <summary>
+        /// The building assigned to the unit based on it's profession
+        /// </summary>
+        public Building ProfessionBuilding { get; set; }
+
         public IBehaviour<UnitBTContext> BehaviourTree { get; }
 
         private float idleBehaviourDuration = 2;

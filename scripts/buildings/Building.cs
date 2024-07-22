@@ -28,6 +28,10 @@ namespace SacaSimulationGame.scripts.buildings
         [Signal]
         public delegate void OnBuildingCompletedEventHandler();
 
+        public readonly int MaxNumberOfEmployees = 1;
+        public List<Unit> WorkingEmployees { get; set; } = [];
+
+
         /// <summary>
         /// The cell where the building is located
         /// </summary>

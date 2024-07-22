@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://b7d7d88eq1lv4"]
+
+[ext_resource type="Script" path="res://scripts/naturalResources/TreeResource.cs" id="1_1y3ps"]
+[ext_resource type="PackedScene" uid="uid://bvx0x5dtj6jh5" path="res://assets/naturalResources/tree.blend" id="1_ceyh7"]
+
+[node name="TreeResource" type="Node3D"]
+script = ExtResource("1_1y3ps")
+
+[node name="tree" parent="." instance=ExtResource("1_ceyh7")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)

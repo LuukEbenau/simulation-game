@@ -1,6 +1,7 @@
 using Godot;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.units.dataObjects;
+using SacaSimulationGame.scripts.units.professions;
 using System;
 namespace SacaSimulationGame.scripts.buildings
 {
@@ -22,8 +23,8 @@ namespace SacaSimulationGame.scripts.buildings
 
         private void House_OnBuildingCompleted()
         {
-            GameManager.UnitManager.SpawnUnit(GlobalPosition, new WorkerDataObject(UnitGender.MALE));
-            GameManager.UnitManager.SpawnUnit(GlobalPosition, new BuilderDataObject(UnitGender.FEMALE));
+            GameManager.UnitManager.SpawnUnit(GlobalPosition, new UnitDataObject(UnitGender.MALE, ProfessionType.Worker));
+            GameManager.UnitManager.SpawnUnit(GlobalPosition, new UnitDataObject(UnitGender.FEMALE, ProfessionType.Builder));
         }
 
         // Called every frame. 'delta' is the elapsed time since the previous frame.
