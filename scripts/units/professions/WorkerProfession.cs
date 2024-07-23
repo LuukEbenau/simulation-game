@@ -9,6 +9,9 @@ using Godot;
 using SacaSimulationGame.scripts.buildings;
 using System.Net.Mime;
 using SacaSimulationGame.scripts.pathfinding;
+using SacaSimulationGame.scripts.buildings.DO;
+using SacaSimulationGame.scripts.units.professions.misc;
+using SacaSimulationGame.scripts.naturalResources;
 
 namespace SacaSimulationGame.scripts.units.professions
 {

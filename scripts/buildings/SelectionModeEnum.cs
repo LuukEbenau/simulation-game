@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SacaSimulationGame.scripts.buildings
+namespace SacaSimulationGame.scripts
 {
     public enum SelectionMode
     {

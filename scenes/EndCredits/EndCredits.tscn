@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://clabvuaem7bsx" path="res://scenes/Credits/Credits.tscn" id="1_h2fy7"]
 [ext_resource type="Script" path="res://scenes/EndCredits/EndCredits.gd" id="2_aiyqd"]
 [ext_resource type="PackedScene" uid="uid://bkcsjsk2ciff" path="res://addons/maaacks_game_template/base/scenes/MusicPlayers/BackgroundMusicPlayer.tscn" id="3_liyoa"]
-[ext_resource type="AudioStream" uid="uid://b14ywbhr0c6sd" path="res://assets/music/mainmenu.mp3" id="4_gt7rm"]
+[ext_resource type="AudioStream" uid="uid://b14ywbhr0c6sd" path="res://assets/audio/music/mainmenu.mp3" id="4_gt7rm"]
 [ext_resource type="Script" path="res://addons/maaacks_game_template/base/scripts/CaptureFocus.gd" id="4_mf17t"]
 
 [node name="EndCredits" instance=ExtResource("1_h2fy7")]

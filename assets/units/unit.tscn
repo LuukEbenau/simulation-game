@@ -1,21 +1,21 @@
 [gd_scene load_steps=8 format=3 uid="uid://cqnighva7bclx"]
 
 [ext_resource type="Script" path="res://scripts/units/Unit.cs" id="1_vum1f"]
-[ext_resource type="PackedScene" uid="uid://d3w18mflpbsr4" path="res://assets/units/builder.blend" id="2_jkv64"]
-[ext_resource type="PackedScene" uid="uid://byltkfnh41o3r" path="res://assets/units/worker.blend" id="3_do7ys"]
-[ext_resource type="Script" path="res://scripts/buildings/storages/GeneralStorage.cs" id="4_4qnpw"]
-[ext_resource type="PackedScene" uid="uid://cj6t83fnxvash" path="res://assets/units/lumberjack.blend" id="4_ackjh"]
-[ext_resource type="PackedScene" uid="uid://xsy5g1dm82qa" path="res://assets/buildings/resourcemodels/wood.blend" id="5_e7ie5"]
-[ext_resource type="PackedScene" uid="uid://nenblraswqky" path="res://assets/buildings/resourcemodels/stone.blend" id="6_57dyx"]
+[ext_resource type="PackedScene" uid="uid://d3w18mflpbsr4" path="res://assets/units/models/builder/builder.blend" id="2_4gngw"]
+[ext_resource type="PackedScene" uid="uid://byltkfnh41o3r" path="res://assets/units/models/worker/worker.blend" id="3_8df1w"]
+[ext_resource type="PackedScene" uid="uid://cj6t83fnxvash" path="res://assets/units/models/lumberjack/lumberjack.blend" id="4_7as5k"]
+[ext_resource type="Script" path="res://scripts/storages/GeneralStorage.cs" id="5_0rr13"]
+[ext_resource type="PackedScene" uid="uid://xsy5g1dm82qa" path="res://assets/buildings/models/singleunit/wood.blend" id="5_e7ie5"]
+[ext_resource type="PackedScene" uid="uid://nenblraswqky" path="res://assets/buildings/models/singleunit/stone.blend" id="6_57dyx"]
 
 [node name="Unit" type="Node3D"]
 script = ExtResource("1_vum1f")
-BuilderModel = ExtResource("2_jkv64")
-WorkerModel = ExtResource("3_do7ys")
-LumberjackModel = ExtResource("4_ackjh")
+BuilderModel = ExtResource("2_4gngw")
+WorkerModel = ExtResource("3_8df1w")
+LumberjackModel = ExtResource("4_7as5k")
 
 [node name="Inventory" type="Node3D" parent="."]
-script = ExtResource("4_4qnpw")
+script = ExtResource("5_0rr13")
 MaxCapacity = 20.0
 
 [node name="ResourceIndicator" type="Node3D" parent="."]
@@ -28,5 +28,3 @@ visible = false
 [node name="Stone" parent="ResourceIndicator" instance=ExtResource("6_57dyx")]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -0.10519, 0, 0)
 visible = false
-
-[node name="builder" parent="." instance=ExtResource("2_jkv64")]

@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using BehaviourTree;
 using BehaviourTree.FluentBuilder;
 using Godot;
-using SacaSimulationGame.scripts.buildings;
+using SacaSimulationGame.scripts.buildings.DO;
 using SacaSimulationGame.scripts.managers;
+using SacaSimulationGame.scripts.units.professions.misc;
 using Windows.Services.Maps;
 
 namespace SacaSimulationGame.scripts.units.professions

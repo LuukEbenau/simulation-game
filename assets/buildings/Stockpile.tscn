@@ -1,27 +1,27 @@
 [gd_scene load_steps=7 format=3 uid="uid://bhiw5grenhi2c"]
 
-[ext_resource type="Script" path="res://scripts/buildings/Stockpile.cs" id="1_06tiq"]
-[ext_resource type="PackedScene" uid="uid://ctn6xisxkibvl" path="res://assets/buildings/woodpile.blend" id="3_11hi5"]
-[ext_resource type="PackedScene" uid="uid://cpbdkd4h2fkyb" path="res://assets/buildings/stockpile_empty.blend" id="3_vgyox"]
-[ext_resource type="PackedScene" uid="uid://xn6ckji1r8bx" path="res://assets/buildings/stonepile.blend" id="4_3e1h1"]
-[ext_resource type="Script" path="res://scripts/buildings/storages/SingleResourceStorage.cs" id="5_43f8r"]
-[ext_resource type="Script" path="res://scripts/buildings/BuildingResources.cs" id="6_asmqj"]
+[ext_resource type="Script" path="res://scripts/buildings/types/Stockpile.cs" id="1_b11k2"]
+[ext_resource type="Script" path="res://scripts/storages/BuildingResources.cs" id="2_1t78p"]
+[ext_resource type="PackedScene" uid="uid://ctn6xisxkibvl" path="res://assets/buildings/models/building/stockpile/woodpile.blend" id="2_rueat"]
+[ext_resource type="PackedScene" uid="uid://xn6ckji1r8bx" path="res://assets/buildings/models/building/stockpile/stonepile.blend" id="3_b2md5"]
+[ext_resource type="PackedScene" uid="uid://cpbdkd4h2fkyb" path="res://assets/buildings/models/building/stockpile/stockpile_empty.blend" id="4_pecg3"]
+[ext_resource type="Script" path="res://scripts/storages/GeneralStorage.cs" id="5_icbio"]
 
 [node name="Stockpile" type="Node3D"]
-script = ExtResource("1_06tiq")
-ModelWood = ExtResource("3_11hi5")
-ModelStone = ExtResource("4_3e1h1")
-ModelCompleted = ExtResource("3_vgyox")
-ModelConstruction = ExtResource("3_vgyox")
+script = ExtResource("1_b11k2")
+ModelWood = ExtResource("2_rueat")
+ModelStone = ExtResource("3_b2md5")
+ModelCompleted = ExtResource("4_pecg3")
+ModelConstruction = ExtResource("4_pecg3")
 
 [node name="VisualWrap" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, -0.5)
 
 [node name="Storage" type="Node3D" parent="."]
-script = ExtResource("5_43f8r")
+script = ExtResource("5_icbio")
 MaxCapacity = 100.0
 StorableResources = 3
 
 [node name="BuildingResources" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0.873)
-script = ExtResource("6_asmqj")
+script = ExtResource("2_1t78p")

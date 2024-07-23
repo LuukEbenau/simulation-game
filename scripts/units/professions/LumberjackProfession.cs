@@ -9,6 +9,8 @@ using BehaviourTree.FluentBuilder;
 using Godot;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.managers;
+using SacaSimulationGame.scripts.naturalResources;
+using SacaSimulationGame.scripts.units.professions.misc;
 using Windows.Services.Maps;
 using Windows.Web.Http.Headers;
 

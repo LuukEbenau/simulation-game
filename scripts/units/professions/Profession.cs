@@ -8,6 +8,7 @@ using BehaviourTree.FluentBuilder;
 using Godot;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.pathfinding;
+using SacaSimulationGame.scripts.units.professions.misc;
 using Windows.Services.Maps;
 
 namespace SacaSimulationGame.scripts.units.professions

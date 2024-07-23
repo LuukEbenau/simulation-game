@@ -1,30 +1,30 @@
 [gd_scene load_steps=8 format=3 uid="uid://dld6b4f1nunh2"]
 
-[ext_resource type="Script" path="res://scripts/buildings/Fishingpost.cs" id="1_2jl4h"]
-[ext_resource type="PackedScene" uid="uid://btygq765vnhwp" path="res://assets/buildings/fishingpost.blend" id="1_v16jd"]
-[ext_resource type="PackedScene" uid="uid://bpa62u8lr2lys" path="res://assets/buildings/fishingpost_construction.blend" id="3_1ic5w"]
-[ext_resource type="Script" path="res://scripts/buildings/storages/ResourceCappedStorage.cs" id="4_gotd7"]
-[ext_resource type="Script" path="res://scripts/buildings/BuildingResources.cs" id="5_m5g6f"]
-[ext_resource type="PackedScene" uid="uid://xsy5g1dm82qa" path="res://assets/buildings/resourcemodels/wood.blend" id="6_bmome"]
-[ext_resource type="PackedScene" uid="uid://nenblraswqky" path="res://assets/buildings/resourcemodels/stone.blend" id="7_wycs0"]
+[ext_resource type="Script" path="res://scripts/buildings/types/Fishingpost.cs" id="1_v3ust"]
+[ext_resource type="Script" path="res://scripts/storages/ResourceCappedStorage.cs" id="2_78s8c"]
+[ext_resource type="PackedScene" uid="uid://btygq765vnhwp" path="res://assets/buildings/models/building/fishingpost/fishingpost.blend" id="2_ex4do"]
+[ext_resource type="PackedScene" uid="uid://bpa62u8lr2lys" path="res://assets/buildings/models/building/fishingpost/fishingpost_construction.blend" id="3_h8vhb"]
+[ext_resource type="Script" path="res://scripts/storages/BuildingResources.cs" id="3_vjuwu"]
+[ext_resource type="PackedScene" uid="uid://xsy5g1dm82qa" path="res://assets/buildings/models/singleunit/wood.blend" id="6_bmome"]
+[ext_resource type="PackedScene" uid="uid://nenblraswqky" path="res://assets/buildings/models/singleunit/stone.blend" id="7_wycs0"]
 
 [node name="Fishingpost" type="Node3D"]
-script = ExtResource("1_2jl4h")
-ModelCompleted = ExtResource("1_v16jd")
-ModelConstruction = ExtResource("3_1ic5w")
+script = ExtResource("1_v3ust")
+ModelCompleted = ExtResource("2_ex4do")
+ModelConstruction = ExtResource("3_h8vhb")
 
 [node name="VisualWrap" type="Node3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
 
 [node name="Storage" type="Node3D" parent="."]
-script = ExtResource("4_gotd7")
-FishCapacity = 20.0
+script = ExtResource("2_78s8c")
+FishCapacity = 100.0
 InputResources = 4
 OutputResources = 4
 
 [node name="BuildingResources" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0.873)
-script = ExtResource("5_m5g6f")
+script = ExtResource("3_vjuwu")
 RequiredWood = 45.0
 RequiredStone = 10.0
 

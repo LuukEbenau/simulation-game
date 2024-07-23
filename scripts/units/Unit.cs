@@ -7,13 +7,16 @@ using System.Threading.Tasks;
 using BehaviourTree;
 using Godot;
 using Newtonsoft.Json;
-using SacaSimulationGame.scripts;
+using SacaSimulationGame.scripts.building;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.storages;
 using SacaSimulationGame.scripts.managers;
+using SacaSimulationGame.scripts.map;
+using SacaSimulationGame.scripts.naturalResources;
 using SacaSimulationGame.scripts.units;
 using SacaSimulationGame.scripts.units.dataObjects;
 using SacaSimulationGame.scripts.units.professions;
+using SacaSimulationGame.scripts.units.professions.misc;
 
 public partial class Unit : Node3D
 {
