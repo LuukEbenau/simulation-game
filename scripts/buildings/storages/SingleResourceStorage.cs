@@ -10,7 +10,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
     /// <summary>
     /// Resource storage which can only hold 1 single resource at the same time
     /// </summary>
-    public partial class SingleResourceStorage() : StorageBase
+    public partial class SingleResourceStorage : StorageBase
     {
         [Export] public float MaxCapacity { get; set; }
         [Export] public ResourceType StorableResources { get; set; } = ResourceType.AllResources;

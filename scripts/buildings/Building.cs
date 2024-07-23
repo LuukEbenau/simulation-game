@@ -119,7 +119,7 @@ namespace SacaSimulationGame.scripts.buildings
                 this.CurrentBuildingProgress = this.TotalBuildingProgressNeeded;
                 this.BuildingCompleted = true;
 
-                GD.Print("building completed");
+                //GD.Print("building completed");
                 UpdateBuildingProgress();
 
                 this.EmitSignal(SignalName.OnBuildingCompleted);

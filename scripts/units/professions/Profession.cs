@@ -19,7 +19,7 @@ namespace SacaSimulationGame.scripts.units.professions
         /// <summary>
         /// The building assigned to the unit based on it's profession
         /// </summary>
-        public Building ProfessionBuilding { get; set; }
+        public StorageBuildingBase ProfessionBuilding { get; set; }
 
         public IBehaviour<UnitBTContext> BehaviourTree { get; }
 

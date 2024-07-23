@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.managers;
 using SacaSimulationGame.scripts.pathfinding;
+using SacaSimulationGame.scripts.naturalResources;
 
 namespace SacaSimulationGame.scripts.units
 {
@@ -22,5 +23,10 @@ namespace SacaSimulationGame.scripts.units
         public double WaitingTime { get; set; } = 0;
 
         public StorageBuildingBase ResourcePickupBuilding { get; set; }
+
+        /// <summary>
+        /// Assigned resource for the unit, for example trees of lumberjacks
+        /// </summary>
+        public INaturalResource AssignedResource { get; set; }
     }
 }

@@ -44,7 +44,7 @@ namespace SacaSimulationGame.scripts.units.professions
             {
                 if (building.AssignUnit(Unit))
                 {
-                    GD.Print($"found target building to build {targetBuilding}");
+                    //GD.Print($"found target building to build {targetBuilding}");
                     targetBuilding = building;
                     break;
                 }
@@ -58,7 +58,7 @@ namespace SacaSimulationGame.scripts.units.professions
             context.Building = targetBuilding;
             context.Destination = Unit.MapManager.CellToWorld(context.Building.Instance.Cell, centered: true);
 
-            GD.Print($"target building is located at {context.Destination}");
+            //GD.Print($"target building is located at {context.Destination}");
 
             return BehaviourStatus.Succeeded;
         }
@@ -83,7 +83,7 @@ namespace SacaSimulationGame.scripts.units.professions
             else
             {
                 context.WaitingTime = 0;
-                var finished = context.Building.Instance.AddBuildingProgress(context.Delta);
+                var finished = context.Building.Instance.AddBuildingProgress(context.Delta * Unit.Stats.ActivitySpeedMultiplier);
 
                 if (finished)
                 {

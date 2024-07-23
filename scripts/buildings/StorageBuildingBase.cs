@@ -16,7 +16,7 @@ namespace SacaSimulationGame.scripts.buildings
         public override void _Ready()
         {
             base._Ready();
-            this.StoredResources = GetNode<StorageBase>("Storage"); // new SingleResourceStorage(100, ResourceType.StockpileResources);
+            this.StoredResources = GetNode<StorageBase>("Storage");
             this.StoredResources.StoredResourcesChanged += () => UpdateVisualBasedOnResources();
         }
 

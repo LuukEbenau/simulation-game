@@ -10,13 +10,8 @@ namespace SacaSimulationGame.scripts.buildings.storages
 {
     public abstract partial class StorageBase : Node3D
     {
-        //[Export] public float MaxCapacity { get; set; }
-
         [Signal]
         public delegate void StoredResourcesChangedEventHandler();
-
-        //public float StorageSpaceLeft => MaxCapacity - CurrentCapacity;
-        //public abstract float CurrentCapacity => Wood + Stone;
 
         public float CurrentCapacity => Wood + Stone;
 
@@ -32,8 +27,8 @@ namespace SacaSimulationGame.scripts.buildings.storages
 
         public abstract float GetStorageSpaceLeft(ResourceType type);
 
-        public float Wood { get; private set; } = 0;
-        public float Stone { get; private set; } = 0;
+        public virtual float Wood { get; set; } = 0;
+        public virtual float Stone { get; set; } = 0;
 
         protected bool ValidateResourceTypeIsPure(ResourceType resourceType)
         {
@@ -102,8 +97,8 @@ namespace SacaSimulationGame.scripts.buildings.storages
         public virtual float AddResource(ResourceType resourceType, float amount)
         {
             ValidateResourceTypeIsPure(resourceType);
-
-            if (GetStorageSpaceLeft(resourceType) <= amount)
+            var storageSpaceLeft = GetStorageSpaceLeft(resourceType);
+            if (storageSpaceLeft < amount)
             {
                 //GD.Print($"could not store {amount} resources of type {resourceType}");
                 return amount; //TODO: can't we just store it and return back the resources which couldnt be picked up?

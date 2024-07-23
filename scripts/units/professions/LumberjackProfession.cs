@@ -16,6 +16,14 @@ namespace SacaSimulationGame.scripts.units.professions
 {
     public class LumberjackProfession(Unit unit) : Profession(unit)
     {
+        private IBehaviour<UnitBTContext> MoveToProfessionBuildingAndDropoffResources => FluentBuilder.Create<UnitBTContext>()
+            .Sequence("Move to Profession Building And Drop off Resources")
+                .Do("Set destination", SetDestinationToProfessionBuilding)
+                .Do("Find path", FindPathToDestination)
+                .Do("Follow path", FollowPath)
+                .Do("Drop off Resources", DropOfResourcesAtProfessionBuilding)
+            .End()
+            .Build();
         protected override IBehaviour<UnitBTContext> GetBehaviourTree()
         {
             return FluentBuilder.Create<UnitBTContext>()
@@ -26,16 +34,22 @@ namespace SacaSimulationGame.scripts.units.professions
                             .Do("Find profession building", FindProfessionBuilding)
                             //TODO: move to profession building
                         .End()
+                        .Subtree(MoveToProfessionBuildingAndDropoffResources)
+                        //actions
                         .RandomSelector("Action Selection")
                             .Sequence("Plant Tree")
                                 .Do("Find Suitable planting position", FindSuitablePlantingLocation)
-                                .Do("Find path to building", FindPathToDestination)
-                                .Do("Move To Building", FollowPath)
+                                .Do("Find path to tree planting site", FindPathToDestination)
+                                .Do("Move To tree planting site", FollowPath)
                                 .Do("Plant Tree", PlantTree)
                             .End()
-                            //.Sequence("Chop tree")
-                                
-                            //.End()
+                            .Sequence("Chop tree")
+                                .Do("Check if cuttable tree in region", AssignCuttableTreeInRadius)
+                                .Do("Find path to building", FindPathToDestination)
+                                .Do("Move To tree planting site", FollowPath)
+                                .Do("Chop Tree", ChopTree)
+                                //drop of resources
+                            .End()
                         .End()
                     .End()
                     .Subtree(IdleBehaviourTree)
@@ -43,12 +57,103 @@ namespace SacaSimulationGame.scripts.units.professions
                 .Build();
         }
 
-        BehaviourStatus PlantTree(UnitBTContext context)
+        BehaviourStatus SetDestinationToProfessionBuilding(UnitBTContext context)
         {
-            var treePlantingDuration = 2;
+            context.Destination = ProfessionBuilding.GlobalPosition;
+
+            return BehaviourStatus.Succeeded;
+        }
+
+        BehaviourStatus DropOfResourcesAtProfessionBuilding(UnitBTContext context)
+        {
+            var resourcesToCheck = new List<ResourceType>();
+            var t = Unit.Inventory.TypesOfResourcesStored;
+            if (t.HasFlag(ResourceType.Wood)) resourcesToCheck.Add(ResourceType.Wood);
+            if (t.HasFlag(ResourceType.Stone)) resourcesToCheck.Add(ResourceType.Stone);
+
+            foreach (var resourceType in resourcesToCheck)
+            {
+                var storageSpace = ProfessionBuilding.StoredResources.GetStorageSpaceLeft(resourceType);
+
+                var amountRemoved = Unit.Inventory.RemoveResource(resourceType, storageSpace);
+
+                if (amountRemoved > 0)
+                {
+                    var leftOver = ProfessionBuilding.StoredResources.AddResource(resourceType, amountRemoved);
+                    if (leftOver > 0) 
+                    {
+                        GD.PushWarning($"Resource leftover of {leftOver} of resource {resourceType}, this should never happen here.");
+                        Unit.Inventory.AddResource(resourceType, leftOver);
+                    }
+                }
+            }
+
+            return BehaviourStatus.Succeeded;
+        }
+
+        BehaviourStatus ChopTree(UnitBTContext context) {
+
+            var resourcesToTake = (float)context.Delta * Unit.Stats.ActivitySpeedMultiplier;
+
+            var (resourcesTaken, resourceType) = context.AssignedResource.CollectResource(resourcesToTake);
+
+            if(resourcesTaken == 0 || resourceType == default)
+            {
+                //TODO: this happens for some reason, debuh
+                GD.Print("no resource could be found");
+                return BehaviourStatus.Succeeded; // finished chopping
+            }
+
+            Unit.Inventory.AddResource(resourceType, resourcesTaken);
 
             context.WaitingTime += context.Delta;
-            if(context.WaitingTime <= treePlantingDuration)
+            var timeoutTime = 30;
+
+            //failsafe:
+            if (context.WaitingTime > timeoutTime) {
+                return BehaviourStatus.Failed;
+            }
+            
+
+            if(context.AssignedResource.GetNrOfResourcesLeft() == 0)
+            {
+                return BehaviourStatus.Succeeded;
+            }
+            if(Unit.Inventory.GetStorageSpaceLeft(resourceType) == 0)
+            {
+                return BehaviourStatus.Succeeded;
+            }
+
+            return BehaviourStatus.Running;
+        }
+
+        BehaviourStatus AssignCuttableTreeInRadius(UnitBTContext context)
+        {
+            var collectionRadius = 12;
+            var closestResource = Unit.GameManager.NaturalResourceManager.NaturalResources
+                .Select(r => (r, r.GlobalPosition.DistanceTo(ProfessionBuilding.GlobalPosition)))
+                .Where(r => r.Item2 < Unit.GameManager.MapManager.CellSize.X * collectionRadius)
+                .OrderBy(r=>r.Item2)
+                .Select(r=>r.r)
+                .FirstOrDefault();
+
+            if(closestResource == null)
+            {
+                return BehaviourStatus.Failed;
+            }
+
+            context.AssignedResource = closestResource;
+            context.Destination = closestResource.GlobalPosition;
+
+            return BehaviourStatus.Succeeded;
+        }
+
+        BehaviourStatus PlantTree(UnitBTContext context)
+        {
+            var treePlantingDuration = 7;
+
+            context.WaitingTime += context.Delta;
+            if(context.WaitingTime <= treePlantingDuration / Unit.Stats.ActivitySpeedMultiplier)
             {
                 return BehaviourStatus.Running;
             }
@@ -86,7 +191,7 @@ namespace SacaSimulationGame.scripts.units.professions
 
             if(closestBuilding == null) return BehaviourStatus.Failed;
 
-            ProfessionBuilding = closestBuilding.Instance;
+            ProfessionBuilding = closestBuilding.Instance as StorageBuildingBase;
 
             return BehaviourStatus.Succeeded;
         }

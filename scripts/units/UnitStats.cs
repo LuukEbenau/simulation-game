@@ -12,5 +12,6 @@ namespace SacaSimulationGame.scripts.units
         public const float MAXHEALTH = 100;
         //public float MaxHealth => 100;
         public float Speed { get; set; }
+        public float ActivitySpeedMultiplier = 5;
     }
 }
