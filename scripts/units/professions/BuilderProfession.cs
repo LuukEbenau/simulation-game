@@ -36,7 +36,8 @@ namespace SacaSimulationGame.scripts.units.professions
             var buildingsOrdered = from b in Unit.BuildingManager.GetBuildings()
                     where !b.Instance.BuildingCompleted
                     orderby b.IsUnreachableCounter ascending,
-                            b.Instance.BuildingResources.PercentageResourcesAquired - b.Instance.BuildingPercentageComplete descending,
+                            b.Instance.BuildingResources.PercentageResourcesAquired - b.Instance.BuildingPercentageComplete
+                            descending,
                             b.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition) ascending
                     select b;
 

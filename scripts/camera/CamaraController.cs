@@ -1,6 +1,9 @@
 using Godot;
 using SacaSimulationGame.scripts.managers;
 using System;
+using System.Threading.Tasks;
+
+
 
 public partial class CamaraController : Node3D
 {
@@ -8,7 +11,7 @@ public partial class CamaraController : Node3D
     private float _moveSpeedDynamic = 75.0f;
     [Export] public float ZoomSpeed { get; set; } = 5.0f;
     [Export] public float MinZoom { get; set; } = 6.0f;
-    [Export] public float MaxZoom { get; set; } = 190.0f;
+    [Export] public float MaxZoom { get; set; } = 140.0f;
     /// <summary>
     /// MouseDistanceFromBorder
     /// </summary>
@@ -21,6 +24,8 @@ public partial class CamaraController : Node3D
     private Node3D _map;
     private Vector3 _minWorldCoord;
     private Vector3 _maxWorldCoord;
+
+    private bool _isCinematicZooming = false;
 
     private GameManager GameManager { get; set; }
     public override void _Ready()
@@ -39,43 +44,89 @@ public partial class CamaraController : Node3D
         UpdateCameraAngle();
 
         this.GameManager = GetParent().GetNode<GameManager>("GameManager");
+
+        StartCinematicZoomout();
     }
+
+    private void StartCinematicZoomout()
+    {
+        _isCinematicZooming = true;
+
+        var spawnPoint = GameManager.SpawnLocation.GlobalPosition;
+        GlobalPosition = new Vector3(spawnPoint.X + 5, MinZoom, spawnPoint.Z + 25);
+        UpdateCameraAngle();
+
+    }
+
+    private float EaseOutQuad(float t)
+    {
+        return t == 1.0f ? 1.0f : 1 - Mathf.Pow(2, -10 * t);
+        //return t * (2 - t);
+    }
+    private void TickCinematicZoomout(double delta)
+    {
+        var finalZoomY = MaxZoom * 0.4f;
+        var startZoomY = MinZoom;
+        var totalZoomDistance = finalZoomY - startZoomY;
+        var currentZoomY = GlobalPosition.Y - startZoomY;
+        var zoomProgress = Mathf.Clamp((float)(currentZoomY / totalZoomDistance), 0.0f, 1.0f);
+
+        if (GlobalPosition.Y >= finalZoomY)
+        {
+            _isCinematicZooming = false;
+        }
+        else
+        {
+            var easedProgress = EaseOutQuad(zoomProgress) + 0.15f;
+            var cinematicZoomSpeedCoefficient = 7.5f * easedProgress;
+            ZoomCamera((float)delta * cinematicZoomSpeedCoefficient);
+        }
+    }
+
 
     public override void _Process(double delta)
     {
-        if(_minWorldCoord == default)
+        if (_isCinematicZooming)
         {
-            var borderBoundarySize = 5;
-            var minCell = new Vector2I(borderBoundarySize, borderBoundarySize);
-            var maxCell = new Vector2I(this.GameManager.MapManager.MapWidth - borderBoundarySize, GameManager.MapManager.MapHeight - borderBoundarySize);
-            _minWorldCoord = this.GameManager.MapManager.CellToWorld(minCell);
-            _maxWorldCoord = this.GameManager.MapManager.CellToWorld(maxCell);
+            TickCinematicZoomout(delta);
         }
+        else
+        {
 
-        Vector2 mousePos = GetViewport().GetMousePosition();
-        Vector3 moveDir = Vector3.Zero;
+            if (_minWorldCoord == default)
+            {
+                var borderBoundarySize = 5;
+                var minCell = new Vector2I(borderBoundarySize, borderBoundarySize);
+                var maxCell = new Vector2I(this.GameManager.MapManager.MapWidth - borderBoundarySize, GameManager.MapManager.MapHeight - borderBoundarySize);
+                _minWorldCoord = this.GameManager.MapManager.CellToWorld(minCell);
+                _maxWorldCoord = this.GameManager.MapManager.CellToWorld(maxCell);
+            }
 
-        //TODO: i want to prevent scrolling outside map borders. The borders of the map are defined as following:
+            Vector2 mousePos = GetViewport().GetMousePosition();
+            Vector3 moveDir = Vector3.Zero;
 
-        //var borderBoundarySize = 40;
+            //TODO: i want to prevent scrolling outside map borders. The borders of the map are defined as following:
 
-        //var minCell = new Vector2I(this.GameManager.MapManager.MinX + borderBoundarySize, this.GameManager.MapManager.MinY + borderBoundarySize);
-        //var maxCell = new Vector2I(this.GameManager.MapManager.MaxX - borderBoundarySize, GameManager.MapManager.MaxY - borderBoundarySize);
-        //var minWorldCoord = this.GameManager.MapManager.CellToWorld(minCell);
-        //var maxWorldCoord = this.GameManager.MapManager.CellToWorld(maxCell);
+            //var borderBoundarySize = 40;
 
-        // Check if mouse is near the borders
-        if (mousePos.X < MouseDistanceFromScreenBorderThreshhold || Input.IsActionPressed("Move Camera Left"))
-            moveDir.X -= 1;
-        else if (mousePos.X > _viewportSize.X - MouseDistanceFromScreenBorderThreshhold || Input.IsActionPressed("Move Camera Right"))
-            moveDir.X += 1;
+            //var minCell = new Vector2I(this.GameManager.MapManager.MinX + borderBoundarySize, this.GameManager.MapManager.MinY + borderBoundarySize);
+            //var maxCell = new Vector2I(this.GameManager.MapManager.MaxX - borderBoundarySize, GameManager.MapManager.MaxY - borderBoundarySize);
+            //var minWorldCoord = this.GameManager.MapManager.CellToWorld(minCell);
+            //var maxWorldCoord = this.GameManager.MapManager.CellToWorld(maxCell);
 
-        if (mousePos.Y < MouseDistanceFromScreenBorderThreshhold || Input.IsActionPressed("Move Camera Top"))
-            moveDir.Z -= 1;
-        else if (mousePos.Y > _viewportSize.Y - MouseDistanceFromScreenBorderThreshhold || Input.IsActionPressed("Move Camera Bottom"))
-            moveDir.Z += 1;
+            // Check if mouse is near the borders
+            if (mousePos.X < MouseDistanceFromScreenBorderThreshhold || Input.IsActionPressed("Move Camera Left"))
+                moveDir.X -= 1;
+            else if (mousePos.X > _viewportSize.X - MouseDistanceFromScreenBorderThreshhold || Input.IsActionPressed("Move Camera Right"))
+                moveDir.X += 1;
 
-        MoveScreen(moveDir, (float)delta);
+            if (mousePos.Y < MouseDistanceFromScreenBorderThreshhold || Input.IsActionPressed("Move Camera Top"))
+                moveDir.Z -= 1;
+            else if (mousePos.Y > _viewportSize.Y - MouseDistanceFromScreenBorderThreshhold || Input.IsActionPressed("Move Camera Bottom"))
+                moveDir.Z += 1;
+
+            MoveScreen(moveDir, (float)delta);
+        }
     }
 
     private void MoveScreen(Vector3 dir, float delta = 1.0f)
@@ -99,13 +150,15 @@ public partial class CamaraController : Node3D
 
     public override void _Input(InputEvent @event)
     {
+        if (_isCinematicZooming) return;
+
         if (@event.IsActionPressed("Zoom Out Camera"))
             ZoomCamera(-1);
         else if (@event.IsActionPressed("Zoom In Camera"))
             ZoomCamera(1);
     }
 
-    private void ZoomCamera(int direction)
+    private void ZoomCamera(float direction)
     {
         if (_camera == null || _map == null)
             return;

@@ -17,7 +17,7 @@ namespace SacaSimulationGame.scripts.managers
         public IWorldMapManager MapManager { get; set; }
         public IBuildingManager BuildingManager { get; set; }
         public NaturalResourceManager NaturalResourceManager { get; set; }
-        private Node3D SpawnLocation { get; set; }
+        public Node3D SpawnLocation { get; private set; }
         // Called when the node enters the scene tree for the first time.
         public override void _Ready()
         {
@@ -61,8 +61,8 @@ namespace SacaSimulationGame.scripts.managers
             }
 
             (UnitDataObject unit, Vector2I offset)[] unitsToSpawn = [
-                (new UnitDataObject(UnitGender.MALE,   ProfessionType.Worker ), new Vector2I(2, 2)),
-                (new UnitDataObject(UnitGender.FEMALE, ProfessionType.Builder), new Vector2I(2, 3)),
+                //(new UnitDataObject(UnitGender.MALE,   ProfessionType.Worker ), new Vector2I(2, 2)),
+                //(new UnitDataObject(UnitGender.FEMALE, ProfessionType.Builder), new Vector2I(2, 3)),
                 (new UnitDataObject(UnitGender.FEMALE, ProfessionType.Builder), new Vector2I(2,-2)),
                 (new UnitDataObject(UnitGender.MALE,   ProfessionType.Worker ), new Vector2I(2,-3))
             ];
