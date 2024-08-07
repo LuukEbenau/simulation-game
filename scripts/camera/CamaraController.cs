@@ -53,7 +53,7 @@ public partial class CamaraController : Node3D
         _isCinematicZooming = true;
 
         var spawnPoint = GameManager.SpawnLocation.GlobalPosition;
-        GlobalPosition = new Vector3(spawnPoint.X + 5, MinZoom, spawnPoint.Z + 25);
+        GlobalPosition = new Vector3(spawnPoint.X + 5, MinZoom, spawnPoint.Z + 30);
         UpdateCameraAngle();
 
     }
@@ -65,7 +65,7 @@ public partial class CamaraController : Node3D
     }
     private void TickCinematicZoomout(double delta)
     {
-        var finalZoomY = MaxZoom * 0.4f;
+        var finalZoomY = MaxZoom * 0.25f;
         var startZoomY = MinZoom;
         var totalZoomDistance = finalZoomY - startZoomY;
         var currentZoomY = GlobalPosition.Y - startZoomY;

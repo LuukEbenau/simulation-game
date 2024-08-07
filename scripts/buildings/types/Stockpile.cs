@@ -112,7 +112,7 @@ public partial class Stockpile : StorageBuildingBase
             lastIndicator = BuildingVisual;
             indicators = BuildingVisual.GetChildren()
                 .Where(c => c.Name.ToString().StartsWith(itemPrefix))
-                .OrderBy(c => int.Parse(c.Name.ToString()[itemPrefix.Length..]))
+                .OrderBy(c => c.Name.ToString())//int.Parse(c.Name.ToString()[itemPrefix.Length..]))
                 .Select(c => c as Node3D)
                 .ToList();
         }
