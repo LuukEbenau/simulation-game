@@ -1,14 +1,17 @@
-[gd_scene load_steps=4 format=3 uid="uid://b7d7d88eq1lv4"]
+[gd_scene load_steps=5 format=3 uid="uid://b7d7d88eq1lv4"]
 
 [ext_resource type="Script" path="res://scripts/naturalResources/instances/TreeResource.cs" id="1_j5w1w"]
 [ext_resource type="PackedScene" uid="uid://bvx0x5dtj6jh5" path="res://assets/naturalResources/models/tree/tree.blend" id="2_hlsd2"]
 [ext_resource type="Script" path="res://scripts/storages/ResourceDeposit.cs" id="3_6ooht"]
+[ext_resource type="PackedScene" uid="uid://bp5ixxi0rwu4e" path="res://assets/naturalResources/models/tree/tree_felled.blend" id="3_rpstp"]
 
 [node name="TreeResource" type="Node3D"]
 script = ExtResource("1_j5w1w")
+TreeModel = ExtResource("2_hlsd2")
+TreeModelFelled = ExtResource("3_rpstp")
 
-[node name="tree" parent="." instance=ExtResource("2_hlsd2")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+[node name="VisualWrap" type="Node3D" parent="."]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
 
 [node name="ResourceStorage" type="Node3D" parent="."]
 script = ExtResource("3_6ooht")

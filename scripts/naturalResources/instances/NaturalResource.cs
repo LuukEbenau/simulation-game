@@ -11,12 +11,13 @@ namespace SacaSimulationGame.scripts.naturalResources
 {
     public partial class NaturalResource : Node3D, INaturalResource
     {
-        private StorageBase ResourceStorage { get; set; }
-
+        protected StorageBase ResourceStorage { get; set; }
+        protected Node3D VisualWrap { get; set; }
         public override void _Ready()
         {
             base._Ready();
             ResourceStorage = GetNode<StorageBase>("ResourceStorage");
+            VisualWrap = GetNode<Node3D>("VisualWrap");
         }
 
 
