@@ -231,7 +231,9 @@ namespace SacaSimulationGame.scripts.map
                         }
                         if (colliderNode.Name == MapManager.Terrain.Name)
                         {
-                            return (CellType.GROUND, position.Y);
+                            var ct = CellType.GROUND;
+
+                            return (ct, position.Y);
                         }
                     }
                 }

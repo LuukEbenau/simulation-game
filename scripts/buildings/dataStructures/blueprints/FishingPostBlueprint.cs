@@ -12,21 +12,29 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
     {
         public override BuildingType Type => BuildingType.FishingPost;
         public override SelectionMode SelectionMode => SelectionMode.Single;
-        public override CellType[,] Shape { get; }
-        public override float MaxSlopeAngle { get; }
+        public override BuildingContraints[,] CellConstraints { get; }
+        //public override float MaxSlopeAngle { get; }
 
         public FishingPostBlueprint()
         {
 
-            Shape = new CellType[5, 2]
+            CellConstraints = new BuildingContraints[5, 2]
             {
-                { CellType.GROUND,CellType.GROUND},
-                { CellType.WATER | CellType.GROUND, CellType.WATER | CellType.GROUND },
-                { CellType.WATER, CellType.WATER },
-                { CellType.WATER, CellType.WATER },
-                { CellType.WATER, CellType.WATER },
+                { new BuildingContraints { CellTypes = CellType.GROUND }, new BuildingContraints { CellTypes = CellType.GROUND }},
+                { new BuildingContraints { CellTypes = CellType.GROUND | CellType.WATER }, new BuildingContraints { CellTypes = CellType.GROUND | CellType.WATER }},
+                { new BuildingContraints { CellTypes = CellType.WATER }, new BuildingContraints { CellTypes = CellType.WATER }},
+                { new BuildingContraints { CellTypes = CellType.WATER }, new BuildingContraints { CellTypes = CellType.WATER }},
+                { new BuildingContraints { CellTypes = CellType.WATER }, new BuildingContraints { CellTypes = CellType.WATER }},
             };
-            MaxSlopeAngle = 15f;
+            //Shape = new CellType[5, 2]
+            //{
+            //    { CellType.GROUND,CellType.GROUND},
+            //    { CellType.WATER | CellType.GROUND, CellType.WATER | CellType.GROUND },
+            //    { CellType.WATER, CellType.WATER },
+            //    { CellType.WATER, CellType.WATER },
+            //    { CellType.WATER, CellType.WATER },
+            //};
+            //MaxSlopeAngle = 15f;
         }
     }
 }

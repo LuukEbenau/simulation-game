@@ -11,18 +11,14 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
     public class RoadBlueprint : BuildingBlueprintBase
     {
         public override BuildingType Type => BuildingType.Road;
-        public override CellType[,] Shape { get; }
-        public override float MaxSlopeAngle { get; }
+        public override BuildingContraints[,] CellConstraints { get; }
         public override SelectionMode SelectionMode => SelectionMode.Path;
         public RoadBlueprint()
         {
-            Shape = new CellType[1, 1]
+            CellConstraints = new BuildingContraints[1, 1]
             {
-                { CellType.GROUND}
+                { new BuildingContraints{ MaxSlope = 20f, CellTypes = CellType.GROUND}}
             };
-            MaxSlopeAngle = 20f;
         }
-
-
     }
 }

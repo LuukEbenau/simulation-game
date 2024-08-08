@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Godot;
 using SacaSimulationGame.scripts.naturalResources;
 
+
 namespace SacaSimulationGame.scripts.buildings.storages
 {
     public abstract partial class StorageBase : Node3D
@@ -13,7 +14,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
         [Signal]
         public delegate void StoredResourcesChangedEventHandler();
 
-        public float CurrentCapacity => Wood + Stone;
+        public float CurrentCapacity => Wood + Stone + Fish;
 
         /// <summary>
         /// Allowed resources to be deposited
@@ -29,6 +30,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
 
         public virtual float Wood { get; set; } = 0;
         public virtual float Stone { get; set; } = 0;
+        public virtual float Fish { get; set; } = 0;
 
         protected bool ValidateResourceTypeIsPure(ResourceType resourceType)
         {
@@ -41,13 +43,31 @@ namespace SacaSimulationGame.scripts.buildings.storages
 
         public float GetResourcesOfType(ResourceType resourceType)
         {
-            ValidateResourceTypeIsPure(resourceType);
+            //ValidateResourceTypeIsPure(resourceType);
+            float resources = 0;
+            var resourceFound = false;
 
-            if (resourceType == ResourceType.Wood) return Wood;
-            if (resourceType == ResourceType.Stone) return Stone;
+            if (resourceType.HasFlag(ResourceType.Wood))
+            {
+                resources += Wood;
+                resourceFound = true;
+            }
 
-            throw new Exception("Resource type not implemented yet");
-            //return 0;
+            if (resourceType.HasFlag(ResourceType.Stone))
+            {
+                resources += Stone;
+                resourceFound = true;
+            }
+
+            if (resourceType.HasFlag(ResourceType.Fish))
+            {
+                resources += Fish;
+                resourceFound = true;
+            }
+
+            if(!resourceFound) throw new Exception($"Resource type not implemented yet  {resourceType}");
+
+            return resources;
         }
 
         /// <summary>

@@ -30,7 +30,7 @@ namespace SacaSimulationGame.scripts.managers
 
 
 
-        private WorldMapManager MapManager { get; set; }
+        private IWorldMapManager MapManager { get; set; }
         private Camera3D Camera { get; set; }
 
         /// <summary>
@@ -311,9 +311,9 @@ namespace SacaSimulationGame.scripts.managers
         {
             //// KEEP TRACK OF Building
             var occupiedCellsByBuilding = new List<Vector2I>();
-            for (var occX = 0; occX < building.Shape.GetLength(0); occX++)
+            for (var occX = 0; occX < building.CellConstraints.GetLength(0); occX++)
             {
-                for (var occY = 0; occY < building.Shape.GetLength(1); occY++)
+                for (var occY = 0; occY < building.CellConstraints.GetLength(1); occY++)
                 {
                     var offset = new Vector2I(occX, occY);
                     offset = offset.Rotate((int)building.Rotation);

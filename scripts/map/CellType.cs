@@ -11,6 +11,7 @@ namespace SacaSimulationGame.scripts.map
     {
         NONE = 0,
         GROUND = 1,
-        WATER =2
+        WATER =2,
+        HILL = 4
     }
 }

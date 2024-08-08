@@ -12,6 +12,7 @@ using SacaSimulationGame.scripts.pathfinding;
 using SacaSimulationGame.scripts.buildings.DO;
 using SacaSimulationGame.scripts.units.professions.misc;
 using SacaSimulationGame.scripts.naturalResources;
+using SacaSimulationGame.scripts.helpers;
 
 namespace SacaSimulationGame.scripts.units.professions
 {
@@ -106,11 +107,36 @@ namespace SacaSimulationGame.scripts.units.professions
 
         public BehaviourStatus FindResourcePickupPoint(UnitBTContext context)
         {
+            // Higher is better
+            float buildingWithBestResourcesConstraint(StorageBuildingBase storageBuilding)
+            {
+                var overlappingType = storageBuilding.StoredResources.TypesOfResourcesStored & context.Building.Instance.BuildingResources.TypesOfResourcesRequired;
+
+                float totalResourcesReq = 0f;
+                float totalResourcesAtResourceStore = 0f;
+                foreach(var t in overlappingType.GetActiveFlags())
+                {
+                    var amountRequired = context.Building.Instance.BuildingResources.RequiresOfResource(t);
+                    totalResourcesReq += amountRequired;
+
+                    var amountAvailable = storageBuilding.StoredResources.GetResourcesOfType(t);
+
+                    totalResourcesAtResourceStore += MathF.Min(amountAvailable, amountRequired); // only the required amount matters
+                }
+
+                // now to order, we should take a function of the distance and the resource value the storage would bring.
+                var percentageOfAllResources = totalResourcesAtResourceStore / totalResourcesReq;
+                var distanceCoeff = storageBuilding.GlobalPosition.DistanceTo(Unit.GlobalPosition) * 2; // x2 since it has to walk twice, but mathematically i dont think this matters.
+                var value = percentageOfAllResources / distanceCoeff;
+
+                return value;
+            }
+            
             var closestResourceDeposit = this.Unit.BuildingManager.GetBuildings()
                 .Where(b => b.Instance.IsResourceStorage)
                 .Where(b => ((b.Instance as StorageBuildingBase).StoredResources.TypesOfResourcesStored & context.Building.Instance.BuildingResources.TypesOfResourcesRequired) > 0)
                 .OrderBy(b => b.IsUnreachableCounter)
-                .ThenBy(b => b.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition))
+                .ThenByDescending(b => buildingWithBestResourcesConstraint(b.Instance as StorageBuildingBase))
                 .FirstOrDefault();
 
             if (closestResourceDeposit == null) {

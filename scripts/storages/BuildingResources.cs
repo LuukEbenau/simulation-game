@@ -11,11 +11,11 @@ using SacaSimulationGame.scripts.units.dataObjects;
 
 namespace SacaSimulationGame.scripts.buildings
 {
-    public partial class BuildingResources : Node3D
+    public partial class BuildingResources : Node3D, IBuildingResources
     {
         public float PercentageResourcesAquired => (CurrentWood + CurrentStone + 1) / (RequiredWood + RequiredStone + 1);
         public bool RequiresResources => PercentageResourcesAquired < 1;
-        
+
         [Export] public float RequiredWood { get; set; }
         public float CurrentWood { get; private set; }
         [Export] public float RequiredStone { get; set; }
@@ -45,7 +45,7 @@ namespace SacaSimulationGame.scripts.buildings
             base._Ready();
             if (this.RequiredWood > 0) TypesOfResourcesRequired |= ResourceType.Wood;
             if (this.RequiredStone > 0) TypesOfResourcesRequired |= ResourceType.Stone;
-            
+
             _woodWrap = GetNodeOrNull<Node3D>("Wood");
             if (_woodWrap != null)
             {
@@ -58,9 +58,11 @@ namespace SacaSimulationGame.scripts.buildings
             }
         }
 
-        private void UpdateResourceVisual() {
-            if (_woodIndicatorNodes != null && RequiredWood > 0) {
-                
+        private void UpdateResourceVisual()
+        {
+            if (_woodIndicatorNodes != null && RequiredWood > 0)
+            {
+
                 var percentWood = CurrentWood / RequiredWood;
                 var nrOfIndicators = Mathf.FloorToInt(percentWood * _woodIndicatorNodes.Count);
 
@@ -88,15 +90,25 @@ namespace SacaSimulationGame.scripts.buildings
 
         public float RequiresOfResource(ResourceType resourceType)
         {
-            if (resourceType == ResourceType.Wood)
+            float amount = 0;
+
+            bool resourceTypeFound = false;
+
+            if (resourceType.HasFlag(ResourceType.Wood))
             {
-                return  RequiredWood - CurrentWood;
+                resourceTypeFound = true;
+                amount += RequiredWood - CurrentWood;
             }
-            else if (resourceType == ResourceType.Stone)
+
+            if (resourceType.HasFlag(ResourceType.Stone))
             {
-                return RequiredStone - CurrentStone;
+                resourceTypeFound = true;
+                amount += RequiredStone - CurrentStone;
             }
-            else throw new Exception($"Resource type {resourceType} not implemented");
+
+            if(!resourceTypeFound) throw new Exception($"Resource type {resourceType} not implemented");
+
+            return amount;
         }
 
         /// <summary>

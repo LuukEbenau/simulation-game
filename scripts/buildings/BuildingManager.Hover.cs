@@ -2,6 +2,7 @@
 using SacaSimulationGame.scripts.buildings.dataStructures.blueprints;
 using SacaSimulationGame.scripts.map;
 using SacaSimulationGame.scripts.pathfinding;
+using System;
 using System.Collections.Generic;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -106,11 +107,12 @@ namespace SacaSimulationGame.scripts.managers
         private List<(Vector2I cell, MapDataItem cellData, bool isBuildable)> CheckBuildingBuildable(Vector2I cell, BuildingBlueprintBase blueprint, bool visualiseHover = false)
         {
             bool buildingBuildable = true;
-            int shapeWidth = blueprint.Shape.GetLength(0);
-            int shapeLength = blueprint.Shape.GetLength(1);
+            int shapeWidth = blueprint.CellConstraints.GetLength(0);
+            int shapeLength = blueprint.CellConstraints.GetLength(1);
 
             List<(Vector2I cell, MapDataItem cellData, bool isBuildable)> celldata = [];
 
+            MapDataItem baseCellData = null;
             for (int x = 0; x < shapeWidth; x++)
             {
                 for (int y = 0; y < shapeLength; y++)
@@ -119,7 +121,12 @@ namespace SacaSimulationGame.scripts.managers
                     var cellShifted = cell + vecRotated;
                     if (MapManager.TryGetCell(cellShifted, out MapDataItem data))
                     {
-                        bool cellBuildable = IsCellBuildable(data, blueprint.Shape[x, y], blueprint.MaxSlopeAngle, cellShifted);
+                        if(x==0 && y == 0)
+                        {
+                            baseCellData = data;
+                        }
+
+                        bool cellBuildable = IsCellBuildable(data, blueprint, x, y, cellShifted, baseCellData);
                         buildingBuildable &= cellBuildable;
 
                         celldata.Add((cellShifted,data,cellBuildable));
@@ -132,12 +139,12 @@ namespace SacaSimulationGame.scripts.managers
                 }
             }
             return celldata;
-
-            //return buildingBuildable;
         }
 
-        private bool IsCellBuildable(MapDataItem data, CellType buildingCellType, float maxSlopeAngle, Vector2I cell)
+        private bool IsCellBuildable(MapDataItem data, BuildingBlueprintBase blueprint, int shapeX, int shapeY, Vector2I cell, MapDataItem baseCellData)
         {
+            var buildingContraints = blueprint.CellConstraints[shapeX, shapeY];
+
             // check for obstacles
             var cellOccupied = this.OccupiedCells[cell.X, cell.Y].Id > 0;
             if (cellOccupied)
@@ -145,20 +152,48 @@ namespace SacaSimulationGame.scripts.managers
                 return false;
             }
 
-            //check for terrain
-            if (data.CellType.HasFlag(CellType.WATER))
+            //check for slope constraint
+            if(buildingContraints.MaxSlope != default)
             {
-                return buildingCellType.HasFlag(CellType.WATER);
+                if(data.Slope > buildingContraints.MaxSlope)
+                {
+                    return false;
+                }
             }
-            else if (data.CellType.HasFlag(CellType.GROUND))
+            // check for terrain type constraint
+            if(buildingContraints.CellTypes != default)
             {
-                return buildingCellType.HasFlag(CellType.GROUND) && data.Slope <= maxSlopeAngle;
+                if (!buildingContraints.CellTypes.HasFlag(data.CellType))
+                {
+                    return false;
+                }
             }
-            else
+
+            if (buildingContraints.ElevationConstraint != default)
             {
-                GD.Print($"Unknown cell type: {data.CellType} of cell {cell}");
-                return false;
+                if(!buildingContraints.ElevationConstraint(baseCellData.Height, data.Height))
+                {
+                    return false;
+                }
             }
+
+
+
+            return true;
+
+            //if (data.CellType.HasFlag(CellType.WATER))
+            //{
+            //    return buildingContraints.CellTypes.HasFlag(CellType.WATER);
+            //}
+            //else if (data.CellType.HasFlag(CellType.GROUND))
+            //{
+            //    return buildingContraints.CellTypes.HasFlag(CellType.GROUND) && data.Slope <= buildingContraints.MaxSlope;
+            //}
+            //else
+            //{
+            //    GD.Print($"Unknown cell type: {data.CellType} of cell {cell}");
+            //    return false;
+            //}
         }
         private Vector2I GetHoveredCell()
         {

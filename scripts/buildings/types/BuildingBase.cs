@@ -43,7 +43,7 @@ namespace SacaSimulationGame.scripts.buildings
         public bool BuildingCompleted { get; set; } = false;
         private float _currentBuildingProgress = 0;
         public double CurrentBuildingProgress { get; set; }
-        public BuildingResources BuildingResources { get; protected set; }
+        public IBuildingResources BuildingResources { get; protected set; }
 
         public void RotateBuilding(BuildingRotation rotation)
         {

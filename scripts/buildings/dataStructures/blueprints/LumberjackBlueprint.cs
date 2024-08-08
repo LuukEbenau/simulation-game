@@ -11,18 +11,16 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
     public class LumberjackBlueprint : BuildingBlueprintBase
     {
         public override BuildingType Type => BuildingType.Stockpile;
-        public override CellType[,] Shape { get; }
-        public override float MaxSlopeAngle { get; }
+        public override BuildingContraints[,] CellConstraints { get; }
         public override SelectionMode SelectionMode => SelectionMode.Single;
         public LumberjackBlueprint()
         {
-
-            Shape = new CellType[2, 2]
+            var c = new BuildingContraints { CellTypes = CellType.GROUND, MaxSlope = 10f };
+            CellConstraints = new BuildingContraints[2, 2]
             {
-                { CellType.GROUND, CellType.GROUND},
-                { CellType.GROUND, CellType.GROUND}
+                { c, c},
+                { c, c},
             };
-            MaxSlopeAngle = 15f;
         }
     }
 }

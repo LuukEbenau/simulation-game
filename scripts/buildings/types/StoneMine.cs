@@ -9,12 +9,12 @@ using SacaSimulationGame.scripts.units.professions.misc;
 
 namespace SacaSimulationGame.scripts.buildings
 {
-    public partial class Lumberjack : StorageBuildingBase
+    public partial class StoneMine : StorageBuildingBase
     {
         public override int MaxBuilders => 2;
-        public override double TotalBuildingProgressNeeded => 5;
+        public override double TotalBuildingProgressNeeded => 20;
         public override bool IsResourceStorage => false;
-    
+
         public override BuildingType Type => BuildingType.Lumberjack;
         public override void _Ready()
         {
@@ -37,7 +37,7 @@ namespace SacaSimulationGame.scripts.buildings
             if (this.BuildingCompleted)
             {
                 //temporary: passive income
-                var currentResource = ResourceType.Wood;
+                var currentResource = ResourceType.Stone;
 
                 StoredResources.AddResource(currentResource, (float)delta);
             }
@@ -45,7 +45,7 @@ namespace SacaSimulationGame.scripts.buildings
 
         protected override void UpdateVisualBasedOnResources()
         {
-            
+
         }
     }
 }
