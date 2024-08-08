@@ -30,22 +30,27 @@ namespace SacaSimulationGame.scripts.naturalResources
 
         private void UpdateResourceVisual()
         {
-            Node3D model = null; 
-            if(this.ResourceStorage.GetStorageSpaceLeft(ResourceType.Wood) > 0)
-            {
-                if (CurrentResourceVisualScene == null || CurrentResourceVisualScene != TreeModelFelled)
-                {
-                    CurrentResourceVisualScene = TreeModelFelled;
-                    model = TreeModelFelled.Instantiate<Node3D>();
-                }
-            }
-            else
+            Node3D model = null;
+            if (this.ResourceStorage.GetStorageSpaceLeft(ResourceType.Wood) == 0)
             {
                 if (CurrentResourceVisualScene == null || CurrentResourceVisualScene != TreeModel)
                 {
                     CurrentResourceVisualScene = TreeModel;
                     model = TreeModel.Instantiate<Node3D>();
                 }
+            }
+            else if (this.ResourceStorage.CurrentCapacity == 0) {
+                // resource is empty, and has to be removed
+                this.NaturalResourceManager.RemoveResource(this);
+            }
+            else
+            {
+                if (CurrentResourceVisualScene == null || CurrentResourceVisualScene != TreeModelFelled)
+                {
+                    CurrentResourceVisualScene = TreeModelFelled;
+                    model = TreeModelFelled.Instantiate<Node3D>();
+                }
+                
             }
 
             if (model != null)

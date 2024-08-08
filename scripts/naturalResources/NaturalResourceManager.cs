@@ -26,6 +26,17 @@ namespace SacaSimulationGame.scripts.managers
             GameManager = GetParent<GameManager>();
         }
 
+        public bool RemoveResource(NaturalResource resource)
+        {
+            if (NaturalResources.Remove(resource))
+            {
+                RemoveChild(resource);
+                return true;
+            }
+
+            return false;
+        }
+
         public bool AddResource(Vector3 position, NaturalResourceType type) {
             if (type == NaturalResourceType.Tree) {
                 var instance = TreeModel.Instantiate<TreeResource>();
@@ -33,6 +44,7 @@ namespace SacaSimulationGame.scripts.managers
                 AddChild(instance);
 
                 instance.GlobalPosition = position;
+                instance.NaturalResourceManager = this;
                 //TODO: something with the cells, so that we can prevent multiple resources on same cell, or resources on top of buildings, etc.
                 NaturalResources.Add(instance);
                 return true;

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Godot;
 using SacaSimulationGame.scripts.buildings.storages;
+using SacaSimulationGame.scripts.managers;
 using SacaSimulationGame.scripts.naturalResources.instances;
 
 namespace SacaSimulationGame.scripts.naturalResources
@@ -13,6 +14,9 @@ namespace SacaSimulationGame.scripts.naturalResources
     {
         protected StorageBase ResourceStorage { get; set; }
         protected Node3D VisualWrap { get; set; }
+
+
+        public NaturalResourceManager NaturalResourceManager { get; set; }
         public override void _Ready()
         {
             base._Ready();
