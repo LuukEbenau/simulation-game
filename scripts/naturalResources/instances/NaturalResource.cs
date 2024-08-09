@@ -15,7 +15,7 @@ namespace SacaSimulationGame.scripts.naturalResources
         protected StorageBase ResourceStorage { get; set; }
         protected Node3D VisualWrap { get; set; }
 
-
+        public Vector2I Cell { get; set; }
         public NaturalResourceManager NaturalResourceManager { get; set; }
         public override void _Ready()
         {

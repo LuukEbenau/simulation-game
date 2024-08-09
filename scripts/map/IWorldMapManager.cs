@@ -18,7 +18,7 @@ namespace SacaSimulationGame.scripts.map
         AstarPathfinder Pathfinder { get; }
         Node3D Terrain { get; set; }
         TerrainMapper TerrainMapper { get; set; }
-
+        CellOccupationData GetCellOccupation(Vector2I cell);
         bool CellInsideBounds(Vector2I cell);
         Vector3 CellToWorld(Vector2I cell, float height = 0, bool centered = false);
         Vector3 CellToWorldInterpolated(Vector2 cell, float height = 0);

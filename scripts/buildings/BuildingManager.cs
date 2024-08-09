@@ -147,7 +147,7 @@ namespace SacaSimulationGame.scripts.managers
                     {
                         // just single building
                         var cells = CheckBuildingBuildable(lastHoveredCell, selectedBuilding);
-                        if (cells.All(b => b.isBuildable))
+                        if (cells.All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
                         {
                             foreach (var cell in cells)
                             {
@@ -170,7 +170,7 @@ namespace SacaSimulationGame.scripts.managers
                                 }
                             }
                             //if any of the cells in the path is obstructed, the path is not possible
-                            if (!CheckBuildingBuildable(pathCell.Cell, selectedBuilding).All(b => b.isBuildable))
+                            if (!CheckBuildingBuildable(pathCell.Cell, selectedBuilding).All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
                             {
                                 isPathBuildable = false;
                             }
@@ -202,7 +202,7 @@ namespace SacaSimulationGame.scripts.managers
             {
                 if (@event.IsActionPressed("Build"))
                 {
-                    if (CheckBuildingBuildable(lastHoveredCell, selectedBuilding).All(b => b.isBuildable))
+                    if (CheckBuildingBuildable(lastHoveredCell, selectedBuilding).All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
                     {
                         // Build building
                         if (selectedBuilding.SelectionMode == SelectionMode.Single)

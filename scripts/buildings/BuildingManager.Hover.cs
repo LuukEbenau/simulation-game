@@ -51,7 +51,7 @@ namespace SacaSimulationGame.scripts.managers
                                 {
                                     SelectionPath = this.MapManager.Pathfinder.FindPath(SelectionPathStart, lastHoveredCell, maxIterationCount: 500);
                                 }
-                                var cellsToVisualise = new List<(Vector2I cell, MapDataItem cellData, bool isBuildable)>();
+                                var cellsToVisualise = new List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)>();
                                 foreach (var pathCell in SelectionPath)
                                 {
                                     // If type of building is the same, and selectionType is not Single, instead of coloring red we are just going to skip the building
@@ -82,7 +82,7 @@ namespace SacaSimulationGame.scripts.managers
                         }
                         else
                         {
-                            throw new System.Exception($"Selectionmode {selectedBuilding.SelectionMode} not implemented");
+                            throw new Exception($"Selectionmode {selectedBuilding.SelectionMode} not implemented");
                         }
                     }
                 }
@@ -95,7 +95,7 @@ namespace SacaSimulationGame.scripts.managers
             VisualiseBuildableCells(CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover: true));
         }
 
-        private void VisualiseBuildableCells(List<(Vector2I cell, MapDataItem cellData, bool isBuildable)> celldata)
+        private void VisualiseBuildableCells(List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)> celldata)
         {
             for(int i = 0; i < celldata.Count;i++)
             {
@@ -104,13 +104,13 @@ namespace SacaSimulationGame.scripts.managers
             }
         }
 
-        private List<(Vector2I cell, MapDataItem cellData, bool isBuildable)> CheckBuildingBuildable(Vector2I cell, BuildingBlueprintBase blueprint, bool visualiseHover = false)
+        private List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)> CheckBuildingBuildable(Vector2I cell, BuildingBlueprintBase blueprint, bool visualiseHover = false)
         {
             bool buildingBuildable = true;
             int shapeWidth = blueprint.CellConstraints.GetLength(0);
             int shapeLength = blueprint.CellConstraints.GetLength(1);
 
-            List<(Vector2I cell, MapDataItem cellData, bool isBuildable)> celldata = [];
+            List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)> celldata = [];
 
             MapDataItem baseCellData = null;
             for (int x = 0; x < shapeWidth; x++)
@@ -126,8 +126,8 @@ namespace SacaSimulationGame.scripts.managers
                             baseCellData = data;
                         }
 
-                        bool cellBuildable = IsCellBuildable(data, blueprint, x, y, cellShifted, baseCellData);
-                        buildingBuildable &= cellBuildable;
+                        BuildabilityStatus cellBuildable = IsCellBuildable(data, blueprint, x, y, cellShifted, baseCellData);
+                        buildingBuildable &= cellBuildable != BuildabilityStatus.BLOCKED;
 
                         celldata.Add((cellShifted,data,cellBuildable));
 
@@ -141,23 +141,30 @@ namespace SacaSimulationGame.scripts.managers
             return celldata;
         }
 
-        private bool IsCellBuildable(MapDataItem data, BuildingBlueprintBase blueprint, int shapeX, int shapeY, Vector2I cell, MapDataItem baseCellData)
+        private enum BuildabilityStatus
+        {
+            FREE = 1,
+            PARTIAL = 2,
+            BLOCKED = 3
+        }
+
+        private BuildabilityStatus IsCellBuildable(MapDataItem data, BuildingBlueprintBase blueprint, int shapeX, int shapeY, Vector2I cell, MapDataItem baseCellData)
         {
             var buildingContraints = blueprint.CellConstraints[shapeX, shapeY];
 
             // check for obstacles
-            var cellOccupied = this.OccupiedCells[cell.X, cell.Y].Id > 0;
-            if (cellOccupied)
+            var cellOccupation = MapManager.GetCellOccupation(cell);    
+            if (cellOccupation.Building)
             {
-                return false;
+                return BuildabilityStatus.BLOCKED;
             }
 
             //check for slope constraint
-            if(buildingContraints.MaxSlope != default)
+            if (buildingContraints.MaxSlope != default)
             {
                 if(data.Slope > buildingContraints.MaxSlope)
                 {
-                    return false;
+                    return BuildabilityStatus.BLOCKED;
                 }
             }
             // check for terrain type constraint
@@ -165,7 +172,7 @@ namespace SacaSimulationGame.scripts.managers
             {
                 if (!buildingContraints.CellTypes.HasFlag(data.CellType))
                 {
-                    return false;
+                    return BuildabilityStatus.BLOCKED;
                 }
             }
 
@@ -173,27 +180,17 @@ namespace SacaSimulationGame.scripts.managers
             {
                 if(!buildingContraints.ElevationConstraint(baseCellData.Height, data.Height))
                 {
-                    return false;
+                    return BuildabilityStatus.BLOCKED;
                 }
             }
 
+            // If natural resource, its partially free
+            if (cellOccupation.NaturalResource)
+            {
+                return BuildabilityStatus.PARTIAL;
+            }
 
-
-            return true;
-
-            //if (data.CellType.HasFlag(CellType.WATER))
-            //{
-            //    return buildingContraints.CellTypes.HasFlag(CellType.WATER);
-            //}
-            //else if (data.CellType.HasFlag(CellType.GROUND))
-            //{
-            //    return buildingContraints.CellTypes.HasFlag(CellType.GROUND) && data.Slope <= buildingContraints.MaxSlope;
-            //}
-            //else
-            //{
-            //    GD.Print($"Unknown cell type: {data.CellType} of cell {cell}");
-            //    return false;
-            //}
+            return BuildabilityStatus.FREE;
         }
         private Vector2I GetHoveredCell()
         {
@@ -271,9 +268,16 @@ namespace SacaSimulationGame.scripts.managers
                 indicator.Visible = false;
             }
         }
-        private void VisualizeCell(int meshInstanceIndex, Vector2I cellShifted, MapDataItem data, bool cellBuildable)
+        private void VisualizeCell(int meshInstanceIndex, Vector2I cellShifted, MapDataItem data, BuildabilityStatus cellBuildable)
         {
-            var color = cellBuildable ? new Color(0, 1, 0) : new Color(1, 0, 0);
+            Color color = cellBuildable switch
+            {
+                BuildabilityStatus.FREE => new Color(0, 1, 0),
+                BuildabilityStatus.PARTIAL => new Color(1, 1, 0),
+                BuildabilityStatus.BLOCKED => new Color(1, 0, 0),
+                _ => new Color(1, 1, 1)
+            };
+
             Vector3 worldPos3d = MapManager.CellToWorld(cellShifted, data.Height + 0.4f, centered:true);
 
             var hoverIndicatorMesh = GetHoverIndicator(meshInstanceIndex, MapManager.CellSize);

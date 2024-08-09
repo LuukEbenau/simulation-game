@@ -200,14 +200,21 @@ namespace SacaSimulationGame.scripts.units.professions
 
         BehaviourStatus FindSuitablePlantingLocation(UnitBTContext context)
         {
-            var rand = new Random();
+            int maxtries = 40;
+            for (int i = 0; i < maxtries; i++) {
+                var rand = new Random();
+                var dir = new Vector3(rand.Next(-20, 20), 0, rand.Next(-20, 20));
+                var newPos = Unit.GlobalPosition + dir;
 
-            var dir = new Vector3(rand.Next(-20, 20), 0, rand.Next(-20, 20));
+                var cell = Unit.MapManager.WorldToCell(newPos);
+                if (!this.Unit.MapManager.GetCellOccupation(cell).IsOccupied)
+                {
+                    context.Destination = newPos;
+                    return BehaviourStatus.Succeeded;
+                }
+            }
 
-            var newPos = Unit.GlobalPosition + dir;
-
-            context.Destination = newPos;
-            return BehaviourStatus.Succeeded;
+            return BehaviourStatus.Failed;
         }
     }
 }

@@ -1,4 +1,5 @@
 using Godot;
+using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.map;
 using SacaSimulationGame.scripts.pathfinding;
 using System;
@@ -7,6 +8,14 @@ using System.Linq;
 using Windows.Services.Maps;
 namespace SacaSimulationGame.scripts.managers
 {
+
+    public struct CellOccupationData
+    {
+        public bool Unit;
+        public bool NaturalResource;
+        public bool Building;
+        public bool IsOccupied => Unit || NaturalResource || Building;
+    }
     public partial class WorldMapManager : Node3D, IWorldMapManager
     {
         [Export]
@@ -89,6 +98,22 @@ namespace SacaSimulationGame.scripts.managers
 
         public GameManager GameManager { get; private set; }
         public AstarPathfinder Pathfinder { get; private set; }
+
+
+        /// <summary>
+        /// Gets whether a cell is occupied by any unit
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns></returns>
+        public CellOccupationData GetCellOccupation(Vector2I cell)
+        {
+            return new CellOccupationData
+            {
+                Building = this.GameManager.BuildingManager.OccupiedCells[cell.X, cell.Y].Type != BuildingType.None,
+                NaturalResource = this.GameManager.NaturalResourceManager.OccupiedCells[cell.X, cell.Y]
+            };
+        }
+
 
 
         #region cell mapping to world
