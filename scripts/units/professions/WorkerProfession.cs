@@ -366,6 +366,8 @@ namespace SacaSimulationGame.scripts.units.professions
                 }
             }
 
+            context.Building.IsUnreachableCounter = 0;
+
             return BehaviourStatus.Succeeded;
         }
         #endregion

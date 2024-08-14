@@ -22,10 +22,12 @@ namespace SacaSimulationGame.scripts.managers
 
         private readonly float _buildingHeight = 0.25f;
 
-        public struct BuildingTypeIdPair(int id, BuildingType type)
+        public struct BuildingTypeIdPair(int id, BuildingType type, BuildingBase building)
         {
             public int Id = id;
             public BuildingType Type = type;
+            public BuildingBase Building = building;
+            public bool BuildingCompleted => Building == null ? false : Building.BuildingCompleted;
         }
 
         private readonly Vector2I _defaultVec = new(int.MinValue, int.MinValue);
@@ -303,7 +305,13 @@ namespace SacaSimulationGame.scripts.managers
             }
 
 
-            buildingDataObject.OccupiedCells = CalculateOccupiedCellsByBuilding(buildingBlueprint, cell, buildingDataObject.Id);
+            buildingDataObject.OccupiedCells = CalculateOccupiedCellsByBuilding(buildingBlueprint, cell);
+
+            foreach(var occupiedCell in buildingDataObject.OccupiedCells)
+            {
+                //TODO: this overwrites a potential other building in case something goes wrong in the code. Better would be to have a seperate function with build in checks
+                this.OccupiedCells[occupiedCell.X, occupiedCell.Y] = new BuildingTypeIdPair(buildingDataObject.Id, buildingBlueprint.Type, buildingInstance);
+            }
 
             this.buildingData[dummyPlayer]
                 .Add(buildingDataObject);
@@ -352,7 +360,7 @@ namespace SacaSimulationGame.scripts.managers
         /// <param name="cell"></param>
         /// <param name="buildingId"></param>
         /// <returns></returns>
-        private List<Vector2I> CalculateOccupiedCellsByBuilding(BuildingBlueprintBase building, Vector2I cell, int buildingId)
+        private List<Vector2I> CalculateOccupiedCellsByBuilding(BuildingBlueprintBase building, Vector2I cell)
         {
             //// KEEP TRACK OF Building
             var occupiedCellsByBuilding = new List<Vector2I>();
@@ -369,8 +377,6 @@ namespace SacaSimulationGame.scripts.managers
                     //
 
                     occupiedCellsByBuilding.Add(cellPos);
-
-                    this.OccupiedCells[cellPos.X, cellPos.Y] = new BuildingTypeIdPair(buildingId, building.Type);
                 }
             }
 

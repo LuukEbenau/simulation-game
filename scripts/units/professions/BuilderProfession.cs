@@ -20,7 +20,7 @@ namespace SacaSimulationGame.scripts.units.professions
         protected override BuildingType ProfessionBuildingType => BuildingType.None;
         protected override float ActivitySpeedBaseline => 3;
 
-        private readonly float _waittimeUntilBuildingTimeout = 8;
+        private readonly float _waittimeUntilBuildingTimeout = 15;
         protected override IBehaviour<UnitBTContext> GetBehaviourTree()
         {
             return FluentBuilder.Create<UnitBTContext>()
@@ -44,15 +44,6 @@ namespace SacaSimulationGame.scripts.units.professions
                 .OrderBy(t => t.Building.IsUnreachableCounter)
                 .ThenByDescending(t => t.Building.Instance.BuildingResources.PercentageResourcesAquired - t.Building.Instance.BuildingPercentageComplete)
                 .ThenBy(t => t.Building.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition));
-
-
-            //var buildingsOrdered = from b in Unit.BuildingManager.GetBuildings()
-            //        where !b.Instance.BuildingCompleted
-            //        orderby b.IsUnreachableCounter ascending,
-            //                b.Instance.BuildingResources.PercentageResourcesAquired - b.Instance.BuildingPercentageComplete
-            //                descending,
-            //                b.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition) ascending
-            //        select b;
 
             BuildBuildingTask targetTask = null;
             foreach (var task in buildingTasks)
@@ -102,6 +93,7 @@ namespace SacaSimulationGame.scripts.units.professions
             else
             {
                 context.WaitingTime = 0;
+                t.Building.IsUnreachableCounter = 0;
                 var finished = t.Building.Instance.AddBuildingProgress(context.Delta * GetActivitySpeedCoefficient());
 
                 if (finished)

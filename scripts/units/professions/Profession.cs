@@ -139,9 +139,12 @@ namespace SacaSimulationGame.scripts.units.professions
 
             PathfindingNode3D targetNode = context.Path[context.CurrentPathIndex];
             var direction = (targetNode.Position - Unit.GlobalPosition).Normalized();
-            var movement = direction * Unit.Stats.Speed * (float)context.Delta * targetNode.SpeedMultiplier;
 
-            if (Unit.GlobalPosition.DistanceTo(targetNode.Position) > movement.Length())
+            float groundSurfaceSpeedMultiplier = context.CurrentPathIndex == 0 ? targetNode.SpeedMultiplier : context.Path[context.CurrentPathIndex - 1].SpeedMultiplier;
+
+            var movement = direction * Unit.Stats.Speed * (float)context.Delta * groundSurfaceSpeedMultiplier;
+
+            if (Unit.GlobalPosition.DistanceTo(targetNode.Position) > movement.Length() * 5)
             {
                 Unit.GlobalTranslate(movement);
             }

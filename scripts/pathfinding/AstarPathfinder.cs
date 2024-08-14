@@ -53,8 +53,7 @@ namespace SacaSimulationGame.scripts.pathfinding
                 openSet.Remove(openSet.Min);
                 foreach (var neighbor in GetNeighbors(current.Cell))
                 {
-                    // low is good, big is bad
-                    float cellSpeedMultiplier = 1.0f;
+                    float cellSpeedMultiplier = 1.0f; // low is good, big is bad
 
                     // if neighbor is the destination, we can exit
                     if (neighbor == goal)
@@ -67,28 +66,38 @@ namespace SacaSimulationGame.scripts.pathfinding
                         cameFrom[neighborNode] = current;
                         return ReconstructPath(cameFrom, neighborNode);
                     }
-                    else if (!gameManager.MapManager.TryGetCell(neighbor, out var neighborData) || neighborData.CellType != traversableTerrainType)
+                    var cellExists = gameManager.MapManager.TryGetCell(neighbor, out var neighborData);
+                    if (!cellExists)
+                    {
                         continue;
+                    }
 
+                    var obstacleAtCell = gameManager.BuildingManager.OccupiedCells[neighbor.X, neighbor.Y];
 
-
-                    var cellObstacleType = gameManager.BuildingManager.OccupiedCells[neighbor.X, neighbor.Y];
+                    if (neighborData.CellType != traversableTerrainType)
+                    {
+                        if (traversableTerrainType.HasFlag(CellType.GROUND) && obstacleAtCell.BuildingCompleted && obstacleAtCell.Type == BuildingType.Bridge) { 
+                            // its a bridge, so its traversable
+                            //TODO: only bridges which are finished
+                        }
+                        else continue; // its not traversable terrain
+                        //TODO: if its a bridge, it would be traversable for example
+                    }
+    
                     //TODO: only apply speed bonus after road is finished
                     //TODO: this is kind of inefficient, since we are calculating this multiple times for a neighbor. better would be to do this only once per neighbor.
                     //TODO:
-                    if (cellObstacleType.Type != BuildingType.None)
+                    if (obstacleAtCell.BuildingCompleted)
                     {
-                        if (BuildingType.ObstacleBuildings.HasFlag(cellObstacleType.Type)) { 
+                        if (BuildingType.ObstacleBuildings.HasFlag(obstacleAtCell.Type)) { 
                             continue; 
                         }
 
-                        if (cellObstacleType.Type.HasFlag(BuildingType.Road))
+                        if ((obstacleAtCell.Type & (BuildingType.Road|BuildingType.Bridge)) > 0 )
                         {
-                            
                             cellSpeedMultiplier = roadSpeedMultiplier;
                         }
                     }
-
 
                     float tentativeGScore = gScore[current.Cell] + (Distance(current.Cell, neighbor) * cellSpeedMultiplier * pathScoreCoefficient);
                     if (!gScore.TryGetValue(neighbor, out float value) || tentativeGScore < value)
