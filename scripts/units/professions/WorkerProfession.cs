@@ -131,6 +131,8 @@ namespace SacaSimulationGame.scripts.units.professions
 
         public BehaviourStatus FindResourcePickupPoint(UnitBTContext context)
         {
+            
+
             // Higher is better
             float buildingWithBestResourcesConstraint(StorageBuildingBase storageBuilding)
             {
@@ -159,8 +161,8 @@ namespace SacaSimulationGame.scripts.units.professions
             var closestResourceDeposit = this.Unit.BuildingManager.GetBuildings()
                 .Where(b => b.Instance.IsResourceStorage)
                 .Where(b => ((b.Instance as StorageBuildingBase).StoredResources.TypesOfResourcesStored & context.Building.Instance.BuildingResources.TypesOfResourcesRequired) > 0)
-                //.OrderBy(b => b.IsUnreachableCounter) //TODO: make this task based too
-                .OrderByDescending(b => buildingWithBestResourcesConstraint(b.Instance as StorageBuildingBase))
+                .OrderBy(b => b.IsUnreachableCounter) //TODO: make this task based too
+                .ThenByDescending(b => buildingWithBestResourcesConstraint(b.Instance as StorageBuildingBase))
                 .FirstOrDefault();
 
             if (closestResourceDeposit == null)
@@ -268,7 +270,6 @@ namespace SacaSimulationGame.scripts.units.professions
             return storageEfficientyValue / distance;
         }
 
-        //private static readonly ResourceType[] _possibleResourceTypes = [ResourceType.Wood, ResourceType.Stone];//Enum.GetValues(typeof(ResourceType)).Cast<ResourceType>().Where(r=>r != ResourceType.None).ToArray();
         public BehaviourStatus DepositResourcesAtResourceStore(UnitBTContext context)
         {
             var building = context.ResourceStorageBuilding;

@@ -158,17 +158,17 @@ namespace SacaSimulationGame.scripts.units.professions
             return BehaviourStatus.Running;
         }
 
-        private BehaviourStatus IsInBuildingDistance(UnitBTContext context)
-        {
-            var buildingPos = Unit.GameManager.MapManager.CellToWorld(context.Building.Instance.Cell, centered: true);
+        //private BehaviourStatus IsInBuildingDistance(UnitBTContext context)
+        //{
+        //    var buildingPos = Unit.GameManager.MapManager.CellToWorld(context.Building.Instance.Cell, centered: true);
 
-            if (Unit.GlobalPosition.DistanceTo(buildingPos) <= 1.0)
-            {
-                return BehaviourStatus.Succeeded;
-            }
+        //    if (Unit.GlobalPosition.DistanceTo(buildingPos) <= 1.0)
+        //    {
+        //        return BehaviourStatus.Succeeded;
+        //    }
 
-            return BehaviourStatus.Failed;
-        }
+        //    return BehaviourStatus.Failed;
+        //}
 
 
         #region resource gathering

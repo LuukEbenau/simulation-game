@@ -15,25 +15,22 @@ namespace SacaSimulationGame.scripts.units.professions.misc
 {
     public class UnitBTContext
     {
+        /// <summary>
+        /// Delta Time
+        /// </summary>
         public double Delta { get; set; }
 
         public UnitTask AssignedTask { get; set; }
+        public BuildingDataObject Building { get; set; }
+        public StorageBuildingBase ResourceStorageBuilding { get; set; }
 
         public Vector3 Destination { get; set; }
-        public BuildingDataObject Building { get; set; }
-
-        //public StorageBuildingBase ResourceStorageTarget { get; set; }
-
         public int CurrentPathIndex { get; set; }
         public List<PathfindingNode3D> Path { get; set; }
 
-        public double WaitingTime { get; set; } = 0;
-
-        public StorageBuildingBase ResourceStorageBuilding { get; set; }
-
         /// <summary>
-        /// Assigned resource for the unit, for example trees of lumberjacks
+        /// When the unit has to idle, this is the counter of how long it has been idling
         /// </summary>
-        //public INaturalResource AssignedResource { get; set; }
+        public double WaitingTime { get; set; } = 0;
     }
 }
