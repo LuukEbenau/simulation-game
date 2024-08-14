@@ -16,9 +16,9 @@ namespace SacaSimulationGame.scripts.buildings
         Stockpile = 8,
         Lumberjack = 16,
         Bridge = 32,
-
+        StoneMine = 64,
 
         //groups can be defined here
-        ObstacleBuildings = House | FishingPost
+        ObstacleBuildings = House | FishingPost | Lumberjack | StoneMine
     }
 }

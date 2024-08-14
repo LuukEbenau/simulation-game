@@ -14,9 +14,28 @@ namespace SacaSimulationGame.scripts.pathfinding
     public class AstarPathfinder(GameManager gameManager)
     {
         private readonly float roadSpeedMultiplier = 0.5f;
+        private const float obstructedTerrainMultiplier = 1.5f;
 
         private readonly float heuristicCoefficient = 0.5f;
         private readonly float pathScoreCoefficient = 1f;
+
+        private float GetSpeedAtCell(BuildingManager.BuildingTypeIdPair buildingType)
+        {
+            if (buildingType.BuildingCompleted)
+            {
+                //if((buildingType.Type & BuildingType.Stockpile) > 0)
+                //{
+                //    return obstructedTerrainMultiplier;
+                //}
+                if ((buildingType.Type & (BuildingType.Road | BuildingType.Bridge)) > 0)
+                {
+                    return roadSpeedMultiplier;
+                }
+            }
+
+            return 1.0f;
+        }
+
 
         /// <summary>
         /// 
@@ -26,9 +45,12 @@ namespace SacaSimulationGame.scripts.pathfinding
         /// <param name="traversableTerrainType">the types of terrain which are traversable by this path</param>
         /// <param name="maxIterationCount">maximum amount of explored cells before canceling</param>
         /// <returns></returns>
-        public List<PathfindingNodeGrid> FindPath(Vector2I start, Vector2I goal, CellType traversableTerrainType = CellType.GROUND, int maxIterationCount = 500)
+        public List<PathfindingNodeGrid> FindPath(Vector2I start, Vector2I goal, CellType traversableTerrainType = CellType.GROUND, BuildingType obstacleBuildings = BuildingType.ObstacleBuildings, int maxIterationCount = 500)
         {
-            var startNode = new PathfindingNodeGrid(start, 1.0f);
+            var startCellObstacle = gameManager.BuildingManager.OccupiedCells[start.X, start.Y];
+            var startCellSpeed = GetSpeedAtCell(startCellObstacle);
+            var startNode = new PathfindingNodeGrid(start, startCellSpeed);
+
             var goalNode = new PathfindingNodeGrid(start, 1.0f);
 
             var openSet = new SortedSet<(float cost, PathfindingNodeGrid node)>(new NodeComparer());
@@ -53,19 +75,9 @@ namespace SacaSimulationGame.scripts.pathfinding
                 openSet.Remove(openSet.Min);
                 foreach (var neighbor in GetNeighbors(current.Cell))
                 {
-                    float cellSpeedMultiplier = 1.0f; // low is good, big is bad
+                    //float cellSpeedMultiplier = 1.0f; // low is good, big is bad
 
-                    // if neighbor is the destination, we can exit
-                    if (neighbor == goal)
-                    {
-                        //if its the goal, we exit directly. Otherwise, pathfinding will never find a path since the building is considered a obstacle
-                        //TODO: this is a hacky approach, we need to find something better in the future. For example, if a building would be 3x3 and the target cell coordinate is the middle one, it will still crash in this case
-                        //TODO: we might be able to make a* with a collection of goal cells, so that it stops if it hits any of the building cells
-                        //TODO: make building blueprints passable until its actually being build.
-                        var neighborNode = new PathfindingNodeGrid(neighbor, 1f / cellSpeedMultiplier);
-                        cameFrom[neighborNode] = current;
-                        return ReconstructPath(cameFrom, neighborNode);
-                    }
+
                     var cellExists = gameManager.MapManager.TryGetCell(neighbor, out var neighborData);
                     if (!cellExists)
                     {
@@ -73,6 +85,18 @@ namespace SacaSimulationGame.scripts.pathfinding
                     }
 
                     var obstacleAtCell = gameManager.BuildingManager.OccupiedCells[neighbor.X, neighbor.Y];
+
+                    // if neighbor is the destination, we can exit
+                    if (neighbor == goal)
+                    {
+                        //if its the goal, we exit directly. Otherwise, pathfinding will never find a path since the building is considered a obstacle
+                        //TODO: we might be able to make a* with a collection of goal cells, so that it stops if it hits any of the building cells
+                        //TODO: make building blueprints passable until its actually being build.
+                        var neighborNode = new PathfindingNodeGrid(neighbor, 1f / GetSpeedAtCell(obstacleAtCell));
+                        cameFrom[neighborNode] = current;
+                        return ReconstructPath(cameFrom, neighborNode);
+                    }
+
 
                     if (neighborData.CellType != traversableTerrainType)
                     {
@@ -83,21 +107,13 @@ namespace SacaSimulationGame.scripts.pathfinding
                         else continue; // its not traversable terrain
                         //TODO: if its a bridge, it would be traversable for example
                     }
-    
-                    //TODO: only apply speed bonus after road is finished
-                    //TODO: this is kind of inefficient, since we are calculating this multiple times for a neighbor. better would be to do this only once per neighbor.
-                    //TODO:
-                    if (obstacleAtCell.BuildingCompleted)
-                    {
-                        if (BuildingType.ObstacleBuildings.HasFlag(obstacleAtCell.Type)) { 
-                            continue; 
-                        }
 
-                        if ((obstacleAtCell.Type & (BuildingType.Road|BuildingType.Bridge)) > 0 )
-                        {
-                            cellSpeedMultiplier = roadSpeedMultiplier;
-                        }
+                    if ((obstacleAtCell.Type & obstacleBuildings) > 0)
+                    {
+                        continue;
                     }
+
+                    var cellSpeedMultiplier = GetSpeedAtCell(obstacleAtCell);
 
                     float tentativeGScore = gScore[current.Cell] + (Distance(current.Cell, neighbor) * cellSpeedMultiplier * pathScoreCoefficient);
                     if (!gScore.TryGetValue(neighbor, out float value) || tentativeGScore < value)

@@ -1,4 +1,5 @@
 ﻿using Godot;
+using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.dataStructures.blueprints;
 using SacaSimulationGame.scripts.map;
 using SacaSimulationGame.scripts.pathfinding;
@@ -14,8 +15,6 @@ namespace SacaSimulationGame.scripts.managers
         private double timeElapsedSinceLastHoverUpdate = 0;
         private double hoverIndicatorUpdateInterval = 1 / 60;
         private Vector2I lastHoveredCell = default;
-
-
 
         private void HandleHoverBehaviour(double delta)
         {
@@ -49,7 +48,10 @@ namespace SacaSimulationGame.scripts.managers
                                 }
                                 else
                                 {
-                                    SelectionPath = this.MapManager.Pathfinder.FindPath(SelectionPathStart, lastHoveredCell, maxIterationCount: 500);
+                                    SelectionPath = this.MapManager.Pathfinder.FindPath(SelectionPathStart, lastHoveredCell,
+                                        traversableTerrainType:CellType.GROUND, 
+                                        obstacleBuildings: BuildingType.ObstacleBuildings | BuildingType.Stockpile,
+                                        maxIterationCount: 400);
                                 }
                                 var cellsToVisualise = new List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)>();
                                 foreach (var pathCell in SelectionPath)
