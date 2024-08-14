@@ -6,6 +6,7 @@ using SacaSimulationGame.scripts.map;
 using SacaSimulationGame.scripts.units;
 using SacaSimulationGame.scripts.units.dataObjects;
 using SacaSimulationGame.scripts.units.professions.misc;
+using SacaSimulationGame.scripts.units.tasks;
 using System;
 using System.Linq;
 
@@ -16,7 +17,8 @@ namespace SacaSimulationGame.scripts.managers
         public IUnitManager UnitManager { get; set; }
         public IWorldMapManager MapManager { get; set; }
         public IBuildingManager BuildingManager { get; set; }
-        public NaturalResourceManager NaturalResourceManager { get; set; }
+        public ITaskManager TaskManager { get; set; }
+        public INaturalResourceManager NaturalResourceManager { get; set; }
         public Node3D SpawnLocation { get; private set; }
         // Called when the node enters the scene tree for the first time.
         public override void _Ready()
@@ -24,6 +26,7 @@ namespace SacaSimulationGame.scripts.managers
             UnitManager = GetNode<UnitManager>("UnitManager");
             MapManager = GetNode<WorldMapManager>("MapManager");
             BuildingManager = GetNode<BuildingManager>("BuildingManager");
+            TaskManager = GetNode<TaskManager>("TaskManager");
             NaturalResourceManager = GetNode<NaturalResourceManager>("NaturalResourceManager");
             this.SpawnLocation = GetNode<Node3D>("SpawnLocation");
             SpawnInitialVillage();
@@ -53,7 +56,7 @@ namespace SacaSimulationGame.scripts.managers
                 //spawnCell = MapManager.MapData.ElementAt(randI).Key;
                 //TODO: give randomness in the spawn location, now the loop doesnt do anything
                 var building = new HouseBlueprint { 
-                    Rotation = BuildingRotation.Bottom,
+                    Rotation = BuildingRotation.Right,
                     RequiresBuilding = false
                 };
 

@@ -30,7 +30,18 @@ namespace SacaSimulationGame.scripts.buildings
 
         public readonly int MaxNumberOfEmployees = 1;
         public List<Unit> WorkingEmployees { get; set; } = [];
-
+        public bool AddEmployee(Unit employee)
+        {
+            if (WorkingEmployees.Count < MaxNumberOfEmployees)
+            {
+                WorkingEmployees.Add(employee);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// The cell where the building is located

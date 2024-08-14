@@ -121,7 +121,7 @@ public partial class Stockpile : StorageBuildingBase
         if (nrOfIndicators > 0)
         {
             var currentStoredResources = StoredResources.GetResourcesOfType(StoredResources.TypesOfResourcesStored);
-            var maxStoredResources = StoredResources.GetStorageSpaceLeft(StoredResources.TypesOfResourcesStored);
+            var maxStoredResources = StoredResources.GetStorageCapacityLeft(StoredResources.TypesOfResourcesStored);
 
             
             var percentageFull = (currentStoredResources <= 0) ? 0 : currentStoredResources / (maxStoredResources + currentStoredResources);

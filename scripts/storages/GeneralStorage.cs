@@ -20,7 +20,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
 
         //public ResourceType StorableResources { get; } = storableResources;
 
-        public override float GetStorageSpaceLeft(ResourceType type)
+        public override float GetStorageCapacityLeft(ResourceType type)
         {
             return MaxCapacity - CurrentCapacity;
         }

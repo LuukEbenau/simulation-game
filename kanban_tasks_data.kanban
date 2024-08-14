@@ -11,24 +11,50 @@
 			"uuid": "f67225d6-b3c3-495f-aa41-80954e6c731c",
 			"title": "Todo",
 			"tasks": [
-				"956db413-2d5e-47ad-b07c-2ec47c85e1f1"
+				"dc8537da-71fa-4c83-9187-614ba1dd6b03",
+				"2e08afcf-6cdf-4a15-aec8-f464682cf304"
 			]
 		},
 		{
 			"uuid": "98056f71-81cd-4269-ace6-caccc676bc49",
 			"title": "Doing",
-			"tasks": []
+			"tasks": [
+				"d0123472-3989-45eb-bb49-ce4c4b0d965f"
+			]
 		},
 		{
 			"uuid": "aa92a743-3a1e-496f-a717-cfaa69aa39ed",
 			"title": "Done",
-			"tasks": []
+			"tasks": [
+				"956db413-2d5e-47ad-b07c-2ec47c85e1f1"
+			]
 		}
 	],
 	"tasks": [
 		{
 			"uuid": "956db413-2d5e-47ad-b07c-2ec47c85e1f1",
 			"title": "Behaviour trees",
+			"description": "",
+			"category": "c8ab7dbe-066e-4d6d-b8b6-d9ec63a05133",
+			"steps": []
+		},
+		{
+			"uuid": "dc8537da-71fa-4c83-9187-614ba1dd6b03",
+			"title": "UI for building",
+			"description": "",
+			"category": "c8ab7dbe-066e-4d6d-b8b6-d9ec63a05133",
+			"steps": []
+		},
+		{
+			"uuid": "2e08afcf-6cdf-4a15-aec8-f464682cf304",
+			"title": "Dynamic keybindings based on selected building",
+			"description": "",
+			"category": "c8ab7dbe-066e-4d6d-b8b6-d9ec63a05133",
+			"steps": []
+		},
+		{
+			"uuid": "d0123472-3989-45eb-bb49-ce4c4b0d965f",
+			"title": "Task system",
 			"description": "",
 			"category": "c8ab7dbe-066e-4d6d-b8b6-d9ec63a05133",
 			"steps": []

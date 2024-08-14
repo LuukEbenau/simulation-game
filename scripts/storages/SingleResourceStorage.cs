@@ -30,7 +30,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
             if (CurrentResourceStored == 0 || resourceType == CurrentResourceStored)
             {
                 CurrentResourceStored = resourceType;
-                if (amount < GetStorageSpaceLeft(resourceType))
+                if (amount < GetStorageCapacityLeft(resourceType))
                 {
                     base.AddResource(resourceType, amount);
 
@@ -38,8 +38,8 @@ namespace SacaSimulationGame.scripts.buildings.storages
                 }
                 else
                 {
-                    base.AddResource(resourceType, GetStorageSpaceLeft(resourceType));
-                    var leftover = amount - GetStorageSpaceLeft(resourceType);
+                    base.AddResource(resourceType, GetStorageCapacityLeft(resourceType));
+                    var leftover = amount - GetStorageCapacityLeft(resourceType);
 
                     return leftover;
                 }
@@ -48,7 +48,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
             return amount;
         }
 
-        public override float GetStorageSpaceLeft(ResourceType type)
+        public override float GetStorageCapacityLeft(ResourceType type)
         {
             return MaxCapacity - CurrentCapacity;
         }

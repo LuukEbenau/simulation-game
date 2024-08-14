@@ -26,7 +26,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
         public abstract ResourceType OutputResourceTypes { get; }
         public ResourceType TypesOfResourcesStored { get; private set; } = 0;
 
-        public abstract float GetStorageSpaceLeft(ResourceType type);
+        public abstract float GetStorageCapacityLeft(ResourceType type);
 
         public virtual float Wood { get; set; } = 0;
         public virtual float Stone { get; set; } = 0;
@@ -117,7 +117,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
         public virtual float AddResource(ResourceType resourceType, float amount)
         {
             ValidateResourceTypeIsPure(resourceType);
-            var storageSpaceLeft = GetStorageSpaceLeft(resourceType);
+            var storageSpaceLeft = GetStorageCapacityLeft(resourceType);
             if (storageSpaceLeft < amount)
             {
                 //GD.Print($"could not store {amount} resources of type {resourceType}");

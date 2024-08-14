@@ -6,15 +6,20 @@ using System.Threading.Tasks;
 using BehaviourTree;
 using BehaviourTree.FluentBuilder;
 using Godot;
+using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.DO;
 using SacaSimulationGame.scripts.managers;
 using SacaSimulationGame.scripts.units.professions.misc;
+using SacaSimulationGame.scripts.units.tasks;
 using Windows.Services.Maps;
 
 namespace SacaSimulationGame.scripts.units.professions
 {
     public class BuilderProfession(Unit unit) : Profession(unit)
     {
+        protected override BuildingType ProfessionBuildingType => BuildingType.None;
+        protected override float ActivitySpeedBaseline => 3;
+
         private readonly float _waittimeUntilBuildingTimeout = 8;
         protected override IBehaviour<UnitBTContext> GetBehaviourTree()
         {
@@ -33,32 +38,42 @@ namespace SacaSimulationGame.scripts.units.professions
 
         public BehaviourStatus FindBuildingToBuild(UnitBTContext context)
         {
-            var buildingsOrdered = from b in Unit.BuildingManager.GetBuildings()
-                    where !b.Instance.BuildingCompleted
-                    orderby b.IsUnreachableCounter ascending,
-                            b.Instance.BuildingResources.PercentageResourcesAquired - b.Instance.BuildingPercentageComplete
-                            descending,
-                            b.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition) ascending
-                    select b;
+            var buildingTasks = Unit.GameManager.TaskManager.GetTasks()
+                .Where(t => t is BuildBuildingTask)
+                .Select(t => t as BuildBuildingTask)
+                .OrderBy(t => t.Building.IsUnreachableCounter)
+                .ThenByDescending(t => t.Building.Instance.BuildingResources.PercentageResourcesAquired - t.Building.Instance.BuildingPercentageComplete)
+                .ThenBy(t => t.Building.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition));
 
-            BuildingDataObject targetBuilding = null;
-            foreach (var building in buildingsOrdered)
+
+            //var buildingsOrdered = from b in Unit.BuildingManager.GetBuildings()
+            //        where !b.Instance.BuildingCompleted
+            //        orderby b.IsUnreachableCounter ascending,
+            //                b.Instance.BuildingResources.PercentageResourcesAquired - b.Instance.BuildingPercentageComplete
+            //                descending,
+            //                b.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition) ascending
+            //        select b;
+
+            BuildBuildingTask targetTask = null;
+            foreach (var task in buildingTasks)
             {
-                if (building.AssignUnit(Unit))
+                if (task.Building.AssignUnit(Unit))
                 {
                     //GD.Print($"found target building to build {targetBuilding}");
-                    targetBuilding = building;
+                    targetTask = task;
                     break;
                 }
             }
 
-            if (targetBuilding == null)
+            if (targetTask == null)
             {
                 return BehaviourStatus.Failed;
             }
 
-            context.Building = targetBuilding;
-            context.Destination = Unit.MapManager.CellToWorld(context.Building.Instance.Cell, centered: true);
+
+            context.AssignedTask = targetTask;
+            //context.Building = targetTask;
+            context.Destination = Unit.MapManager.CellToWorld(targetTask.Building.Instance.Cell, centered: true);
 
             //GD.Print($"target building is located at {context.Destination}");
 
@@ -67,14 +82,16 @@ namespace SacaSimulationGame.scripts.units.professions
         
         public BehaviourStatus BuildBuilding(UnitBTContext context)
         {
-            if(context.Building.Instance.BuildingPercentageComplete >= context.Building.Instance.BuildingResources.PercentageResourcesAquired)
+            var t = context.AssignedTask as BuildBuildingTask;
+            
+            if(t.Building.Instance.BuildingPercentageComplete >= t.Building.Instance.BuildingResources.PercentageResourcesAquired)
             {
                 //waiting for resources
                 context.WaitingTime += context.Delta;
                 if (context.WaitingTime > _waittimeUntilBuildingTimeout)
                 {
-                    context.Building.IsUnreachableCounter++;
-                    context.Building.UnassignUnit(Unit);
+                    t.Building.IsUnreachableCounter++;
+                    t.Building.UnassignUnit(Unit);
                     return BehaviourStatus.Failed;
                 }
                 else
@@ -85,11 +102,11 @@ namespace SacaSimulationGame.scripts.units.professions
             else
             {
                 context.WaitingTime = 0;
-                var finished = context.Building.Instance.AddBuildingProgress(context.Delta * Unit.Stats.ActivitySpeedMultiplier);
+                var finished = t.Building.Instance.AddBuildingProgress(context.Delta * GetActivitySpeedCoefficient());
 
                 if (finished)
                 {
-                    context.Building.UnassignUnit(Unit); //TODO: what if the task gets canceled? i also want to it clear then.
+                    t.Building.UnassignUnit(Unit); //TODO: what if the task gets canceled? i also want to it clear then.
                     return BehaviourStatus.Succeeded;
                 }
                 else
@@ -104,7 +121,8 @@ namespace SacaSimulationGame.scripts.units.professions
             var result = FindPathToDestination(context);
             if (result == BehaviourStatus.Failed)
             {
-                context.Building.IsUnreachableCounter++;
+                var t = context.AssignedTask as BuildBuildingTask;
+                t.Building.IsUnreachableCounter++;
             }
 
             return result;

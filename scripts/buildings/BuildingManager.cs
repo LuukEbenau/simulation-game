@@ -4,7 +4,9 @@ using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.dataStructures.blueprints;
 using SacaSimulationGame.scripts.buildings.DO;
 using SacaSimulationGame.scripts.map;
+using SacaSimulationGame.scripts.naturalResources;
 using SacaSimulationGame.scripts.pathfinding;
+using SacaSimulationGame.scripts.units.tasks;
 using System.Collections.Generic;
 using System.Linq;
 namespace SacaSimulationGame.scripts.managers
@@ -27,8 +29,6 @@ namespace SacaSimulationGame.scripts.managers
         }
 
         private readonly Vector2I _defaultVec = new(int.MinValue, int.MinValue);
-
-
 
         private IWorldMapManager MapManager { get; set; }
         private Camera3D Camera { get; set; }
@@ -279,6 +279,30 @@ namespace SacaSimulationGame.scripts.managers
             Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + _buildingHeight, centered: false);
 
             var buildingDataObject = new BuildingDataObject(dummyPlayer, buildingInstance);
+
+            // when partially buildable
+            var buildabilities = CheckBuildingBuildable(cell, buildingBlueprint);
+
+            var resourcesToRemoveBeforeBuilding = new List<NaturalResourceGatherTask>();
+
+            foreach(var buildabilitypair  in buildabilities)
+            {
+                var buildabilityStatus = buildabilitypair.isBuildable;
+
+                if(buildabilityStatus == BuildabilityStatus.PARTIAL)
+                {
+                    var resource = GameManager.NaturalResourceManager
+                        .GetResourcesAtCell(buildabilitypair.cell)
+                        .FirstOrDefault();
+                    //NOTE: if we want to support multiple resources at the same cell, we need to not do firstOrDefault
+                    if(resource != default)
+                    {
+                        resourcesToRemoveBeforeBuilding.Add(new NaturalResourceGatherTask(resource));
+                    }
+                }
+            }
+
+
             buildingDataObject.OccupiedCells = CalculateOccupiedCellsByBuilding(buildingBlueprint, cell, buildingDataObject.Id);
 
             this.buildingData[dummyPlayer]
@@ -294,6 +318,27 @@ namespace SacaSimulationGame.scripts.managers
             if (!buildingBlueprint.RequiresBuilding)
             {
                 buildingDataObject.Instance.CompleteBuilding();
+                //NOTE: in this case resources do not get removed, so we need to be sure theres no resources below, or we should remove the resources.
+            }
+            else
+            {
+                //enqueue a task for workers
+                //TODO: if theres partial cells, add a pre-task to remove all resources below it first
+                var buildBuildingTask = new BuildBuildingTask(buildingDataObject);
+
+                UnitTask taskToExecute;
+                if (resourcesToRemoveBeforeBuilding.Count > 0)
+                {
+                    var preTasks = resourcesToRemoveBeforeBuilding.Select(t => t as UnitTask).ToList();
+                    taskToExecute = new CollectionTask(preTasks) { FollowUpTasks = [buildBuildingTask] };
+                }
+                else
+                {
+                    taskToExecute = buildBuildingTask;
+                    
+                }
+                //TODO: in case of collection tasks, is the collection task automatically finished too?
+                GameManager.TaskManager.EnqueueTask(taskToExecute);
             }
 
             GD.Print($"Building building at coordinate {worldPosition}. Total building count: {this.buildingData[dummyPlayer].Count}");
@@ -316,12 +361,12 @@ namespace SacaSimulationGame.scripts.managers
                 for (var occY = 0; occY < building.CellConstraints.GetLength(1); occY++)
                 {
                     var offset = new Vector2I(occX, occY);
-                    offset = offset.Rotate((int)building.Rotation);
+                    offset = offset.Rotate((int)building.Rotation); //TODO: take into account rotation
 
                     var cellPos = cell + offset;
                     //var occXMap = cell.X + occX;
                     //var occYMap = cell.Y + occY;
-                    ////TODO: take into account rotation
+                    //
 
                     occupiedCellsByBuilding.Add(cellPos);
 

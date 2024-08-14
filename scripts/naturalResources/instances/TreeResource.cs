@@ -31,7 +31,7 @@ namespace SacaSimulationGame.scripts.naturalResources
         private void UpdateResourceVisual()
         {
             Node3D model = null;
-            if (this.ResourceStorage.GetStorageSpaceLeft(ResourceType.Wood) == 0)
+            if (this.ResourceStorage.GetStorageCapacityLeft(ResourceType.Wood) == 0)
             {
                 if (CurrentResourceVisualScene == null || CurrentResourceVisualScene != TreeModel)
                 {

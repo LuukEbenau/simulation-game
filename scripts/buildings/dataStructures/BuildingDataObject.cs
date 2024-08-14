@@ -20,9 +20,10 @@ namespace SacaSimulationGame.scripts.buildings.DO
             Id = buildingIndexCounter++;
             Player = player;
             Instance = building;
-            AssignedUnits = [];
         }
-        private List<Unit> AssignedUnits { get; set; }
+
+
+        private List<Unit> AssignedUnits { get; set; } = [];
 
         /// <summary>
         /// This counts the amount of times the building was unreachable for a unit, used to filter out unreachable buildings

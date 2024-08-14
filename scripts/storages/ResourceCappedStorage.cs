@@ -60,7 +60,7 @@ namespace SacaSimulationGame.scripts.buildings.storages
         }
 
 
-        public override float GetStorageSpaceLeft(ResourceType type)
+        public override float GetStorageCapacityLeft(ResourceType type)
         {
             ValidateResourceTypeIsPure(type);
 

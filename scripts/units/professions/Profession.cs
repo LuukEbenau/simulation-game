@@ -7,14 +7,31 @@ using BehaviourTree;
 using BehaviourTree.FluentBuilder;
 using Godot;
 using SacaSimulationGame.scripts.buildings;
+using SacaSimulationGame.scripts.helpers;
+using SacaSimulationGame.scripts.naturalResources;
 using SacaSimulationGame.scripts.pathfinding;
 using SacaSimulationGame.scripts.units.professions.misc;
+using SacaSimulationGame.scripts.units.tasks;
 using Windows.Services.Maps;
 
 namespace SacaSimulationGame.scripts.units.professions
 {
     public abstract class Profession
     {
+
+        private float GetSkillSpeedMultiplier()
+        {
+            return MathF.Sqrt(SkillLevel + 1);
+        }
+
+        protected float GetActivitySpeedCoefficient()
+        {
+            return GetSkillSpeedMultiplier() * ActivitySpeedBaseline;
+        }
+
+        protected abstract BuildingType ProfessionBuildingType { get; }
+        protected abstract float ActivitySpeedBaseline { get; }
+
         public Unit Unit { get; }
 
         /// <summary>
@@ -152,5 +169,115 @@ namespace SacaSimulationGame.scripts.units.professions
 
             return BehaviourStatus.Failed;
         }
+
+
+        #region resource gathering
+        protected BehaviourStatus ChopTree(UnitBTContext context)
+        {
+
+            var resourcesToTake = (float)context.Delta * GetActivitySpeedCoefficient();
+
+
+            var t = context.AssignedTask as NaturalResourceGatherTask;
+
+            var (resourcesTaken, resourceType) = t.Resource.CollectResource(resourcesToTake);
+
+            if (resourcesTaken == 0 || resourceType == default)
+            {
+                //resource has disappeared while we were moving to its location
+                //TODO: should we detect it disappearing already while it is walking?
+                GD.Print("no resource could be found");
+                return BehaviourStatus.Succeeded; // finished chopping
+            }
+
+            Unit.Inventory.AddResource(resourceType, resourcesTaken);
+
+            context.WaitingTime += context.Delta;
+            var timeoutTime = 30;
+
+            //failsafe:
+            if (context.WaitingTime > timeoutTime)
+            {
+                return BehaviourStatus.Failed;
+            }
+
+
+            if (t.Resource.GetNrOfResourcesLeft() == 0)
+            {
+                return BehaviourStatus.Succeeded;
+            }
+            if (Unit.Inventory.GetStorageCapacityLeft(resourceType) == 0)
+            {
+                return BehaviourStatus.Succeeded;
+            }
+
+            return BehaviourStatus.Running;
+        }
+        #endregion
+
+        #region profession building
+        protected IBehaviour<UnitBTContext> MoveToProfessionBuildingAndDropoffResources => FluentBuilder.Create<UnitBTContext>()
+            .Sequence("Move to Profession Building And Drop off Resources")
+                .Do("Set destination", SetDestinationToProfessionBuilding)
+                .Do("Find path", FindPathToDestination)
+                .Do("Follow path", FollowPath)
+                .Do("Drop off Resources", DropOfResourcesAtProfessionBuilding)
+            .End()
+        .Build();
+
+
+        protected BehaviourStatus FindProfessionBuilding(UnitBTContext context)
+        {
+            var closestBuilding = Unit.BuildingManager.GetBuildings()
+                .Where(b => this.ProfessionBuildingType.HasFlag(b.Instance.Type) && b.Instance.WorkingEmployees.Count < b.Instance.MaxNumberOfEmployees)
+                .OrderBy(b => b.Instance.WorkingEmployees.Count)
+                .ThenBy(b => Unit.GlobalPosition.DistanceTo(b.Instance.GlobalPosition))
+                .FirstOrDefault();
+
+            if (closestBuilding == null) return BehaviourStatus.Failed;
+
+            ProfessionBuilding = closestBuilding.Instance as StorageBuildingBase;
+            ProfessionBuilding.AddEmployee(Unit);
+
+            return BehaviourStatus.Succeeded;
+        }
+        protected bool HasProfessionBuilding(UnitBTContext context)
+        {
+            if (this.ProfessionBuilding == null) return false;
+            //TODO: what if a building is destroyed? this has to be taken into account
+            return true;
+        }
+
+        protected BehaviourStatus SetDestinationToProfessionBuilding(UnitBTContext context)
+        {
+            context.Destination = ProfessionBuilding.GlobalPosition;
+
+            return BehaviourStatus.Succeeded;
+        }
+
+
+        protected BehaviourStatus DropOfResourcesAtProfessionBuilding(UnitBTContext context)
+        {
+            foreach (var resourceType in Unit.Inventory.TypesOfResourcesStored.GetActiveFlags())
+            {
+                var storageSpace = ProfessionBuilding.StoredResources.GetStorageCapacityLeft(resourceType);
+
+                var amountRemoved = Unit.Inventory.RemoveResource(resourceType, storageSpace);
+
+                if (amountRemoved > 0)
+                {
+                    var leftOver = ProfessionBuilding.StoredResources.AddResource(resourceType, amountRemoved);
+                    if (leftOver > 0)
+                    {
+                        GD.PushWarning($"Resource leftover of {leftOver} of resource {resourceType}, this should never happen here.");
+                        Unit.Inventory.AddResource(resourceType, leftOver);
+                    }
+                }
+            }
+
+            return BehaviourStatus.Succeeded;
+        }
+
+        #endregion
     }
 }

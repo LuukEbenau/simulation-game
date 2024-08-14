@@ -9,7 +9,7 @@ using Windows.Services.Maps;
 
 namespace SacaSimulationGame.scripts.managers
 {
-    public partial class NaturalResourceManager: Node3D
+    public partial class NaturalResourceManager : Node3D, INaturalResourceManager
     {
         [Export] public PackedScene TreeModel { get; set; }
 
@@ -18,13 +18,13 @@ namespace SacaSimulationGame.scripts.managers
         public GameManager GameManager { get; set; }
 
         private bool[,] _occupiedCells;
-        public bool[,] OccupiedCells  => _occupiedCells ??= new bool[GameManager.MapManager.MapWidth, GameManager.MapManager.MapHeight]; 
+        public bool[,] OccupiedCells => _occupiedCells ??= new bool[GameManager.MapManager.MapWidth, GameManager.MapManager.MapHeight];
 
         public override void _Ready()
         {
             base._Ready();
             GameManager = GetParent<GameManager>();
-            
+
         }
 
         public bool RemoveResource(NaturalResource resource)
@@ -39,20 +39,33 @@ namespace SacaSimulationGame.scripts.managers
             return false;
         }
 
-        public bool AddResource(Vector3 position, NaturalResourceType type) {
+        public IEnumerable<NaturalResource> GetResourcesAtCell(Vector2I cell) { 
+            foreach(var resource in NaturalResources)
+            {
+                if(resource.Cell == cell)
+                {
+                    yield return resource;
+                }
+            }
+        }
+
+        public bool AddResource(Vector3 position, NaturalResourceType type)
+        {
             var cell = this.GameManager.MapManager.WorldToCell(position);
 
             var cellOccupation = GameManager.MapManager.GetCellOccupation(cell);
-            if (cellOccupation.IsOccupied) {
+            if (cellOccupation.IsOccupied)
+            {
                 return false;
             }
 
-            if (type == NaturalResourceType.Tree) {
+            if (type == NaturalResourceType.Tree)
+            {
                 var instance = TreeModel.Instantiate<TreeResource>();
 
                 AddChild(instance);
                 NaturalResources.Add(instance);
-   
+
                 instance.GlobalPosition = position;
                 instance.Cell = cell;
                 instance.NaturalResourceManager = this;
