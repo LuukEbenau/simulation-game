@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3 uid="uid://1pdv76fc2dve"]
+[gd_scene load_steps=37 format=3 uid="uid://1pdv76fc2dve"]
 
 [ext_resource type="Script" path="res://scripts/GameManager.cs" id="1_jcks0"]
 [ext_resource type="Script" path="res://scripts/map/WorldMapManager.cs" id="2_lea2q"]
@@ -17,6 +17,7 @@
 [ext_resource type="PackedScene" uid="uid://wgp8mplor3b4" path="res://assets/buildings/lumberjack.tscn" id="10_hkxaj"]
 [ext_resource type="Texture2D" uid="uid://cjvjhaa5ta2w3" path="res://assets/TerrainData/Level1_slot0_albedo_bump.png" id="10_iah8u"]
 [ext_resource type="Texture2D" uid="uid://dwr5rscyhfdau" path="res://assets/TerrainData/Level1_slot1_albedo_bump.png" id="11_ovtdu"]
+[ext_resource type="PackedScene" uid="uid://cd3rfbinjwfrd" path="res://assets/buildings/bridge.tscn" id="11_wxmv0"]
 [ext_resource type="Texture2D" uid="uid://md6s1dhjxc6i" path="res://assets/TerrainData/Level1_slot2_albedo_bump.png" id="12_is0kv"]
 [ext_resource type="Script" path="res://scripts/naturalResources/NaturalResourceManager.cs" id="13_078rw"]
 [ext_resource type="Texture2D" uid="uid://v45mx0ysfpoc" path="res://assets/TerrainData/Level1_slot0_normal_roughness.png" id="13_li7dd"]
@@ -144,6 +145,7 @@ RoadBuilding = ExtResource("7_fd4ej")
 FishingpostBuilding = ExtResource("8_stmox")
 StockpileBuilding = ExtResource("9_btrcm")
 LumberjackBuilding = ExtResource("10_hkxaj")
+BridgeBuilding = ExtResource("11_wxmv0")
 
 [node name="UnitManager" type="Node3D" parent="GameManager"]
 script = ExtResource("6_be53k")

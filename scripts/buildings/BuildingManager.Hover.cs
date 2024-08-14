@@ -48,8 +48,10 @@ namespace SacaSimulationGame.scripts.managers
                                 }
                                 else
                                 {
+                                    var cellTypesAllowed = selectedBuilding.CellConstraints[0, 0].CellTypes;
+                                    //TODO: make this dynamic, so that for example the base can be different celltype
                                     SelectionPath = this.MapManager.Pathfinder.FindPath(SelectionPathStart, lastHoveredCell,
-                                        traversableTerrainType:CellType.GROUND, 
+                                        traversableTerrainType: cellTypesAllowed, 
                                         obstacleBuildings: BuildingType.ObstacleBuildings | BuildingType.Stockpile,
                                         maxIterationCount: 400);
                                 }

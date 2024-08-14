@@ -25,6 +25,9 @@ namespace SacaSimulationGame.scripts.units.professions
         private readonly Random _rnd = new();
         protected override float ActivitySpeedBaseline => 1;
 
+        //TODO: behaviour for emptying the stored resources of resource gathering buildings
+
+
         protected override IBehaviour<UnitBTContext> GetBehaviourTree()
         {
             //1. find target
@@ -316,8 +319,9 @@ namespace SacaSimulationGame.scripts.units.professions
         {
             var buildingsOrdered = Unit.BuildingManager.GetBuildings()
                 .Where(b => !b.Instance.BuildingCompleted && b.Instance.BuildingResources.RequiresResources)
-                .OrderBy(b => b.IsUnreachableCounter)
-                .ThenByDescending(b => b.GetNrOfAssignedUnits);
+                .OrderByDescending(b => b.GetNrOfAssignedUnits)
+                .ThenBy(b => b.IsUnreachableCounter);
+                
             //.ThenBy(b => b.Building.GlobalPosition.DistanceTo(Unit.GlobalPosition));
 
             BuildingDataObject targetBuilding = buildingsOrdered.FirstOrDefault();

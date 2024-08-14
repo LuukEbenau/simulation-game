@@ -8,6 +8,7 @@ using SacaSimulationGame.scripts.naturalResources;
 using SacaSimulationGame.scripts.pathfinding;
 using SacaSimulationGame.scripts.units.tasks;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 namespace SacaSimulationGame.scripts.managers
 {
@@ -19,6 +20,7 @@ namespace SacaSimulationGame.scripts.managers
         [Export] public PackedScene FishingpostBuilding { get; set; }
         [Export] public PackedScene StockpileBuilding { get; set; }
         [Export] public PackedScene LumberjackBuilding { get; set; }
+        [Export] public PackedScene BridgeBuilding { get; set; }
 
         private readonly float _buildingHeight = 0.25f;
 
@@ -123,6 +125,10 @@ namespace SacaSimulationGame.scripts.managers
             {
                 ChangeBuildingSelection(new LumberjackBlueprint());
             }
+            else if (@event.IsActionPressed("Action Slot 6"))
+            {
+                ChangeBuildingSelection(new BridgeBlueprint());
+            }
             else if (@event.IsActionPressed("Cancel Selection"))
             {
                 selectedBuilding = null;
@@ -169,6 +175,11 @@ namespace SacaSimulationGame.scripts.managers
                                 if (building.Instance.Type == selectedBuilding.Type)
                                 {
                                     continue;//same type, we can skip it since it already exists
+                                }
+                                else
+                                {
+                                    Debug.Print($"Warning: different building than current on this position, should we also skip it?");
+                                    continue;
                                 }
                             }
                             //if any of the cells in the path is obstructed, the path is not possible
@@ -237,8 +248,8 @@ namespace SacaSimulationGame.scripts.managers
         {
             if (MapManager.GetCell(cell).CellType != CellType.GROUND)
             {
-                GD.Print("Tried to place building on terrain different than ground");
-                return false;
+                GD.Print("Tried to place building on terrain different than ground, should this be allowed? for now do nothing");
+                //return false;
             }
             // Instantiate the scene
             PackedScene scene;
@@ -261,6 +272,10 @@ namespace SacaSimulationGame.scripts.managers
             else if (buildingBlueprint is LumberjackBlueprint)
             {
                 scene = this.LumberjackBuilding;
+            }
+            else if(buildingBlueprint is BridgeBlueprint)
+            {
+                scene = this.BridgeBuilding;
             }
             else
             {
