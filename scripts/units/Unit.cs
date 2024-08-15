@@ -32,6 +32,9 @@ public partial class Unit : Node3D
     public StorageBase Inventory { get; private set; }
 
 
+    private static int _unitIdxCounter = 0;
+    private int UnitIdx = 0;
+    public string UnitName { get; set; }
 
     public GameManager GameManager { get; set; }
     public IBuildingManager BuildingManager => GameManager.BuildingManager;
@@ -42,6 +45,12 @@ public partial class Unit : Node3D
 
     private Node3D VisualModel { get; set; } = null;
 
+    public Unit()
+    {
+        UnitIdx = _unitIdxCounter++;
+        UnitName = $"Unit {UnitIdx}"; // failsafe in case no name is selected
+    }
+
     public void ChangeProfession(ProfessionType professionType)
     {
         if (VisualModel != null) RemoveChild(VisualModel);
@@ -51,16 +60,19 @@ public partial class Unit : Node3D
         {
             this.Profession = new WorkerProfession(this);
             VisualModel = WorkerModel.Instantiate<Node3D>();
+            UnitName = $"Worker {UnitIdx}";
         }
         else if (professionType == ProfessionType.Builder)
         {
             this.Profession = new BuilderProfession(this);
             VisualModel = BuilderModel.Instantiate<Node3D>();
+            UnitName = $"Builder {UnitIdx}";
         }
         else if (professionType == ProfessionType.Lumberjack)
         {
             this.Profession = new LumberjackProfession(this);
             this.VisualModel = LumberjackModel.Instantiate<Node3D>();
+            UnitName = $"Lumberjack {UnitIdx}";
         }
         else
         {
@@ -95,10 +107,20 @@ public partial class Unit : Node3D
         context ??= new UnitBTContext();
         context.Delta = delta;
 
-        var status = this.Profession.BehaviourTree.Tick(context);
-        if (status == BehaviourStatus.Failed)
+        try
         {
+            var status = this.Profession.BehaviourTree.Tick(context);
+            if (status == BehaviourStatus.Failed)
+            {
+                context = new UnitBTContext();
+                //this.Profession.BehaviourTree.Reset();
+            }
+        }
+        catch (Exception ex) {
+            context = new UnitBTContext();
             this.Profession.BehaviourTree.Reset();
+            GD.PushWarning($"Error occured while running Behaviour tree",ex);
+
         }
 
     }

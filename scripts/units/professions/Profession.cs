@@ -56,8 +56,10 @@ namespace SacaSimulationGame.scripts.units.professions
             get {
                 _idleBehaviourTree ??= FluentBuilder.Create<UnitBTContext>()
                     .Sequence("Idle Sequence")
+                        //.UntilSuccess("Find valid destination")
                         .Do("Get random position to move to", this.GetRandomNearbyLocation)
                         .Do("Find Path to nearby position", this.FindPathToDestination)
+                        //.End()
                         .Do("follow path", this.FollowPath)
                         .Do("Idle", this.DoNothingSequence)
                     .End()
@@ -115,13 +117,12 @@ namespace SacaSimulationGame.scripts.units.professions
 
             if (cellPath.Count == 0)
             {
-
                 return BehaviourStatus.Failed;
             }
 
             context.Path = cellPath
                 .Select(node => new PathfindingNode3D(
-                    Unit.MapManager.CellToWorld(node.Cell, height: Unit.MapManager.GetCell(node.Cell).Height + 0.2f, centered:true),
+                    Unit.MapManager.CellToWorld(node.Cell, height: Unit.MapManager.GetCell(node.Cell).Height + 0.15f, centered:true),
                     node.SpeedMultiplier)
                 )
                 .ToList();
@@ -133,23 +134,38 @@ namespace SacaSimulationGame.scripts.units.professions
         {
             if (context.Path == default || context.Path.Count == 0)
             {
-                GD.Print("No destination defined");
+                GD.Print($"'{Unit.UnitName}': No destination defined, tree status name: {this.BehaviourTree.Name}");
                 return BehaviourStatus.Failed;
             }
 
-            PathfindingNode3D targetNode = context.Path[context.CurrentPathIndex];
+            PathfindingNode3D targetNode;
+            try
+            {
+                targetNode = context.Path[context.CurrentPathIndex];
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"'{Unit.UnitName}': An error has occured getting the next cell in the path: path index {context.CurrentPathIndex}, with path of length {context.Path.Count} | tree status: {this.BehaviourTree.Name}", ex);
+            }
             var direction = (targetNode.Position - Unit.GlobalPosition).Normalized();
 
-            float groundSurfaceSpeedMultiplier = context.CurrentPathIndex == 0 ? targetNode.SpeedMultiplier : context.Path[context.CurrentPathIndex - 1].SpeedMultiplier;
+            float groundSurfaceSpeedMultiplier = targetNode.SpeedMultiplier;
+            if (context.CurrentPathIndex > 0) groundSurfaceSpeedMultiplier = Mathf.Max(groundSurfaceSpeedMultiplier, context.Path[context.CurrentPathIndex - 1].SpeedMultiplier);
+            
 
             var movement = direction * Unit.Stats.Speed * (float)context.Delta * groundSurfaceSpeedMultiplier;
 
-            if (Unit.GlobalPosition.DistanceTo(targetNode.Position) > movement.Length() * 5)
+            if (Unit.GlobalPosition.DistanceTo(targetNode.Position) > movement.Length() )
             {
                 Unit.GlobalTranslate(movement);
             }
             else
             {
+                // idx = 2
+                // count = 3
+                // 
+
+
                 context.CurrentPathIndex++;
 
                 if (context.CurrentPathIndex >= context.Path.Count)
@@ -189,7 +205,7 @@ namespace SacaSimulationGame.scripts.units.professions
             {
                 //resource has disappeared while we were moving to its location
                 //TODO: should we detect it disappearing already while it is walking?
-                GD.Print("no resource could be found");
+                GD.Print($"'{Unit.UnitName}': no resource could be found");
                 return BehaviourStatus.Succeeded; // finished chopping
             }
 
@@ -272,7 +288,7 @@ namespace SacaSimulationGame.scripts.units.professions
                     var leftOver = ProfessionBuilding.StoredResources.AddResource(resourceType, amountRemoved);
                     if (leftOver > 0)
                     {
-                        GD.PushWarning($"Resource leftover of {leftOver} of resource {resourceType}, this should never happen here.");
+                        GD.PushWarning($"'{Unit.UnitName}': Resource leftover of {leftOver} of resource {resourceType}, this should never happen here.");
                         Unit.Inventory.AddResource(resourceType, leftOver);
                     }
                 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,6 +40,7 @@ namespace SacaSimulationGame.scripts.units.professions
         public BehaviourStatus FindBuildingToBuild(UnitBTContext context)
         {
             var buildingTasks = Unit.GameManager.TaskManager.GetTasks()
+                
                 .Where(t => t is BuildBuildingTask)
                 .Select(t => t as BuildBuildingTask)
                 .OrderBy(t => t.Building.IsUnreachableCounter)
@@ -50,7 +52,6 @@ namespace SacaSimulationGame.scripts.units.professions
             {
                 if (task.Building.AssignUnit(Unit))
                 {
-                    //GD.Print($"found target building to build {targetBuilding}");
                     targetTask = task;
                     break;
                 }
@@ -66,7 +67,7 @@ namespace SacaSimulationGame.scripts.units.professions
             //context.Building = targetTask;
             context.Destination = Unit.MapManager.CellToWorld(targetTask.Building.Instance.Cell, centered: true);
 
-            //GD.Print($"target building is located at {context.Destination}");
+            GD.Print($"'{Unit.UnitName}': target building is located at {context.Destination}");
 
             return BehaviourStatus.Succeeded;
         }
@@ -113,8 +114,10 @@ namespace SacaSimulationGame.scripts.units.professions
             var result = FindPathToDestination(context);
             if (result == BehaviourStatus.Failed)
             {
+                GD.Print($"'{Unit.UnitName}': No path could be found to the destination for building task");
                 var t = context.AssignedTask as BuildBuildingTask;
                 t.Building.IsUnreachableCounter++;
+                t.Building.UnassignUnit(Unit);
             }
 
             return result;

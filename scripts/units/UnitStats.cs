@@ -12,6 +12,11 @@ namespace SacaSimulationGame.scripts.units
         public const float MAXHEALTH = 100;
         //public float MaxHealth => 100;
         public float Speed { get; set; }
-        
+        //public string Name { get; set; }
+
+        //private static int _unitIdx = 0;
+        public UnitStats() {
+            //this.Name = "Wild Beaver " + _unitIdx++;
+        }
     }
 }

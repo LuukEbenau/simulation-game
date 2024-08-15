@@ -45,7 +45,7 @@ namespace SacaSimulationGame.scripts.pathfinding
         /// <param name="traversableTerrainType">the types of terrain which are traversable by this path</param>
         /// <param name="maxIterationCount">maximum amount of explored cells before canceling</param>
         /// <returns></returns>
-        public List<PathfindingNodeGrid> FindPath(Vector2I start, Vector2I goal, CellType traversableTerrainType = CellType.GROUND, BuildingType obstacleBuildings = BuildingType.ObstacleBuildings, int maxIterationCount = 500)
+        public List<PathfindingNodeGrid> FindPath(Vector2I start, Vector2I goal, CellType traversableTerrainType = CellType.GROUND, BuildingType obstacleBuildings = BuildingType.ObstacleBuildings, int maxIterationCount = 1000)
         {
             var startCellObstacle = gameManager.BuildingManager.OccupiedCells[start.X, start.Y];
             var startCellSpeed = GetSpeedAtCell(startCellObstacle);

@@ -98,7 +98,7 @@ namespace SacaSimulationGame.scripts.units.professions
             else
             {
                 context.WaitingTime = 0;
-                GD.Print("failed to plant tree");
+                GD.Print($"'{Unit.UnitName}': failed to plant tree");
                 return BehaviourStatus.Failed;
             }
         }

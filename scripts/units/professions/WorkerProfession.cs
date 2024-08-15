@@ -134,8 +134,6 @@ namespace SacaSimulationGame.scripts.units.professions
 
         public BehaviourStatus FindResourcePickupPoint(UnitBTContext context)
         {
-            
-
             // Higher is better
             float buildingWithBestResourcesConstraint(StorageBuildingBase storageBuilding)
             {
@@ -287,7 +285,7 @@ namespace SacaSimulationGame.scripts.units.professions
                     if (leftover > 0)
                     {
                         Unit.Inventory.AddResource(resourceType, leftover);
-                        GD.PushWarning($"Warning: leftover resources detected, this should not happen since its calculated beforehands");
+                        GD.PushWarning($"'{Unit.UnitName}': WARNING: leftover resources detected, this should not happen since its calculated beforehands");
                     }
                 }
             }
@@ -320,9 +318,8 @@ namespace SacaSimulationGame.scripts.units.professions
             var buildingsOrdered = Unit.BuildingManager.GetBuildings()
                 .Where(b => !b.Instance.BuildingCompleted && b.Instance.BuildingResources.RequiresResources)
                 .OrderByDescending(b => b.GetNrOfAssignedUnits)
-                .ThenBy(b => b.IsUnreachableCounter);
-                
-            //.ThenBy(b => b.Building.GlobalPosition.DistanceTo(Unit.GlobalPosition));
+                .ThenBy(b => b.IsUnreachableCounter)
+                .ThenBy(b => b.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition));
 
             BuildingDataObject targetBuilding = buildingsOrdered.FirstOrDefault();
             //TODO: What if we don't have this resource in the entire kingdom, wanted behaviour would be is th
@@ -365,7 +362,7 @@ namespace SacaSimulationGame.scripts.units.professions
                     if (leftover > 0)
                     {
                         Unit.Inventory.AddResource(resourceType, leftover);
-                        GD.PushWarning($"Warning: leftover resources detected, this should not happen since its calculated beforehands");
+                        GD.PushWarning($"'{Unit.UnitName}': WARNING: leftover resources detected, this should not happen since its calculated beforehands");
                     }
                 }
             }
