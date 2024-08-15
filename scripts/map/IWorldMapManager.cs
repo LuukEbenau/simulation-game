@@ -1,4 +1,5 @@
 ﻿using Godot;
+using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.managers;
 using SacaSimulationGame.scripts.pathfinding;
 
@@ -26,5 +27,6 @@ namespace SacaSimulationGame.scripts.map
         bool TryGetCell(Vector2I cell, out MapDataItem item);
         bool WorldPosInsideBounds(Vector3 worldPos);
         Vector2I WorldToCell(Vector3 worldPos);
+        bool CellIsTraversable(Vector2I cell, CellType allowedTerrainTypes, BuildingType obstacleBuildings = BuildingType.ObstacleBuildings);
     }
 }

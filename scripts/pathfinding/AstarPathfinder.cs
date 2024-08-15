@@ -19,6 +19,8 @@ namespace SacaSimulationGame.scripts.pathfinding
         private readonly float heuristicCoefficient = 0.5f;
         private readonly float pathScoreCoefficient = 1f;
 
+        private GameManager GameManager { get; } = gameManager;
+
         private float GetSpeedAtCell(BuildingManager.BuildingTypeIdPair buildingType)
         {
             if (buildingType.BuildingCompleted)
@@ -75,14 +77,9 @@ namespace SacaSimulationGame.scripts.pathfinding
                 openSet.Remove(openSet.Min);
                 foreach (var neighbor in GetNeighbors(current.Cell))
                 {
-                    //float cellSpeedMultiplier = 1.0f; // low is good, big is bad
-
-
                     var cellExists = gameManager.MapManager.TryGetCell(neighbor, out var neighborData);
-                    if (!cellExists)
-                    {
-                        continue;
-                    }
+                    if (!cellExists) continue;
+                    
 
                     var obstacleAtCell = gameManager.BuildingManager.OccupiedCells[neighbor.X, neighbor.Y];
 
@@ -97,21 +94,23 @@ namespace SacaSimulationGame.scripts.pathfinding
                         return ReconstructPath(cameFrom, neighborNode);
                     }
 
-
-                    if (neighborData.CellType != traversableTerrainType)
-                    {
-                        if (traversableTerrainType.HasFlag(CellType.GROUND) && obstacleAtCell.BuildingCompleted && obstacleAtCell.Type == BuildingType.Bridge) { 
-                            // its a bridge, so its traversable
-                            //TODO: only bridges which are finished
-                        }
-                        else continue; // its not traversable terrain
-                        //TODO: if its a bridge, it would be traversable for example
-                    }
-
-                    if ((obstacleAtCell.Type & obstacleBuildings) > 0)
+                    if (!this.GameManager.MapManager.CellIsTraversable(neighbor, traversableTerrainType, obstacleBuildings))
                     {
                         continue;
                     }
+
+                    //if (neighborData.CellType != traversableTerrainType)
+                    //{
+                    //    if (traversableTerrainType.HasFlag(CellType.GROUND) && obstacleAtCell.BuildingCompleted && obstacleAtCell.Type == BuildingType.Bridge) { 
+                    //        // its a bridge, so its traversable
+                    //    }
+                    //    else continue;
+                    //}
+
+                    //if ((obstacleAtCell.Type & obstacleBuildings) > 0)
+                    //{
+                    //    continue;
+                    //}
 
                     var cellSpeedMultiplier = GetSpeedAtCell(obstacleAtCell);
 

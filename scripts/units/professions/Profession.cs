@@ -72,13 +72,22 @@ namespace SacaSimulationGame.scripts.units.professions
         public BehaviourStatus GetRandomNearbyLocation(UnitBTContext context)
         {
             var rand = new Random();
+            for (int retryCount = 0; retryCount < 10; retryCount++)
+            {
+                var dir = new Vector3(rand.Next(-5, 5), 0, rand.Next(-5, 5));
 
-            var dir = new Vector3(rand.Next(-5, 5), 0, rand.Next(-5, 5));
+                var newPos = Unit.GlobalPosition + dir;
 
-            var newPos = Unit.GlobalPosition + dir;
+                var newCell = Unit.MapManager.WorldToCell(newPos);
 
-            context.Destination = newPos;
-            return BehaviourStatus.Succeeded;
+                if(Unit.MapManager.CellIsTraversable(newCell, map.CellType.GROUND))
+                {
+                    context.Destination = newPos;
+                    return BehaviourStatus.Succeeded;
+                }
+            }
+
+            return BehaviourStatus.Failed;
         }
 
         public Profession(Unit unit)

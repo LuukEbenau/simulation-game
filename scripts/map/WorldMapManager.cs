@@ -52,8 +52,35 @@ namespace SacaSimulationGame.scripts.managers
         public int MaxY { get; private set; }
         public int MapWidth { get; private set; }
         public int MapHeight { get; private set; }
-        private Dictionary<Vector2I, MapDataItem> MapData2 { get; set; }
+        //private Dictionary<Vector2I, MapDataItem> MapData2 { get; set; }
         private MapDataItem[,] MapData { get; set; }
+
+        public bool CellIsTraversable(Vector2I cell, CellType allowedTerrainTypes, BuildingType obstacleBuildings = BuildingType.ObstacleBuildings)
+        {
+            //if (!CellInsideBounds(cell)) return false;
+            var cellExists = GameManager.MapManager.TryGetCell(cell, out var neighborData);
+            if (!cellExists) return false;
+
+            var obstacleAtCell = GameManager.BuildingManager.OccupiedCells[cell.X, cell.Y];
+            //var cellType = this.MapData[cell.X, cell.Y].CellType;
+
+            //if (neighborData.CellType != allowedTerrainTypes)
+            if ((allowedTerrainTypes & neighborData.CellType) == 0)
+            {
+                if (allowedTerrainTypes.HasFlag(CellType.GROUND) && obstacleAtCell.BuildingCompleted && obstacleAtCell.Type == BuildingType.Bridge)
+                {
+                    // its a bridge, so its traversable
+                }
+                else return false;
+            }
+
+            if ((obstacleAtCell.Type & obstacleBuildings) > 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
 
         public MapDataItem GetCell(Vector2I cell)
         {
