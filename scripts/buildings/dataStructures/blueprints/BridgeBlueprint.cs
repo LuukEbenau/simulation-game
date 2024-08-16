@@ -12,13 +12,37 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
         public override BuildingType Type => BuildingType.Bridge;
         public override BuildingContraints[,] CellConstraints { get; }
         public override SelectionMode SelectionMode => SelectionMode.Line;
+
         public BridgeBlueprint()
         {
             CellConstraints = new BuildingContraints[1, 1]
             {
-                { new BuildingContraints{ MaxSlope = 255f, CellTypes = CellType.WATER}} 
-                //TODO: it should be that it starts as ground and ends as ground, but is water in between
+                { new BuildingContraints { 
+                    MaxSlope = 255f, 
+                    CellTypes = CellType.WATER,
+                    CalculateHeight = (float cellHeight, float baseHeight) => baseHeight
+                } }
             };
+
+            static bool destinationElevationConstraint(float buildingBaseHeight, float cellHeight)
+            {
+                return true;
+                //float elevationHeight = 5f;
+                //return (buildingBaseHeight - cellHeight) >= elevationHeight;
+            }
+
+            BaseCellConstraintOverride = new BuildingContraints
+            {
+                CellTypes = CellType.GROUND
+            };
+            DestinationCellConstraintOverride = new BuildingContraints
+            {
+                CellTypes = CellType.GROUND,
+                ElevationConstraint = destinationElevationConstraint,
+                CalculateHeight = (float cellHeight, float baseHeight) => baseHeight //TODO, instead, it needs to have an gradient from the baseheight to cellheight
+            };
+
+
         }
     }
 }

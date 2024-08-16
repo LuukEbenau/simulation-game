@@ -29,7 +29,10 @@ namespace SacaSimulationGame.scripts.managers
                 }
                 else
                 {
-                    var cellTypesAllowed = selectedBuilding.CellConstraints[0, 0].CellTypes;
+                    var cellTypesAllowed = selectedBuilding.GetConstraints(0, 0).CellTypes;//.CellConstraints[0, 0].CellTypes;
+                    //TODO: to prevent future problems it would be better to also implement the base and destionation cell constraints here
+
+
                     //TODO: make this dynamic, so that for example the base can be different celltype
                     SelectionPath = this.MapManager.Pathfinder.FindPath(SelectionPathStart, lastHoveredCell,
                         traversableTerrainType: cellTypesAllowed,
@@ -37,8 +40,19 @@ namespace SacaSimulationGame.scripts.managers
                         maxIterationCount: 400);
                 }
                 var cellsToVisualise = new List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)>();
-                foreach (var pathCell in SelectionPath)
+                for(int i = 0; i < SelectionPath.Count;i++)
+                //foreach (var pathCell in SelectionPath)
                 {
+                    var pathCell = SelectionPath[i];
+                    bool isBase = false, isDestination = false;
+                    if (i==0)
+                    {
+                        isBase = true;
+                    }
+                    if (i==SelectionPath.Count-1)
+                    {
+                        isDestination = true;
+                    }
                     // If type of building is the same, and selectionType is not Single, instead of coloring red we are just going to skip the building
                     //if(pathCell.)
                     var building = GetBuildingAtCell(pathCell.Cell);
@@ -50,7 +64,7 @@ namespace SacaSimulationGame.scripts.managers
                             continue;
                         }
                     }
-                    cellsToVisualise.AddRange(CheckBuildingBuildable(pathCell.Cell, selectedBuilding, visualiseHover: true));
+                    cellsToVisualise.AddRange(CheckBuildingBuildable(pathCell.Cell, selectedBuilding, visualiseHover: true, isBase:isBase, isDestination:isDestination));
                 }
 
                 VisualiseBuildableCells(cellsToVisualise);
@@ -72,7 +86,7 @@ namespace SacaSimulationGame.scripts.managers
                 }
                 else
                 {
-                    var cellTypesAllowed = selectedBuilding.CellConstraints[0, 0].CellTypes;
+                    //var cellTypesAllowed = selectedBuilding.GetConstraints(0, 0).CellTypes;//.CellConstraints[0, 0].CellTypes;
 
                     var diff = lastHoveredCell - SelectionPathStart;
 
@@ -133,8 +147,19 @@ namespace SacaSimulationGame.scripts.managers
                 }
                 
                 var cellsToVisualise = new List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)>();
-                foreach (var pathCell in SelectionPath)
+                for(int i = 0; i< SelectionPath.Count; i++)
+                //foreach (var pathCell in SelectionPath)
                 {
+                    var pathCell = SelectionPath[i];
+                    bool isBase = false, isDestination = false;
+                    if (i == 0)
+                    {
+                        isBase = true;
+                    }
+                    if (i == SelectionPath.Count - 1)
+                    {
+                        isDestination = true;
+                    }
                     // If type of building is the same, and selectionType is not Single, instead of coloring red we are just going to skip the building
                     //if(pathCell.)
                     var building = GetBuildingAtCell(pathCell.Cell);
@@ -146,7 +171,7 @@ namespace SacaSimulationGame.scripts.managers
                             continue;
                         }
                     }
-                    cellsToVisualise.AddRange(CheckBuildingBuildable(pathCell.Cell, selectedBuilding, visualiseHover: true));
+                    cellsToVisualise.AddRange(CheckBuildingBuildable(pathCell.Cell, selectedBuilding, visualiseHover: true, isBase: isBase, isDestination: isDestination));
                 }
 
                 VisualiseBuildableCells(cellsToVisualise);
@@ -217,7 +242,7 @@ namespace SacaSimulationGame.scripts.managers
             }
         }
 
-        private List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)> CheckBuildingBuildable(Vector2I cell, BuildingBlueprintBase blueprint, bool visualiseHover = false)
+        private List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)> CheckBuildingBuildable(Vector2I cell, BuildingBlueprintBase blueprint, bool visualiseHover, bool isBase = true, bool isDestination = true)
         {
             bool buildingBuildable = true;
             int shapeWidth = blueprint.CellConstraints.GetLength(0);
@@ -234,12 +259,13 @@ namespace SacaSimulationGame.scripts.managers
                     var cellShifted = cell + vecRotated;
                     if (MapManager.TryGetCell(cellShifted, out MapDataItem data))
                     {
+                        
                         if(x==0 && y == 0)
                         {
                             baseCellData = data;
                         }
 
-                        BuildabilityStatus cellBuildable = IsCellBuildable(data, blueprint, x, y, cellShifted, baseCellData);
+                        BuildabilityStatus cellBuildable = IsCellBuildable(data, blueprint, x, y, cellShifted, baseCellData, isBase, isDestination);
                         buildingBuildable &= cellBuildable != BuildabilityStatus.BLOCKED;
 
                         celldata.Add((cellShifted,data,cellBuildable));
@@ -261,9 +287,9 @@ namespace SacaSimulationGame.scripts.managers
             BLOCKED = 3
         }
 
-        private BuildabilityStatus IsCellBuildable(MapDataItem data, BuildingBlueprintBase blueprint, int shapeX, int shapeY, Vector2I cell, MapDataItem baseCellData)
+        private BuildabilityStatus IsCellBuildable(MapDataItem data, BuildingBlueprintBase blueprint, int shapeX, int shapeY, Vector2I cell, MapDataItem baseCellData, bool isBase, bool isDestination)
         {
-            var buildingContraints = blueprint.CellConstraints[shapeX, shapeY];
+            var buildingContraints = blueprint.GetConstraints(shapeX, shapeY, isBase, isDestination);
 
             // check for obstacles
             var cellOccupation = MapManager.GetCellOccupation(cell);    

@@ -10,7 +10,7 @@ namespace SacaSimulationGame.scripts.building
     {
         BuildingManager.BuildingTypeIdPair[,] OccupiedCells { get; }
 
-        bool BuildBuilding(Vector2I cell, BuildingBlueprintBase buildingBlueprint);
+        bool BuildBuilding(Vector2I cell, BuildingBlueprintBase buildingBlueprint, bool isBase, bool isDestination, float baseHeight);
         BuildingDataObject GetBuildingAtCell(Vector2I cell);
         List<BuildingDataObject> GetBuildings();
     }

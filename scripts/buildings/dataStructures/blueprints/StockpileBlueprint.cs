@@ -15,10 +15,10 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
         public override SelectionMode SelectionMode => SelectionMode.Single;
         public StockpileBlueprint()
         {
-
+            CalculateCellHeightDelegate ch = (float cellHeight, float baseHeight) => cellHeight;
             CellConstraints = new BuildingContraints[1, 1]
             { 
-                { new BuildingContraints{MaxSlope = 15f, CellTypes= CellType.GROUND} }
+                { new BuildingContraints{MaxSlope = 15f, CellTypes= CellType.GROUND, CalculateHeight = ch} }
             };
         }
     }

@@ -60,7 +60,7 @@ namespace SacaSimulationGame.scripts.managers
                     RequiresBuilding = false
                 };
 
-                spawnSucces = BuildingManager.BuildBuilding(spawnCell, building);
+                spawnSucces = BuildingManager.BuildBuilding(spawnCell, building,true, true, default);
             }
 
             (UnitDataObject unit, Vector2I offset)[] unitsToSpawn = [

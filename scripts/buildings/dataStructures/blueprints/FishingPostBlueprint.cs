@@ -17,14 +17,15 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
 
         public FishingPostBlueprint()
         {
+            CalculateCellHeightDelegate ch = (float cellHeight, float baseHeight) => cellHeight;
 
             CellConstraints = new BuildingContraints[5, 2]
             {
-                { new BuildingContraints { CellTypes = CellType.GROUND }, new BuildingContraints { CellTypes = CellType.GROUND }},
-                { new BuildingContraints { CellTypes = CellType.GROUND | CellType.WATER }, new BuildingContraints { CellTypes = CellType.GROUND | CellType.WATER }},
-                { new BuildingContraints { CellTypes = CellType.WATER }, new BuildingContraints { CellTypes = CellType.WATER }},
-                { new BuildingContraints { CellTypes = CellType.WATER }, new BuildingContraints { CellTypes = CellType.WATER }},
-                { new BuildingContraints { CellTypes = CellType.WATER }, new BuildingContraints { CellTypes = CellType.WATER }},
+                { new BuildingContraints { CellTypes = CellType.GROUND, CalculateHeight = ch }, new BuildingContraints { CellTypes = CellType.GROUND , CalculateHeight = ch}},
+                { new BuildingContraints { CellTypes = CellType.GROUND | CellType.WATER, CalculateHeight = ch }, new BuildingContraints { CellTypes = CellType.GROUND | CellType.WATER, CalculateHeight = ch }},
+                { new BuildingContraints { CellTypes = CellType.WATER, CalculateHeight = ch }, new BuildingContraints { CellTypes = CellType.WATER, CalculateHeight = ch }},
+                { new BuildingContraints { CellTypes = CellType.WATER, CalculateHeight = ch }, new BuildingContraints { CellTypes = CellType.WATER, CalculateHeight = ch }},
+                { new BuildingContraints { CellTypes = CellType.WATER, CalculateHeight = ch }, new BuildingContraints { CellTypes = CellType.WATER, CalculateHeight = ch }},
             };
             //Shape = new CellType[5, 2]
             //{

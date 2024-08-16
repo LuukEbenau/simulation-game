@@ -88,8 +88,6 @@ namespace SacaSimulationGame.scripts.units.professions
                 return BehaviourStatus.Running;
             }
 
-            //Unit.GameManager.
-            //TODO: resource manager which allows planting trees and stuff
             if(Unit.GameManager.NaturalResourceManager.AddResource(context.Destination, NaturalResourceType.Tree))
             {
                 context.WaitingTime = 0;

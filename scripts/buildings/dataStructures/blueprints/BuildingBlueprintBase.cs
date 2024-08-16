@@ -8,18 +8,7 @@ using SacaSimulationGame.scripts.map;
 
 namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
 {
-    public delegate bool ElevationConstraintDelegate(float buildingBaseHeight, float cellHeight);
 
-    public struct BuildingContraints
-    {
-        public CellType CellTypes { get; set; }
-        /// <summary>
-        /// Minimum elevation difference required from the base of the building
-        /// </summary>
-        public ElevationConstraintDelegate ElevationConstraint { get; set; }
-        public float MaxSlope { get; set; }
-
-    }
     public abstract class BuildingBlueprintBase
     {
         public abstract BuildingType Type { get; }
@@ -28,5 +17,46 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
         //public abstract float MaxSlopeAngle { get; }
         public bool RequiresBuilding { get; set; } = true;
         public abstract SelectionMode SelectionMode { get; }
+        public BuildingContraints BaseCellConstraintOverride { get; set; }
+        public BuildingContraints DestinationCellConstraintOverride { get; set; }
+
+        /// <summary>
+        /// Supplies a convenient way to get constraints which automatically merges overrides
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="isBase"></param>
+        /// <param name="isDestination"></param>
+        /// <returns></returns>
+        public BuildingContraints GetConstraints(int x, int y, bool isBase = false, bool isDestination = false)
+        {
+            var buildingContraints = CellConstraints[x, y];
+
+            // We apply the base and destination overrides of applicable
+            if (isDestination && DestinationCellConstraintOverride != default)
+            {
+                var or = DestinationCellConstraintOverride;
+                buildingContraints = new BuildingContraints
+                {
+                    CalculateHeight = or.CalculateHeight ?? buildingContraints.CalculateHeight,
+                    CellTypes = or.CellTypes != default ? or.CellTypes : buildingContraints.CellTypes,
+                    ElevationConstraint = or.ElevationConstraint ?? buildingContraints.ElevationConstraint,
+                    MaxSlope = or.MaxSlope != default ? or.MaxSlope : buildingContraints.MaxSlope
+                };
+            }
+            if (isBase && BaseCellConstraintOverride != default)
+            {
+                var or = BaseCellConstraintOverride;
+                buildingContraints = new BuildingContraints
+                {
+                    CalculateHeight = or.CalculateHeight ?? buildingContraints.CalculateHeight,
+                    CellTypes = or.CellTypes != default ? or.CellTypes : buildingContraints.CellTypes,
+                    ElevationConstraint = or.ElevationConstraint ?? buildingContraints.ElevationConstraint,
+                    MaxSlope = or.MaxSlope != default ? or.MaxSlope : buildingContraints.MaxSlope
+                };
+            }
+
+            return buildingContraints;
+        }
     }
 }

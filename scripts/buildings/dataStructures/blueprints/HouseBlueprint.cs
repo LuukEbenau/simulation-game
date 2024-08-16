@@ -16,7 +16,8 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
         public override SelectionMode SelectionMode => SelectionMode.Single;
         public HouseBlueprint()
         {
-            var c = new BuildingContraints { CellTypes = CellType.GROUND, MaxSlope = 10f };
+            CalculateCellHeightDelegate ch = (float cellHeight, float baseHeight) => cellHeight;
+            var c = new BuildingContraints { CellTypes = CellType.GROUND, MaxSlope = 10f, CalculateHeight = ch };
             CellConstraints = new BuildingContraints[2, 2]
             {
                 { c, c},

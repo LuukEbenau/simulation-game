@@ -9,6 +9,7 @@ using SacaSimulationGame.scripts.pathfinding;
 using SacaSimulationGame.scripts.units.tasks;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 namespace SacaSimulationGame.scripts.managers
 {
@@ -108,7 +109,7 @@ namespace SacaSimulationGame.scripts.managers
             if (lastHoveredCell == SelectionPathStart)
             {
                 // just single building
-                var cells = CheckBuildingBuildable(lastHoveredCell, selectedBuilding);
+                var cells = CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover: false);
                 if (cells.All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
                 {
                     foreach (var cell in cells)
@@ -121,8 +122,21 @@ namespace SacaSimulationGame.scripts.managers
             {
                 bool isPathBuildable = true;
                 List<PathfindingNodeGrid> pathToBuild = [];
-                foreach (var pathCell in SelectionPath)
+                for(int i = 0; i< SelectionPath.Count; i++)
+                //foreach (var pathCell in SelectionPath)
                 {
+                    var pathCell = SelectionPath[i];
+                    bool isBase = false, isDestination = false;
+                    if (i==0)
+                    {
+                        isBase = true;
+                    }
+                    if (i== SelectionPath.Count-1)
+                    {
+                        isDestination = true;
+                    }
+
+
                     var building = GetBuildingAtCell(pathCell.Cell);
                     if (building != null)
                     {
@@ -137,7 +151,7 @@ namespace SacaSimulationGame.scripts.managers
                         }
                     }
                     //if any of the cells in the path is obstructed, the path is not possible
-                    if (!CheckBuildingBuildable(pathCell.Cell, selectedBuilding).All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
+                    if (!CheckBuildingBuildable(pathCell.Cell, selectedBuilding, visualiseHover:false, isBase, isDestination).All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
                     {
                         isPathBuildable = false;
                     }
@@ -149,10 +163,20 @@ namespace SacaSimulationGame.scripts.managers
 
                 if (isPathBuildable)
                 {
-                    foreach (var node in pathToBuild)
+                    float baseHeight = default;
+                    for(int i = 0; i < pathToBuild.Count; i++)
                     {
+                        var node = pathToBuild[i];
                         //TODO: smart rotations of the building
-                        BuildBuilding(node.Cell, selectedBuilding);
+                        bool isBase = i == 0;
+                        bool isDestination = i == pathToBuild.Count - 1;
+                        //float baseHeight = default;
+                        if (isBase)
+                        {
+                            baseHeight = MapManager.GetCell(node.Cell).Height;
+                        }
+
+                        BuildBuilding(node.Cell, selectedBuilding, isBase, isDestination, baseHeight );
                     }
                 }
             }
@@ -232,7 +256,7 @@ namespace SacaSimulationGame.scripts.managers
             {
                 if (@event.IsActionPressed("Build"))
                 {
-                    if (CheckBuildingBuildable(lastHoveredCell, selectedBuilding).All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
+                    if (CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover:false).All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
                     {
                         // Build building
                         if (selectedBuilding.SelectionMode == SelectionMode.Single)
@@ -253,14 +277,8 @@ namespace SacaSimulationGame.scripts.managers
         }
 
         #region building feature
-        public bool BuildBuilding(Vector2I cell, BuildingBlueprintBase buildingBlueprint)
+        private PackedScene GetSceneFromBlueprint(BuildingBlueprintBase buildingBlueprint)
         {
-            if (MapManager.GetCell(cell).CellType != CellType.GROUND)
-            {
-                GD.Print("Tried to place building on terrain different than ground, should this be allowed? for now do nothing");
-                //return false;
-            }
-            // Instantiate the scene
             PackedScene scene;
             if (buildingBlueprint is HouseBlueprint)
             {
@@ -282,7 +300,7 @@ namespace SacaSimulationGame.scripts.managers
             {
                 scene = this.LumberjackBuilding;
             }
-            else if(buildingBlueprint is BridgeBlueprint)
+            else if (buildingBlueprint is BridgeBlueprint)
             {
                 scene = this.BridgeBuilding;
             }
@@ -290,6 +308,19 @@ namespace SacaSimulationGame.scripts.managers
             {
                 throw new System.Exception($"Unknown building type {buildingBlueprint}");
             }
+
+            return scene;
+        }
+
+        public bool BuildBuilding(Vector2I cell, BuildingBlueprintBase buildingBlueprint, bool isBase = true, bool isDestination = true, float baseHeight = default)
+        {
+            if (MapManager.GetCell(cell).CellType != CellType.GROUND)
+            {
+                GD.Print("Tried to place building on terrain different than ground, should this be allowed? for now do nothing");
+                //return false;
+            }
+            // Instantiate the scene
+            PackedScene scene = GetSceneFromBlueprint(buildingBlueprint);
 
             BuildingBase buildingInstance = scene.Instantiate<BuildingBase>();
 
@@ -299,15 +330,24 @@ namespace SacaSimulationGame.scripts.managers
                 return false;
             }
 
+            //bool isBase = false, isDestination = false;
+            var constraints = buildingBlueprint.GetConstraints(0, 0, isBase, isDestination);
+            var cellHeight = MapManager.GetCell(cell).Height;
+            if (baseHeight == default)
+            {
+                baseHeight = cellHeight;
+            }
+            var buildingHeight = constraints.CalculateHeight(cellHeight, baseHeight);
+
             buildingInstance.Cell = cell;
             buildingInstance.Blueprint = buildingBlueprint;
             buildingInstance.GameManager = GameManager;
-            Vector3 worldPosition = MapManager.CellToWorld(cell, height: MapManager.GetCell(cell).Height + _buildingHeight, centered: false);
+            Vector3 worldPosition = MapManager.CellToWorld(cell, height: buildingHeight + _buildingHeight, centered: false);
 
             var buildingDataObject = new BuildingDataObject(dummyPlayer, buildingInstance);
 
             // when partially buildable
-            var buildabilities = CheckBuildingBuildable(cell, buildingBlueprint);
+            var buildabilities = CheckBuildingBuildable(cell, buildingBlueprint,visualiseHover:false, isBase, isDestination);
 
             var resourcesToRemoveBeforeBuilding = new List<NaturalResourceGatherTask>();
 
@@ -327,7 +367,6 @@ namespace SacaSimulationGame.scripts.managers
                     }
                 }
             }
-
 
             buildingDataObject.OccupiedCells = CalculateOccupiedCellsByBuilding(buildingBlueprint, cell);
 
@@ -355,7 +394,6 @@ namespace SacaSimulationGame.scripts.managers
             else
             {
                 //enqueue a task for workers
-                //TODO: if theres partial cells, add a pre-task to remove all resources below it first
                 var buildBuildingTask = new BuildBuildingTask(buildingDataObject);
 
                 UnitTask taskToExecute;
@@ -369,7 +407,7 @@ namespace SacaSimulationGame.scripts.managers
                     taskToExecute = buildBuildingTask;
                     
                 }
-                //TODO: in case of collection tasks, is the collection task automatically finished too?
+
                 GameManager.TaskManager.EnqueueTask(taskToExecute);
             }
 

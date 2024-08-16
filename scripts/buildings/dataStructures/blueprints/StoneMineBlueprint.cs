@@ -26,9 +26,10 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
                 return (buildingBaseHeight - cellHeight) >= elevationHeight;
             }
 
-            var baseCon = new BuildingContraints { CellTypes = CellType.GROUND, MaxSlope = 15f };
-            var l1Con = new BuildingContraints { CellTypes = CellType.GROUND, ElevationConstraint = halfSizeConstraint };
-            var l2Con = new BuildingContraints { CellTypes = CellType.GROUND, ElevationConstraint = fullSizeConstraint };
+            CalculateCellHeightDelegate ch = (float cellHeight, float baseHeight) => cellHeight;
+            var baseCon = new BuildingContraints { CellTypes = CellType.GROUND, MaxSlope = 15f, CalculateHeight = ch };
+            var l1Con = new BuildingContraints { CellTypes = CellType.GROUND, ElevationConstraint = halfSizeConstraint, CalculateHeight = ch };
+            var l2Con = new BuildingContraints { CellTypes = CellType.GROUND, ElevationConstraint = fullSizeConstraint, CalculateHeight = ch };
 
             CellConstraints = new BuildingContraints[4, 2]
             {

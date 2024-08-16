@@ -10,7 +10,6 @@ namespace SacaSimulationGame.scripts.buildings
 {
     public abstract partial class StorageBuildingBase : BuildingBase
     {
-        //TODO: make this base class available for all buildings which can store resources. However, StoredResources should be a interface of different types, for stockpile, singleResourceStorage. For Lumberjack, enable pickup of Wood, for Lumbermill, dropoff wood, pickup planks, etc. This will enable behaviour for all buildings.
         public StorageBase StoredResources { get; protected set; }
 
         public override void _Ready()
