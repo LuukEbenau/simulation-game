@@ -9,7 +9,7 @@ namespace SacaSimulationGame.scripts.buildings
         public override BuildingType Type => BuildingType.Road;
         public override int MaxBuilders => 1;
         public override bool IsResourceStorage => false;
-        public override double TotalBuildingProgressNeeded => 3;
+        public override float TotalBuildingProgressNeeded => 3;
 
         // Called when the node enters the scene tree for the first time.
         public override void _Ready()

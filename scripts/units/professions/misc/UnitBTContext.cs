@@ -21,7 +21,6 @@ namespace SacaSimulationGame.scripts.units.professions.misc
         public double Delta { get; set; }
 
         public UnitTask AssignedTask { get; set; }
-        public BuildingDataObject Building { get; set; }
         public StorageBuildingBase ResourceStorageBuilding { get; set; }
 
         public Vector3 Destination { get; set; }

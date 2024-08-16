@@ -8,7 +8,7 @@ namespace SacaSimulationGame.scripts.buildings
     public partial class House : BuildingBase
     {
         public override int MaxBuilders => 2;
-        public override double TotalBuildingProgressNeeded => 15;
+        public override float TotalBuildingProgressNeeded => 15;
         public override bool IsResourceStorage => false; 
         public override BuildingType Type => BuildingType.House;
         // Called when the node enters the scene tree for the first time.

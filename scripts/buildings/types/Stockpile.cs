@@ -14,7 +14,7 @@ public partial class Stockpile : StorageBuildingBase
     [Export] public PackedScene ModelStone { get; set; }
     public override int MaxBuilders => 1;
    
-    public override double TotalBuildingProgressNeeded => 2;
+    public override float TotalBuildingProgressNeeded => 2;
 
     public override BuildingType Type => BuildingType.Stockpile;
 

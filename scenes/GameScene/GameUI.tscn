@@ -18,22 +18,17 @@
 [ext_resource type="AudioStream" uid="uid://dcm815sntmrmo" path="res://assets/audio/music/gameplaylist/11.mp3" id="13_oj11k"]
 [ext_resource type="AudioStream" uid="uid://bveua0ua6smxe" path="res://assets/audio/music/generated_gameplaylist/01_flutesong.mp3" id="14_kciar"]
 
-[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_sv60v"]
-streams_count = 7
-stream_0/stream = ExtResource("8_7ecdp")
-stream_0/weight = 1.0
-stream_1/stream = ExtResource("9_k5wkp")
-stream_1/weight = 1.0
-stream_2/stream = ExtResource("10_4a65m")
-stream_2/weight = 1.0
-stream_3/stream = ExtResource("11_p3530")
-stream_3/weight = 1.0
-stream_4/stream = ExtResource("12_1e05h")
-stream_4/weight = 1.0
-stream_5/stream = ExtResource("13_oj11k")
-stream_5/weight = 1.0
-stream_6/stream = ExtResource("14_kciar")
-stream_6/weight = 1.0
+[sub_resource type="AudioStreamPlaylist" id="AudioStreamPlaylist_w08ko"]
+shuffle = true
+fade_time = 0.5
+stream_count = 7
+stream_0 = ExtResource("14_kciar")
+stream_1 = ExtResource("8_7ecdp")
+stream_2 = ExtResource("9_k5wkp")
+stream_3 = ExtResource("10_4a65m")
+stream_4 = ExtResource("11_p3530")
+stream_5 = ExtResource("12_1e05h")
+stream_6 = ExtResource("13_oj11k")
 
 [node name="GameUI" type="Control"]
 layout_mode = 3
@@ -57,7 +52,7 @@ files = Array[String](["res://scenes/GameScene/Levels/Level1.tscn"])
 directory = "res://scenes/GameScene/Levels"
 
 [node name="BackgroundMusicPlayer" parent="." instance=ExtResource("7_aibl4")]
-stream = SubResource("AudioStreamRandomizer_sv60v")
+stream = SubResource("AudioStreamPlaylist_w08ko")
 
 [node name="LoadingScreen" parent="." instance=ExtResource("8_elxsf")]
 visible = false

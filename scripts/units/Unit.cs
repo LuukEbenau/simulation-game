@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -119,7 +120,8 @@ public partial class Unit : Node3D
         catch (Exception ex) {
             context = new UnitBTContext();
             this.Profession.BehaviourTree.Reset();
-            GD.PushWarning($"Error occured while running Behaviour tree",ex);
+            GD.PushWarning($"Error occured while running Behaviour tree: {ex.Message}");
+            throw;
 
         }
 

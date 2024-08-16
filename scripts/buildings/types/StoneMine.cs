@@ -12,7 +12,7 @@ namespace SacaSimulationGame.scripts.buildings
     public partial class StoneMine : StorageBuildingBase
     {
         public override int MaxBuilders => 2;
-        public override double TotalBuildingProgressNeeded => 20;
+        public override float TotalBuildingProgressNeeded => 20;
         public override bool IsResourceStorage => false;
 
         public override BuildingType Type => BuildingType.Lumberjack;

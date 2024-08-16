@@ -26,8 +26,6 @@ namespace SacaSimulationGame.scripts.units.professions
         protected override float ActivitySpeedBaseline => 1;
 
         //TODO: behaviour for emptying the stored resources of resource gathering buildings
-
-
         protected override IBehaviour<UnitBTContext> GetBehaviourTree()
         {
             //1. find target
@@ -35,32 +33,73 @@ namespace SacaSimulationGame.scripts.units.professions
             //else: pick up resources
             return FluentBuilder.Create<UnitBTContext>()
                 .Selector("Behaviour selector")
-                    .Subtree(DropOfResourcesSubtree)
+                    .Sequence("")
+                        .Condition("Check if unit carries resources", UnitCarriesResources)
+                        //IF task is found with the workers resource
+                        .Subtree(DropOfResourcesSubtree)
+                    .End()
+                    
                     .Subtree(TaskExecutionSubtree)
-                    .Subtree(DeliverResourcesToBuildingSubtree)
+                    //.Subtree(DeliverResourcesToBuildingSubtree)
                     .Subtree(IdleBehaviourTree)
                 .End()
                 .Build();
         }
         #region executing tasks
+
+        private float _getWeightedBuildingToBuildValue(Unit unit, BuildBuildingTask task)
+        {
+            const float assignedUnitCoefficient = 3;
+            const float prioritizeBuildingsWhichWaitForResourcesCoefficient = 2;
+            var nrOfAssignedUnitsValue = task.Building.GetNrOfAssignedUnits * assignedUnitCoefficient;
+
+            // between 0 and 1
+            float percentDiff = task.Building.Instance.BuildingResources.PercentageResourcesAquired - task.Building.Instance.BuildingPercentageComplete; // big is bad
+            float amountOfResourcesStillRequiredValue = prioritizeBuildingsWhichWaitForResourcesCoefficient - (percentDiff * prioritizeBuildingsWhichWaitForResourcesCoefficient);
+
+            float distance = unit.GlobalPosition.DistanceTo(task.TaskPosition);
+
+            float value = (nrOfAssignedUnitsValue + amountOfResourcesStillRequiredValue) / distance;
+
+            return 1f / value;
+        }
+
         private IBehaviour<UnitBTContext> TaskExecutionSubtree => FluentBuilder.Create<UnitBTContext>()
             .Sequence("Perform task")
-                .Do("FindTask", FindTask)
-                .Selector("Task selector")
+                
+                .RandomSelector("Task selector")
+                    .Sequence("TASK VALIDATION: Deliver Resources To building")
+                        .Do("FindTask", c => FindTask<BuildBuildingTask>(c, 
+                            (t) => {
+                                return t.Building.Instance.BuildingResources.PercentageResourcesAquired < 1;
+                            },
+                            (items) => {
+                                return items.OrderBy(t => _getWeightedBuildingToBuildValue(Unit, t));
+                            }
+                        ))
+                        .Subtree(DeliverResourcesToBuildingSubtree) 
+                    .End()
                     .Sequence("TASK VALIDATION: Natural Resource collection")
-                        .Condition("", c => c.AssignedTask is NaturalResourceGatherTask)
+                        .Do("FindTask", c => FindTask<NaturalResourceGatherTask>(c, 
+                            (t) => !t.IsFinished,
+                            null
+                            )
+                        )
                         .Subtree(NaturalResourceGatherSubtree)
                     .End()
+
                 // Any other types of tasks
                 .End()
             .End()
         .Build();
 
-        public BehaviourStatus FindTask(UnitBTContext context)
+        public BehaviourStatus FindTask<T>(UnitBTContext context, Func<T, bool> condition, Func<IEnumerable<T>, IOrderedEnumerable<T>> orderCriteria) where T : UnitTask
         {
+            var type = typeof(T);
             var availableTasks = this.Unit.GameManager.TaskManager.GetTasks()
-                .Where(ut => ut is NaturalResourceGatherTask)
-                .Select(ut => ut as NaturalResourceGatherTask)
+                .Where(ut => type.Equals(ut.GetType()))
+                .Select(t=> (T)t)
+                .Where(t=> condition(t))
                 .ToList();
 
             if (availableTasks.Count == 0)
@@ -68,13 +107,29 @@ namespace SacaSimulationGame.scripts.units.professions
                 return BehaviourStatus.Failed;
             }
 
-            var availableTask = availableTasks
-                .OrderBy(ut => ut.TaskPosition.DistanceTo(Unit.GlobalPosition))
-                .First();
+            IOrderedEnumerable<T> availableTasksOrdered;
 
-            Debug.Print($"resource gather task found {availableTask.Resource.Name}");
+            if(orderCriteria == null)
+            {
+                availableTasksOrdered = availableTasks
+                    .OrderBy(ut => ut.TaskPosition.DistanceTo(Unit.GlobalPosition));
+            }
+            else
+            {
+                availableTasksOrdered = orderCriteria(availableTasks)
+                    .ThenBy(ut => ut.TaskPosition.DistanceTo(Unit.GlobalPosition));
+            }
+
+            var availableTask = availableTasks.First();
+
+            if (availableTask.IsFinished) //NOTE: not sure if i should do this here, but might be good safety check to not get stuck on a orphan task
+            {
+                this.Unit.GameManager.TaskManager.FinishTask(availableTask);
+                return BehaviourStatus.Failed;
+            }
 
             context.AssignedTask = availableTask;
+            context.Destination = availableTask.TaskPosition;
 
             return BehaviourStatus.Succeeded;
         }
@@ -114,8 +169,8 @@ namespace SacaSimulationGame.scripts.units.professions
         #endregion
         #region resource pickup and dropoff
         private IBehaviour<UnitBTContext> DropOfResourcesSubtree => FluentBuilder.Create<UnitBTContext>()
-                    .Sequence("")
-                .Condition("Check if unit carries resources", UnitCarriesResources)
+            .Sequence("Drop of resources")
+                
                 .Do("FindResourceDropoffPoint", FindResourceDropoffPoint)
                 .Do("find path", FindPathToDestination)
                 .Do("Follow path", FollowPath)
@@ -134,16 +189,17 @@ namespace SacaSimulationGame.scripts.units.professions
 
         public BehaviourStatus FindResourcePickupPoint(UnitBTContext context)
         {
+            var task = context.AssignedTask as BuildBuildingTask;
             // Higher is better
             float buildingWithBestResourcesConstraint(StorageBuildingBase storageBuilding)
             {
-                var overlappingType = storageBuilding.StoredResources.TypesOfResourcesStored & context.Building.Instance.BuildingResources.TypesOfResourcesRequired;
+                var overlappingType = storageBuilding.StoredResources.TypesOfResourcesStored & task.Building.Instance.BuildingResources.TypesOfResourcesRequired;
 
                 float totalResourcesReq = 0f;
                 float totalResourcesAtResourceStore = 0f;
                 foreach (var t in overlappingType.GetActiveFlags())
                 {
-                    var amountRequired = context.Building.Instance.BuildingResources.RequiresOfResource(t);
+                    var amountRequired = task.Building.Instance.BuildingResources.RequiresOfResource(t);
                     totalResourcesReq += amountRequired;
 
                     var amountAvailable = storageBuilding.StoredResources.GetResourcesOfType(t);
@@ -161,7 +217,7 @@ namespace SacaSimulationGame.scripts.units.professions
 
             var closestResourceDeposit = this.Unit.BuildingManager.GetBuildings()
                 .Where(b => b.Instance.IsResourceStorage)
-                .Where(b => ((b.Instance as StorageBuildingBase).StoredResources.TypesOfResourcesStored & context.Building.Instance.BuildingResources.TypesOfResourcesRequired) > 0)
+                .Where(b => ((b.Instance as StorageBuildingBase).StoredResources.TypesOfResourcesStored & task.Building.Instance.BuildingResources.TypesOfResourcesRequired) > 0)
                 .OrderBy(b => b.IsUnreachableCounter) //TODO: make this task based too
                 .ThenByDescending(b => buildingWithBestResourcesConstraint(b.Instance as StorageBuildingBase))
                 .FirstOrDefault();
@@ -205,11 +261,13 @@ namespace SacaSimulationGame.scripts.units.professions
             //TODO: this is only when building a building right now, it would be better to make it generic by keeping track of an instance of what the unit is picking up, and how much
             var buildingStoredResourceType = context.ResourceStorageBuilding.StoredResources.TypesOfResourcesStored;
 
-            var requiredResourcesForBuilding = context.Building.Instance.BuildingResources.TypesOfResourcesRequired;
+            var task = context.AssignedTask as BuildBuildingTask;
+
+            var requiredResourcesForBuilding = task.Building.Instance.BuildingResources.TypesOfResourcesRequired;
 
             if (requiredResourcesForBuilding.HasFlag(buildingStoredResourceType))
             {
-                var amountRequired = context.Building.Instance.BuildingResources.RequiresOfResource(buildingStoredResourceType);
+                var amountRequired = task.Building.Instance.BuildingResources.RequiresOfResource(buildingStoredResourceType);
 
                 var amountToPickup = Mathf.Min(amountRequired, Unit.Inventory.GetStorageCapacityLeft(buildingStoredResourceType));
 
@@ -296,7 +354,7 @@ namespace SacaSimulationGame.scripts.units.professions
         #region Deliver resources to building
         private IBehaviour<UnitBTContext> DeliverResourcesToBuildingSubtree => FluentBuilder.Create<UnitBTContext>()
             .Sequence("Deliver resources to Building")
-                .Do("Find Delivery Target", this.FindDeliveryTarget)
+                //.Do("Find Delivery Target", this.FindDeliveryTarget)
                 .Selector("Get resources if needed")
                     .Condition("Unit has resources", this.UnitHasResourcesForBuilding)
                     .Sequence("Pick up resources")
@@ -313,32 +371,35 @@ namespace SacaSimulationGame.scripts.units.professions
             .End()
         .Build();
 
-        public BehaviourStatus FindDeliveryTarget(UnitBTContext context)
-        {
-            var buildingsOrdered = Unit.BuildingManager.GetBuildings()
-                .Where(b => !b.Instance.BuildingCompleted && b.Instance.BuildingResources.RequiresResources)
-                .OrderByDescending(b => b.GetNrOfAssignedUnits)
-                .ThenBy(b => b.IsUnreachableCounter)
-                .ThenBy(b => b.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition));
+        //public BehaviourStatus FindDeliveryTarget(UnitBTContext context)
+        //{
+        //    var buildingsOrdered = Unit.BuildingManager.GetBuildings()
+        //        .Where(b => !b.Instance.BuildingCompleted && b.Instance.BuildingResources.RequiresResources)
+        //        .OrderByDescending(b => b.GetNrOfAssignedUnits)
+        //        .ThenBy(b => b.IsUnreachableCounter)
+        //        .ThenBy(b => b.Instance.GlobalPosition.DistanceTo(Unit.GlobalPosition));
 
-            BuildingDataObject targetBuilding = buildingsOrdered.FirstOrDefault();
-            //TODO: What if we don't have this resource in the entire kingdom, wanted behaviour would be is th
+        //    BuildingDataObject targetBuilding = buildingsOrdered.FirstOrDefault();
+        //    //TODO: What if we don't have this resource in the entire kingdom, wanted behaviour would be is that this task fails
 
 
-            if (targetBuilding == null)
-            {
-                return BehaviourStatus.Failed;
-            }
+        //    if (targetBuilding == null)
+        //    {
+        //        return BehaviourStatus.Failed;
+        //    }
 
-            context.Building = targetBuilding;
-            context.Destination = Unit.MapManager.CellToWorld(context.Building.Instance.Cell, centered: true);
+        //    var t = new DeliverBuildingResourcesToBuildingTask(targetBuilding);
+        //    context.AssignedTask = t;
+        //    context.Destination = t.TaskPosition;
 
-            return BehaviourStatus.Succeeded;
-        }
+        //    return BehaviourStatus.Succeeded;
+        //}
 
         public bool UnitHasResourcesForBuilding(UnitBTContext context)
         {
-            ResourceType unitHasResourcesForBuilding = (context.Building.Instance.BuildingResources.TypesOfResourcesRequired & Unit.Inventory.TypesOfResourcesStored);
+            var t = context.AssignedTask as BuildBuildingTask;
+
+            ResourceType unitHasResourcesForBuilding = (t.Building.Instance.BuildingResources.TypesOfResourcesRequired & Unit.Inventory.TypesOfResourcesStored);
             if (unitHasResourcesForBuilding > 0)
             {
                 //GD.Print($"unit has resources for building of type {unitHasResourcesForBuilding}, inventory is: {Unit.Inventory.TypesOfResourcesStored}, wood:{Unit.Inventory.Wood}, stone: {Unit.Inventory.Stone}");
@@ -350,7 +411,8 @@ namespace SacaSimulationGame.scripts.units.professions
 
         public BehaviourStatus DeliverBuildingResources(UnitBTContext context)
         {
-            var building = context.Building.Instance;
+            var task = (BuildBuildingTask)context.AssignedTask;
+            var building = task.Building.Instance;
 
             foreach (var resourceType in Unit.Inventory.TypesOfResourcesStored.GetActiveFlags())
             {
@@ -367,7 +429,7 @@ namespace SacaSimulationGame.scripts.units.professions
                 }
             }
 
-            context.Building.IsUnreachableCounter = 0;
+            task.Building.IsUnreachableCounter = 0;
 
             return BehaviourStatus.Succeeded;
         }

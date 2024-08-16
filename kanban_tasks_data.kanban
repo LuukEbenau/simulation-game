@@ -13,7 +13,8 @@
 			"tasks": [
 				"dc8537da-71fa-4c83-9187-614ba1dd6b03",
 				"2e08afcf-6cdf-4a15-aec8-f464682cf304",
-				"94a45b5c-9754-48b1-97b4-9b37cc5a956a"
+				"94a45b5c-9754-48b1-97b4-9b37cc5a956a",
+				"2592ec88-4a32-46be-987e-4ceea3b425c2"
 			]
 		},
 		{
@@ -63,6 +64,13 @@
 		{
 			"uuid": "94a45b5c-9754-48b1-97b4-9b37cc5a956a",
 			"title": "Workers no longer drop of resources when their task has been finished before dropoff",
+			"description": "",
+			"category": "c8ab7dbe-066e-4d6d-b8b6-d9ec63a05133",
+			"steps": []
+		},
+		{
+			"uuid": "2592ec88-4a32-46be-987e-4ceea3b425c2",
+			"title": "behaviour for emptying the stored resources of resource gathering buildings",
 			"description": "",
 			"category": "c8ab7dbe-066e-4d6d-b8b6-d9ec63a05133",
 			"steps": []

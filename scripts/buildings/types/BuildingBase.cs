@@ -49,11 +49,11 @@ namespace SacaSimulationGame.scripts.buildings
         public Vector2I Cell { get; set; }
 
         // Building of the building
-        public double BuildingPercentageComplete => this.CurrentBuildingProgress == 0 ? 0 : this.CurrentBuildingProgress / this.TotalBuildingProgressNeeded;
-        public abstract double TotalBuildingProgressNeeded { get; }
+        public float BuildingPercentageComplete => this.CurrentBuildingProgress == 0 ? 0 : this.CurrentBuildingProgress / this.TotalBuildingProgressNeeded;
+        public abstract float TotalBuildingProgressNeeded { get; }
         public bool BuildingCompleted { get; set; } = false;
         private float _currentBuildingProgress = 0;
-        public double CurrentBuildingProgress { get; set; }
+        public float CurrentBuildingProgress { get; set; }
         public IBuildingResources BuildingResources { get; protected set; }
 
         public void RotateBuilding(BuildingRotation rotation)
@@ -138,7 +138,7 @@ namespace SacaSimulationGame.scripts.buildings
             }
             else
             {
-                this.CurrentBuildingProgress += progress;
+                this.CurrentBuildingProgress += (float)progress;
                 UpdateBuildingProgress();
                 return false;
             } 

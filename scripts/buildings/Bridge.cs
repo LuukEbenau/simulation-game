@@ -14,6 +14,6 @@ namespace SacaSimulationGame.scripts.buildings
 
         public override bool IsResourceStorage => false;
 
-        public override double TotalBuildingProgressNeeded => 10;
+        public override float TotalBuildingProgressNeeded => 10;
     }
 }
