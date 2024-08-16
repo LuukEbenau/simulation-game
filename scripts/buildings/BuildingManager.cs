@@ -103,6 +103,73 @@ namespace SacaSimulationGame.scripts.managers
             VisualizeBuildingBlueprint();
         }
 
+        private void _buildBuildingPath()
+        {
+            if (lastHoveredCell == SelectionPathStart)
+            {
+                // just single building
+                var cells = CheckBuildingBuildable(lastHoveredCell, selectedBuilding);
+                if (cells.All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
+                {
+                    foreach (var cell in cells)
+                    {
+                        BuildBuilding(cell.cell, selectedBuilding);
+                    }
+                }
+            }
+            else if (SelectionPath != null && SelectionPath.Count >= 1)
+            {
+                bool isPathBuildable = true;
+                List<PathfindingNodeGrid> pathToBuild = [];
+                foreach (var pathCell in SelectionPath)
+                {
+                    var building = GetBuildingAtCell(pathCell.Cell);
+                    if (building != null)
+                    {
+                        if (building.Instance.Type == selectedBuilding.Type)
+                        {
+                            continue;//same type, we can skip it since it already exists
+                        }
+                        else
+                        {
+                            Debug.Print($"Warning: different building than current on this position, should we also skip it?");
+                            continue;
+                        }
+                    }
+                    //if any of the cells in the path is obstructed, the path is not possible
+                    if (!CheckBuildingBuildable(pathCell.Cell, selectedBuilding).All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
+                    {
+                        isPathBuildable = false;
+                    }
+                    else
+                    {
+                        pathToBuild.Add(pathCell);
+                    }
+                }
+
+                if (isPathBuildable)
+                {
+                    foreach (var node in pathToBuild)
+                    {
+                        //TODO: smart rotations of the building
+                        BuildBuilding(node.Cell, selectedBuilding);
+                    }
+                }
+            }
+        }
+
+        private void _buildBuildingSingle()
+        {
+            if (BuildBuilding(lastHoveredCell, selectedBuilding))
+            {
+                ClearHoverIndicator();
+            }
+            else
+            {
+                GD.Print("building building failed");
+            }
+        }
+
         public override void _Input(InputEvent @event)
         {
             if (@event.IsActionPressed("Action Slot 1"))
@@ -149,59 +216,9 @@ namespace SacaSimulationGame.scripts.managers
             // For path/area selection
             if (@event.IsActionReleased("Build") && selectedBuilding != null && SelectionPathStart != Vector2I.MaxValue)
             {
-                if (selectedBuilding.SelectionMode == SelectionMode.Path)
+                if ((SelectionMode.Path|SelectionMode.Line).HasFlag(selectedBuilding.SelectionMode))
                 {
-                    if (lastHoveredCell == SelectionPathStart)
-                    {
-                        // just single building
-                        var cells = CheckBuildingBuildable(lastHoveredCell, selectedBuilding);
-                        if (cells.All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
-                        {
-                            foreach (var cell in cells)
-                            {
-                                BuildBuilding(cell.cell, selectedBuilding);
-                            }
-                        }
-                    }
-                    else if (SelectionPath != null && SelectionPath.Count >= 1)
-                    {
-                        bool isPathBuildable = true;
-                        List<PathfindingNodeGrid> pathToBuild = [];
-                        foreach (var pathCell in SelectionPath)
-                        {
-                            var building = GetBuildingAtCell(pathCell.Cell);
-                            if (building != null)
-                            {
-                                if (building.Instance.Type == selectedBuilding.Type)
-                                {
-                                    continue;//same type, we can skip it since it already exists
-                                }
-                                else
-                                {
-                                    Debug.Print($"Warning: different building than current on this position, should we also skip it?");
-                                    continue;
-                                }
-                            }
-                            //if any of the cells in the path is obstructed, the path is not possible
-                            if (!CheckBuildingBuildable(pathCell.Cell, selectedBuilding).All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
-                            {
-                                isPathBuildable = false;
-                            }
-                            else
-                            {
-                                pathToBuild.Add(pathCell);
-                            }
-                        }
-
-                        if (isPathBuildable)
-                        {
-                            foreach (var node in pathToBuild)
-                            {
-                                //TODO: smart rotations of the building
-                                BuildBuilding(node.Cell, selectedBuilding);
-                            }
-                        }
-                    }
+                    _buildBuildingPath();
                 }
 
                 //always reset back to max, regardless mode
@@ -220,17 +237,9 @@ namespace SacaSimulationGame.scripts.managers
                         // Build building
                         if (selectedBuilding.SelectionMode == SelectionMode.Single)
                         {
-                            if (BuildBuilding(lastHoveredCell, selectedBuilding))
-                            {
-                                ClearHoverIndicator();
-                            }
-                            else
-                            {
-                                GD.Print("building building failed");
-                            }
-
+                            _buildBuildingSingle();
                         }
-                        else if (selectedBuilding.SelectionMode == SelectionMode.Path)
+                        else if ((SelectionMode.Path | SelectionMode.Line).HasFlag(selectedBuilding.SelectionMode))
                         {
                             this.SelectionPathStart = lastHoveredCell;
                         }

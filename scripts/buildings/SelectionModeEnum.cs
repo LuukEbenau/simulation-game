@@ -10,6 +10,7 @@ namespace SacaSimulationGame.scripts
     {
         Single = 1,
         Path = 2,
-        Area = 4
+        Area = 4,
+        Line = 8
     }
 }

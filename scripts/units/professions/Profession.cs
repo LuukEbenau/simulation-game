@@ -161,7 +161,6 @@ namespace SacaSimulationGame.scripts.units.professions
             float groundSurfaceSpeedMultiplier = targetNode.SpeedMultiplier;
             if (context.CurrentPathIndex > 0) groundSurfaceSpeedMultiplier = Mathf.Max(groundSurfaceSpeedMultiplier, context.Path[context.CurrentPathIndex - 1].SpeedMultiplier);
             
-
             var movement = direction * Unit.Stats.Speed * (float)context.Delta * groundSurfaceSpeedMultiplier;
 
             if (Unit.GlobalPosition.DistanceTo(targetNode.Position) > movement.Length() )
@@ -170,11 +169,6 @@ namespace SacaSimulationGame.scripts.units.professions
             }
             else
             {
-                // idx = 2
-                // count = 3
-                // 
-
-
                 context.CurrentPathIndex++;
 
                 if (context.CurrentPathIndex >= context.Path.Count)
@@ -185,19 +179,6 @@ namespace SacaSimulationGame.scripts.units.professions
 
             return BehaviourStatus.Running;
         }
-
-        //private BehaviourStatus IsInBuildingDistance(UnitBTContext context)
-        //{
-        //    var buildingPos = Unit.GameManager.MapManager.CellToWorld(context.Building.Instance.Cell, centered: true);
-
-        //    if (Unit.GlobalPosition.DistanceTo(buildingPos) <= 1.0)
-        //    {
-        //        return BehaviourStatus.Succeeded;
-        //    }
-
-        //    return BehaviourStatus.Failed;
-        //}
-
 
         #region resource gathering
         protected BehaviourStatus ChopTree(UnitBTContext context)

@@ -5,6 +5,7 @@ using SacaSimulationGame.scripts.map;
 using SacaSimulationGame.scripts.pathfinding;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SacaSimulationGame.scripts.managers
@@ -15,6 +16,148 @@ namespace SacaSimulationGame.scripts.managers
         private double timeElapsedSinceLastHoverUpdate = 0;
         private double hoverIndicatorUpdateInterval = 1 / 60;
         private Vector2I lastHoveredCell = default;
+
+
+        private void _HandlePathHover(double delta)
+        {
+            if (SelectionPathStart != Vector2I.MaxValue)
+            {
+                //Find path with astar from start to destination, in found use this path to visualise
+                if (SelectionPathStart == lastHoveredCell)
+                {
+                    SelectionPath = [new PathfindingNodeGrid(lastHoveredCell, 1.0f)]; // also allow for just building a single cell
+                }
+                else
+                {
+                    var cellTypesAllowed = selectedBuilding.CellConstraints[0, 0].CellTypes;
+                    //TODO: make this dynamic, so that for example the base can be different celltype
+                    SelectionPath = this.MapManager.Pathfinder.FindPath(SelectionPathStart, lastHoveredCell,
+                        traversableTerrainType: cellTypesAllowed,
+                        obstacleBuildings: BuildingType.ObstacleBuildings | BuildingType.Stockpile,
+                        maxIterationCount: 400);
+                }
+                var cellsToVisualise = new List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)>();
+                foreach (var pathCell in SelectionPath)
+                {
+                    // If type of building is the same, and selectionType is not Single, instead of coloring red we are just going to skip the building
+                    //if(pathCell.)
+                    var building = GetBuildingAtCell(pathCell.Cell);
+                    if (building != null)
+                    {
+                        if (building.Instance.Type == selectedBuilding.Type)
+                        {
+                            //same type, we can skip it
+                            continue;
+                        }
+                    }
+                    cellsToVisualise.AddRange(CheckBuildingBuildable(pathCell.Cell, selectedBuilding, visualiseHover: true));
+                }
+
+                VisualiseBuildableCells(cellsToVisualise);
+
+            }
+            else
+            {
+                VisualiseBuildableCells(CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover: true));
+            }
+        }
+        private void _HandleLineHover(double delta)
+        {
+            if (SelectionPathStart != Vector2I.MaxValue)
+            {
+                //Find path with astar from start to destination, in found use this path to visualise
+                if (SelectionPathStart == lastHoveredCell)
+                {
+                    SelectionPath = [new PathfindingNodeGrid(lastHoveredCell, 1.0f)]; // also allow for just building a single cell
+                }
+                else
+                {
+                    var cellTypesAllowed = selectedBuilding.CellConstraints[0, 0].CellTypes;
+
+                    var diff = lastHoveredCell - SelectionPathStart;
+
+                    Vector2I lineEnd;
+                    bool xLarger;
+                    if(Mathf.Abs(diff.X) > Mathf.Abs(diff.Y))
+                    {
+                        // x is largest, so draw line to X
+                        lineEnd = SelectionPathStart + new Vector2I(diff.X, 0);
+                        xLarger = true;
+                    }
+                    else
+                    {
+                        //y is largest, so draw line to y
+                        lineEnd = SelectionPathStart + new Vector2I(0, diff.Y);
+                        xLarger = false;
+                    }
+
+                    List<Vector2I> line = new List<Vector2I>();
+                    Vector2I current = SelectionPathStart;
+                    Vector2I step = new Vector2I(
+                        Math.Sign(lineEnd.X - SelectionPathStart.X),
+                        Math.Sign(lineEnd.Y - SelectionPathStart.Y)
+                    );
+
+                    while (current != lineEnd)
+                    {
+                        line.Add(current);
+                        if (xLarger)
+                        {
+                            current.X += step.X;
+                            if (current.X == lineEnd.X)
+                            {
+                                while (current.Y != lineEnd.Y)
+                                {
+                                    current.Y += step.Y;
+                                    line.Add(current);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            current.Y += step.Y;
+                            if (current.Y == lineEnd.Y)
+                            {
+                                while (current.X != lineEnd.X)
+                                {
+                                    current.X += step.X;
+                                    line.Add(current);
+                                }
+                            }
+                        }
+                    }
+                    line.Add(lineEnd);
+
+                    // Convert Vector2I to PathfindingNodeGrid if needed
+                    SelectionPath = line.Select(pos => new PathfindingNodeGrid(pos,1.0f)).ToList();
+                }
+                
+                var cellsToVisualise = new List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)>();
+                foreach (var pathCell in SelectionPath)
+                {
+                    // If type of building is the same, and selectionType is not Single, instead of coloring red we are just going to skip the building
+                    //if(pathCell.)
+                    var building = GetBuildingAtCell(pathCell.Cell);
+                    if (building != null)
+                    {
+                        if (building.Instance.Type == selectedBuilding.Type)
+                        {
+                            //same type, we can skip it
+                            continue;
+                        }
+                    }
+                    cellsToVisualise.AddRange(CheckBuildingBuildable(pathCell.Cell, selectedBuilding, visualiseHover: true));
+                }
+
+                VisualiseBuildableCells(cellsToVisualise);
+
+            }
+            else
+            {
+                VisualiseBuildableCells(CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover: true));
+            }
+        }
+
 
         private void HandleHoverBehaviour(double delta)
         {
@@ -40,45 +183,11 @@ namespace SacaSimulationGame.scripts.managers
 
                         if (selectedBuilding.SelectionMode == SelectionMode.Path)
                         {
-                            if (SelectionPathStart != Vector2I.MaxValue)
-                            {
-                                //Find path with astar from start to destination, in found use this path to visualise
-                                if (SelectionPathStart == lastHoveredCell) { 
-                                    SelectionPath = [new PathfindingNodeGrid( lastHoveredCell,1.0f)]; // also allow for just building a single cell
-                                }
-                                else
-                                {
-                                    var cellTypesAllowed = selectedBuilding.CellConstraints[0, 0].CellTypes;
-                                    //TODO: make this dynamic, so that for example the base can be different celltype
-                                    SelectionPath = this.MapManager.Pathfinder.FindPath(SelectionPathStart, lastHoveredCell,
-                                        traversableTerrainType: cellTypesAllowed, 
-                                        obstacleBuildings: BuildingType.ObstacleBuildings | BuildingType.Stockpile,
-                                        maxIterationCount: 400);
-                                }
-                                var cellsToVisualise = new List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)>();
-                                foreach (var pathCell in SelectionPath)
-                                {
-                                    // If type of building is the same, and selectionType is not Single, instead of coloring red we are just going to skip the building
-                                    //if(pathCell.)
-                                    var building = GetBuildingAtCell(pathCell.Cell);
-                                    if (building != null)
-                                    {
-                                        if(building.Instance.Type == selectedBuilding.Type)
-                                        {
-                                            //same type, we can skip it
-                                            continue;
-                                        }
-                                    }
-                                    cellsToVisualise.AddRange(CheckBuildingBuildable(pathCell.Cell, selectedBuilding, visualiseHover: true));
-                                }
-
-                                VisualiseBuildableCells(cellsToVisualise);
-
-                            }
-                            else
-                            {
-                                VisualiseBuildableCells(CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover: true));
-                            }
+                            _HandlePathHover(delta);
+                        }
+                        else if( selectedBuilding.SelectionMode == SelectionMode.Line)
+                        {
+                            _HandleLineHover(delta);
                         }
                         else if (selectedBuilding.SelectionMode == SelectionMode.Single)
                         {

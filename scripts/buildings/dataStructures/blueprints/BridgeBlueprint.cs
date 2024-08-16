@@ -11,7 +11,7 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
     {
         public override BuildingType Type => BuildingType.Bridge;
         public override BuildingContraints[,] CellConstraints { get; }
-        public override SelectionMode SelectionMode => SelectionMode.Path;
+        public override SelectionMode SelectionMode => SelectionMode.Line;
         public BridgeBlueprint()
         {
             CellConstraints = new BuildingContraints[1, 1]
