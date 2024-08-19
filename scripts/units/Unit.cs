@@ -111,6 +111,7 @@ public partial class Unit : Node3D
         try
         {
             var status = this.Profession.BehaviourTree.Tick(context);
+            
             if (status == BehaviourStatus.Failed)
             {
                 context = new UnitBTContext();

@@ -272,7 +272,7 @@ namespace SacaSimulationGame.scripts.units.professions
                 var storageSpace = ProfessionBuilding.StoredResources.GetStorageCapacityLeft(resourceType);
 
                 var amountRemoved = Unit.Inventory.RemoveResource(resourceType, storageSpace);
-
+                
                 if (amountRemoved > 0)
                 {
                     var leftOver = ProfessionBuilding.StoredResources.AddResource(resourceType, amountRemoved);
@@ -282,6 +282,7 @@ namespace SacaSimulationGame.scripts.units.professions
                         Unit.Inventory.AddResource(resourceType, leftOver);
                     }
                 }
+                GD.Print($"'{Unit.UnitName}': Dropped of {amountRemoved} resources at profession building, with storage space {storageSpace}");
             }
 
             return BehaviourStatus.Succeeded;

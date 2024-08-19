@@ -68,6 +68,9 @@ namespace SacaSimulationGame.scripts.units.professions
             .Sequence("Perform task")
                 
                 .RandomSelector("Task selector")
+                    .Sequence("TASK VALIDATION: Remove resources from resource building")
+                        .Subtree(RemoveResourcesFromResourceBuildings)
+                    .End()
                     .Sequence("TASK VALIDATION: Deliver Resources To building")
                         .Do("FindTask", c => FindTask<BuildBuildingTask>(c, 
                             (t) => {
@@ -87,6 +90,7 @@ namespace SacaSimulationGame.scripts.units.professions
                         )
                         .Subtree(NaturalResourceGatherSubtree)
                     .End()
+
 
                 // Any other types of tasks
                 .End()
@@ -152,9 +156,29 @@ namespace SacaSimulationGame.scripts.units.professions
                 .Do("Find Path", FindPathToDestination)
                 .Do("follow path", FollowPath)
             //TODO: finish this
-                //.Do("Pick up resource", PickUpResourcess)
+                .Do("Pick up resource", PickUpResources)
             .End()
         .Build();
+
+        public BehaviourStatus PickUpResources(UnitBTContext context)
+        {
+            var task = context.AssignedTask as PickupResourcesTask;
+            var building = task.Building.Instance as StorageBuildingBase;
+
+            foreach (var resourceType in building.StoredResources.OutputResourceTypes.GetActiveFlags())
+            {
+                var spaceLeft = Unit.Inventory.GetStorageCapacityLeft(resourceType);
+                var amountTaken = building.StoredResources.RemoveResource(resourceType, spaceLeft);
+                if (spaceLeft > 0)
+                {
+                    Unit.Inventory.AddResource(resourceType, amountTaken);
+                }
+            }
+
+            GD.Print("pick up resources succeed");
+            return BehaviourStatus.Succeeded;
+        }
+
 
         /// <summary>
         /// Higher is better
@@ -188,13 +212,19 @@ namespace SacaSimulationGame.scripts.units.professions
                     b,
                     (StorageBuildingBase)b.Instance)
                 )
-                .Where(pair => pair.Item2.StorageStrategy == StorageStrategyEnum.EmptyAllResources 
-                && pair.Item2.StoredResources.GetResourcesOfType(pair.Item2.StoredResources.OutputResourceTypes) > 0)
+                .Where(pair => {
+                    //GD.Print($"storage strategy is: {pair.Item2.StorageStrategy}");
+                    var ra = pair.Item2.StoredResources.GetResourcesOfType(pair.Item2.StoredResources.OutputResourceTypes);
+                    //GD.Print($"Amount of resources: {ra}");
+                    return pair.Item2.StorageStrategy == StorageStrategyEnum.EmptyAllResources && ra > 0;
+                }
+                )
                 .OrderByDescending(pair => GetResourceCollectionBuildingGrading(Unit, pair.b))
                 .ToList();
                 
             if(buildingsOrdered.Count == 0)
             {
+                GD.Print($" No resource pickup building found");
                 return BehaviourStatus.Failed;
             }
 
@@ -204,7 +234,7 @@ namespace SacaSimulationGame.scripts.units.professions
             context.AssignedTask = new PickupResourcesTask(buildingPair.b);
             context.Destination = context.AssignedTask.TaskPosition;
 
-            return BehaviourStatus.Ready;
+            return BehaviourStatus.Succeeded;
         }
 
         #endregion
@@ -322,7 +352,7 @@ namespace SacaSimulationGame.scripts.units.professions
             return BehaviourStatus.Succeeded;
         }
 
-        public BehaviourStatus PickUpResources(UnitBTContext context)
+        public BehaviourStatus PickUpResourcesFromBuilding(UnitBTContext context)
         {
             //TODO: this is only when building a building right now, it would be better to make it generic by keeping track of an instance of what the unit is picking up, and how much
             var buildingStoredResourceType = context.ResourceStorageBuilding.StoredResources.TypesOfResourcesStored;
@@ -427,7 +457,7 @@ namespace SacaSimulationGame.scripts.units.professions
                         .Do("Find Resource Pickup Point", FindResourcePickupPoint)
                         .Do("Find Path To Resource Pickup Point", this.FindPathToResourcePickupPoint)
                         .Do("Move To ResourcePickupPoint", this.FollowPath)
-                        .Do("Pick Up Resources", this.PickUpResources) //todo, if still has space, check if any other resources are also needed?
+                        .Do("Pick Up Resources", this.PickUpResourcesFromBuilding) //todo, if still has space, check if any other resources are also needed?
                     .End()
                 .End()
 
