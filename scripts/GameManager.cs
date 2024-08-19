@@ -3,12 +3,14 @@ using SacaSimulationGame.scripts.building;
 using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.dataStructures.blueprints;
 using SacaSimulationGame.scripts.map;
+using SacaSimulationGame.scripts.naturalResources;
 using SacaSimulationGame.scripts.units;
 using SacaSimulationGame.scripts.units.dataObjects;
 using SacaSimulationGame.scripts.units.professions.misc;
 using SacaSimulationGame.scripts.units.tasks;
 using System;
 using System.Linq;
+
 
 namespace SacaSimulationGame.scripts.managers
 {
@@ -48,6 +50,8 @@ namespace SacaSimulationGame.scripts.managers
             int spawnRetryCount = 0;
             int spawnRetryCoundCap = 100;
             Vector2I spawnCell = FindSuitableStartLocation();
+
+
             while (!spawnSucces && spawnRetryCount < spawnRetryCoundCap)
             {
                 spawnRetryCount++;
@@ -62,6 +66,36 @@ namespace SacaSimulationGame.scripts.managers
 
                 spawnSucces = BuildingManager.BuildBuilding(spawnCell, building,true, true, default);
             }
+
+            var woodstockpile = new StockpileBlueprint
+            {
+                Rotation = BuildingRotation.Right,
+                RequiresBuilding = false,
+                InitialResourceStored = ResourceType.Wood,
+                InitialResourceAmount = 100
+            };
+            BuildingManager.BuildBuilding(spawnCell + new Vector2I(1,-1), woodstockpile, true, true, default);
+            BuildingManager.BuildBuilding(spawnCell + new Vector2I(0, -1), woodstockpile, true, true, default);
+
+            var stonestockpile = new StockpileBlueprint
+            {
+                Rotation = BuildingRotation.Right,
+                RequiresBuilding = false,
+                InitialResourceStored = ResourceType.Stone,
+                InitialResourceAmount = 100
+            };
+            BuildingManager.BuildBuilding(spawnCell + new Vector2I(1, 2), stonestockpile, true, true, default);
+            BuildingManager.BuildBuilding(spawnCell + new Vector2I(0, 2), stonestockpile, true, true, default);
+
+            var roadBlueprint = new RoadBlueprint
+            {
+                Rotation = BuildingRotation.Right,
+                RequiresBuilding = false
+            };
+            BuildingManager.BuildBuilding(spawnCell + new Vector2I(2, -1), roadBlueprint, true, true, default);
+            BuildingManager.BuildBuilding(spawnCell + new Vector2I(2, 0), roadBlueprint, true, true, default);
+            BuildingManager.BuildBuilding(spawnCell + new Vector2I(2, 1), roadBlueprint, true, true, default);
+            BuildingManager.BuildBuilding(spawnCell + new Vector2I(2, 2), roadBlueprint, true, true, default);
 
             (UnitDataObject unit, Vector2I offset)[] unitsToSpawn = [
                 //(new UnitDataObject(UnitGender.MALE,   ProfessionType.Worker ), new Vector2I(2, 2)),

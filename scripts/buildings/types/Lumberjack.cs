@@ -14,7 +14,7 @@ namespace SacaSimulationGame.scripts.buildings
         public override int MaxBuilders => 2;
         public override float TotalBuildingProgressNeeded => 5;
         public override bool IsResourceStorage => false;
-    
+        public override StorageStrategyEnum StorageStrategy => StorageStrategyEnum.EmptyAllResources;
         public override BuildingType Type => BuildingType.Lumberjack;
         public override void _Ready()
         {

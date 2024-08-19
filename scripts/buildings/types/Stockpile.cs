@@ -15,7 +15,7 @@ public partial class Stockpile : StorageBuildingBase
     public override int MaxBuilders => 1;
    
     public override float TotalBuildingProgressNeeded => 2;
-
+    public override StorageStrategyEnum StorageStrategy => StorageStrategyEnum.KeepResourcesUntilNeeded;
     public override BuildingType Type => BuildingType.Stockpile;
 
     private PackedScene _lastShownVisual;
@@ -23,6 +23,7 @@ public partial class Stockpile : StorageBuildingBase
     public override void _Ready()
     {
         base._Ready();
+        UpdateVisualBasedOnResources();
     }
 
 
@@ -37,21 +38,29 @@ public partial class Stockpile : StorageBuildingBase
             //temporary: passive income
             var currentResource = StoredResources.TypesOfResourcesStored;
 
-            if (currentResource == 0)
-            {
-                if(_randomlyDecidedResource == 0)
-                {
-                    var randNumber = new Random().Next(0, 2);
-                    if (randNumber == 0) currentResource = ResourceType.Stone;
-                    if (randNumber == 1) currentResource = ResourceType.Wood;
-                    _randomlyDecidedResource = currentResource;
-                }
-                else
-                {
-                    currentResource = _randomlyDecidedResource;
-                }
-            }
-            StoredResources.AddResource(currentResource, (float)delta);
+            //if (currentResource == 0)
+            //{
+            //    if(_randomlyDecidedResource == 0)
+            //    {
+            //        var randNumber = new Random().Next(0, 2);
+            //        if (randNumber == 0) currentResource = ResourceType.Stone;
+            //        if (randNumber == 1) currentResource = ResourceType.Wood;
+            //        _randomlyDecidedResource = currentResource;
+            //    }
+            //    else
+            //    {
+            //        currentResource = _randomlyDecidedResource;
+            //    }
+            //}
+            //StoredResources.AddResource(currentResource, (float)delta);
+
+            //if (_lastShownVisual == null)
+            //{
+            //    // initial
+            //    GD.Print($"initial with res {currentResource}");
+            //bit unneccesary but for now needed
+            UpdateVisualBasedOnResources();
+            //}
         }
     }
 

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Godot;
 using SacaSimulationGame.scripts.map;
+using SacaSimulationGame.scripts.naturalResources;
 
 namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
 {
@@ -13,6 +14,9 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
         public override BuildingType Type => BuildingType.Stockpile;
         public override BuildingContraints[,] CellConstraints { get; }
         public override SelectionMode SelectionMode => SelectionMode.Single;
+
+        public float InitialResourceAmount { get; set; } = 0;
+        public ResourceType InitialResourceStored { get; set; } = 0;
         public StockpileBlueprint()
         {
             CalculateCellHeightDelegate ch = (float cellHeight, float baseHeight) => cellHeight;

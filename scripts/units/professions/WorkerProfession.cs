@@ -136,12 +136,78 @@ namespace SacaSimulationGame.scripts.units.professions
 
         private BehaviourStatus SetDestinationToTaskLocation(UnitBTContext context)
         {
-            //var cell = Unit.MapManager.WorldToCell(context.AssignedTask.TaskPosition);
-
             context.Destination = context.AssignedTask.TaskPosition;
 
             return BehaviourStatus.Succeeded;
         }
+
+        #region TASK: removeResourcesFromResourceBuildings
+
+        /// <summary>
+        /// 1. Find building which needs to be emptied 
+        /// </summary>
+        private IBehaviour<UnitBTContext> RemoveResourcesFromResourceBuildings => FluentBuilder.Create<UnitBTContext>()
+            .Sequence("Remove Resources from Resource Buildings")
+                .Do("Find resource building to empty", FindResourceCollectingBuildingToEmpty)
+                .Do("Find Path", FindPathToDestination)
+                .Do("follow path", FollowPath)
+            //TODO: finish this
+                //.Do("Pick up resource", PickUpResourcess)
+            .End()
+        .Build();
+
+        /// <summary>
+        /// Higher is better
+        /// </summary>
+        /// <param name="unit"></param>
+        /// <param name="building"></param>
+        /// <param name="resourcesAvailable"></param>
+        /// <returns></returns>
+        private float GetResourceCollectionBuildingGrading(Unit unit, BuildingDataObject building)
+        {
+            var storedResources = ((StorageBuildingBase)building.Instance).StoredResources;
+
+            var spaceLeft = storedResources.GetStorageCapacityLeft(storedResources.OutputResourceTypes);
+            var currentStorageAmount = storedResources.GetResourcesOfType(storedResources.OutputResourceTypes);
+
+            var storedResourcesValue = Mathf.Sqrt(currentStorageAmount+1) - 1;
+            var storageAlmostFullValue = Mathf.Clamp(( 5f / Mathf.Sqrt(spaceLeft+1)) - 1, 0, 1);
+
+            float distance = unit.GlobalPosition.DistanceTo(building.Instance.GlobalPosition);
+
+            float value = (storedResourcesValue + storageAlmostFullValue) / distance;
+
+            return value;
+        }
+
+        private BehaviourStatus FindResourceCollectingBuildingToEmpty(UnitBTContext context)
+        {
+            var buildingsOrdered = Unit.BuildingManager.GetBuildings()
+                .Where(b => b.Instance.BuildingCompleted && b.Instance.IsResourceStorage)
+                .Select(b => (
+                    b,
+                    (StorageBuildingBase)b.Instance)
+                )
+                .Where(pair => pair.Item2.StorageStrategy == StorageStrategyEnum.EmptyAllResources 
+                && pair.Item2.StoredResources.GetResourcesOfType(pair.Item2.StoredResources.OutputResourceTypes) > 0)
+                .OrderByDescending(pair => GetResourceCollectionBuildingGrading(Unit, pair.b))
+                .ToList();
+                
+            if(buildingsOrdered.Count == 0)
+            {
+                return BehaviourStatus.Failed;
+            }
+
+            var buildingPair = buildingsOrdered.First();
+
+            // add it to task
+            context.AssignedTask = new PickupResourcesTask(buildingPair.b);
+            context.Destination = context.AssignedTask.TaskPosition;
+
+            return BehaviourStatus.Ready;
+        }
+
+        #endregion
 
         #region TASK: natural resource gathering
         private IBehaviour<UnitBTContext> NaturalResourceGatherSubtree => FluentBuilder.Create<UnitBTContext>()

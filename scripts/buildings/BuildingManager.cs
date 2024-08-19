@@ -347,7 +347,7 @@ namespace SacaSimulationGame.scripts.managers
             var buildingDataObject = new BuildingDataObject(dummyPlayer, buildingInstance);
 
             // when partially buildable
-            var buildabilities = CheckBuildingBuildable(cell, buildingBlueprint,visualiseHover:false, isBase, isDestination);
+            var buildabilities = CheckBuildingBuildable(cell, buildingBlueprint, visualiseHover: false, isBase, isDestination);
 
             var resourcesToRemoveBeforeBuilding = new List<NaturalResourceGatherTask>();
 
@@ -384,6 +384,23 @@ namespace SacaSimulationGame.scripts.managers
 
             buildingInstance.GlobalPosition = worldPosition;
             buildingInstance.Scale = MapManager.CellSize;
+
+            if (buildingBlueprint is StockpileBlueprint sb)
+            {
+                GD.Print("building stockpile");
+                if (sb.InitialResourceStored > 0)
+                {
+                    var stockpile = buildingInstance as Stockpile;
+                    GD.Print("Storing resource");
+                    var leftover = stockpile.StoredResources.AddResource(sb.InitialResourceStored, sb.InitialResourceAmount);
+                    
+                    if (leftover > 0)
+                    {
+                        GD.Print($"leftover resource which couldnt be stored: {leftover} ");
+                    }
+                }
+            }
+
             buildingInstance.RotateBuilding(buildingBlueprint.Rotation);
 
             if (!buildingBlueprint.RequiresBuilding)

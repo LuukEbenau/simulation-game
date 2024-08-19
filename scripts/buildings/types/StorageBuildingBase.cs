@@ -8,6 +8,11 @@ using SacaSimulationGame.scripts.units;
 
 namespace SacaSimulationGame.scripts.buildings
 {
+    public enum StorageStrategyEnum
+    {
+        EmptyAllResources = 1,
+        KeepResourcesUntilNeeded = 2
+    }
     public abstract partial class StorageBuildingBase : BuildingBase
     {
         public StorageBase StoredResources { get; protected set; }
@@ -21,5 +26,7 @@ namespace SacaSimulationGame.scripts.buildings
 
         protected abstract void UpdateVisualBasedOnResources();
         public override bool IsResourceStorage => true;
+
+        public abstract StorageStrategyEnum StorageStrategy { get; }
     }
 }
