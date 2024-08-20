@@ -23,6 +23,8 @@ namespace SacaSimulationGame.scripts.units.professions.misc
         public UnitTask AssignedTask { get; set; }
         public StorageBuildingBase ResourceStorageBuilding { get; set; }
 
+        public List<UnitTask> TasksToChooseFrom { get; set; }
+
         public Vector3 Destination { get; set; }
         public int CurrentPathIndex { get; set; }
         public List<PathfindingNode3D> Path { get; set; }

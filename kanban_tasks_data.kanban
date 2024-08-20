@@ -14,7 +14,8 @@
 				"dc8537da-71fa-4c83-9187-614ba1dd6b03",
 				"2e08afcf-6cdf-4a15-aec8-f464682cf304",
 				"94a45b5c-9754-48b1-97b4-9b37cc5a956a",
-				"2592ec88-4a32-46be-987e-4ceea3b425c2"
+				"2592ec88-4a32-46be-987e-4ceea3b425c2",
+				"2d8f441c-89b8-49fc-823d-da2491311bbc"
 			]
 		},
 		{
@@ -71,6 +72,13 @@
 		{
 			"uuid": "2592ec88-4a32-46be-987e-4ceea3b425c2",
 			"title": "behaviour for emptying the stored resources of resource gathering buildings",
+			"description": "",
+			"category": "c8ab7dbe-066e-4d6d-b8b6-d9ec63a05133",
+			"steps": []
+		},
+		{
+			"uuid": "2d8f441c-89b8-49fc-823d-da2491311bbc",
+			"title": "Allow dropoff of resources at a resourcestore without predefined resource type",
 			"description": "",
 			"category": "c8ab7dbe-066e-4d6d-b8b6-d9ec63a05133",
 			"steps": []

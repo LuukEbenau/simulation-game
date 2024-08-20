@@ -50,19 +50,18 @@ namespace SacaSimulationGame.scripts.buildings.storages
 
         private float GetResourceCapacity(ResourceType resourceType)
         {
-            return resourceType switch
-            {
-                ResourceType.Wood => WoodCapacity,
-                ResourceType.Stone => StoneCapacity,
-                ResourceType.Fish => FishCapacity,
-                _ => throw new Exception($"Resource type {resourceType} not defined"),
-            };
+            var amount = 0f;
+            if (resourceType.HasFlag(ResourceType.Wood)) amount += WoodCapacity;
+            if (resourceType.HasFlag(ResourceType.Stone)) amount += StoneCapacity;
+            if (resourceType.HasFlag(ResourceType.Fish)) amount += FishCapacity;
+
+            return amount;
         }
 
 
         public override float GetStorageCapacityLeft(ResourceType type)
         {
-            ValidateResourceTypeIsPure(type);
+            //ValidateResourceTypeIsPure(type);
 
             var currentResources = GetResourcesOfType(type);
             var capacity = GetResourceCapacity(type);

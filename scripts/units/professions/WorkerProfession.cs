@@ -15,6 +15,7 @@ using SacaSimulationGame.scripts.naturalResources;
 using SacaSimulationGame.scripts.helpers;
 using SacaSimulationGame.scripts.units.tasks;
 using System.Diagnostics;
+using Windows.Security.Cryptography.Core;
 
 namespace SacaSimulationGame.scripts.units.professions
 {
@@ -64,9 +65,22 @@ namespace SacaSimulationGame.scripts.units.professions
             return 1f / value;
         }
 
+
+        private BehaviourStatus InitiateTaskSelector(UnitBTContext context)
+        {
+            context.TasksToChooseFrom = [];
+            return BehaviourStatus.Succeeded;
+        }
+
+        private BehaviourStatus IncludeTaskManagerTasks(UnitBTContext context)
+        {
+            context.TasksToChooseFrom.AddRange(this.Unit.GameManager.TaskManager.GetTasks());
+            return BehaviourStatus.Succeeded;
+        }
+
         private IBehaviour<UnitBTContext> TaskExecutionSubtree => FluentBuilder.Create<UnitBTContext>()
             .Sequence("Perform task")
-                
+                .Do("",InitiateTaskSelector).Do("",IncludeTaskManagerTasks)
                 .RandomSelector("Task selector")
                     .Sequence("TASK VALIDATION: Remove resources from resource building")
                         .Subtree(RemoveResourcesFromResourceBuildings)
@@ -100,7 +114,7 @@ namespace SacaSimulationGame.scripts.units.professions
         public BehaviourStatus FindTask<T>(UnitBTContext context, Func<T, bool> condition, Func<IEnumerable<T>, IOrderedEnumerable<T>> orderCriteria) where T : UnitTask
         {
             var type = typeof(T);
-            var availableTasks = this.Unit.GameManager.TaskManager.GetTasks()
+            var availableTasks = context.TasksToChooseFrom
                 .Where(ut => type.Equals(ut.GetType()))
                 .Select(t=> (T)t)
                 .Where(t=> condition(t))
@@ -155,7 +169,6 @@ namespace SacaSimulationGame.scripts.units.professions
                 .Do("Find resource building to empty", FindResourceCollectingBuildingToEmpty)
                 .Do("Find Path", FindPathToDestination)
                 .Do("follow path", FollowPath)
-            //TODO: finish this
                 .Do("Pick up resource", PickUpResources)
             .End()
         .Build();
@@ -165,18 +178,30 @@ namespace SacaSimulationGame.scripts.units.professions
             var task = context.AssignedTask as PickupResourcesTask;
             var building = task.Building.Instance as StorageBuildingBase;
 
+            bool succeed = false;
             foreach (var resourceType in building.StoredResources.OutputResourceTypes.GetActiveFlags())
             {
                 var spaceLeft = Unit.Inventory.GetStorageCapacityLeft(resourceType);
                 var amountTaken = building.StoredResources.RemoveResource(resourceType, spaceLeft);
                 if (spaceLeft > 0)
                 {
+                    succeed = true;
                     Unit.Inventory.AddResource(resourceType, amountTaken);
                 }
             }
 
-            GD.Print("pick up resources succeed");
-            return BehaviourStatus.Succeeded;
+
+            if (succeed)
+            {
+                GD.Print("pick up resources succeed");
+                return BehaviourStatus.Succeeded;
+            }
+
+            else
+            {
+                GD.Print("pick up resources failed");
+                return BehaviourStatus.Failed;
+            }
         }
 
 
@@ -385,13 +410,34 @@ namespace SacaSimulationGame.scripts.units.professions
         public BehaviourStatus FindResourceDropoffPoint(UnitBTContext context)
         {
             var storagebuildings = from b in Unit.BuildingManager.GetBuildings()
-                                   where b.Instance.BuildingCompleted && b.Instance.IsResourceStorage
+                                   where b.Instance.BuildingCompleted && b.Instance.IsResourceStorage 
 
                                    //orderby b.IsUnreachableCounter, b.GetNrOfAssignedUnits descending
                                    select b.Instance as StorageBuildingBase;
 
+
+            bool validResourceBuildingCondition(StorageBuildingBase b)
+            {
+                if (b.StorageStrategy != StorageStrategyEnum.KeepResourcesUntilNeeded) return false;
+
+                //conditions: either the stored resource type is None but it allows for the
+                var overlappingResourceType = b.StoredResources.InputResourceTypes & Unit.Inventory.TypesOfResourcesStored;
+                if (overlappingResourceType == 0)
+                {
+                    return false;
+                }
+
+                if(b.StoredResources.GetStorageCapacityLeft(overlappingResourceType) == 0)
+                {
+                    return false;
+                }         
+
+                return true;
+            }
+
+
             var sortedStoragebuildings = from b in storagebuildings
-                    where (b.StoredResources.TypesOfResourcesStored & Unit.Inventory.TypesOfResourcesStored) > 0
+                    where validResourceBuildingCondition(b)
                     orderby _getWeightedResourceDropoffPointValue(b, Unit) descending
                     select b;
 

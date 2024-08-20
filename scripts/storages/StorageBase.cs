@@ -43,7 +43,6 @@ namespace SacaSimulationGame.scripts.buildings.storages
 
         public float GetResourcesOfType(ResourceType resourceType)
         {
-            //ValidateResourceTypeIsPure(resourceType);
             float resources = 0;
             var resourceFound = false;
 

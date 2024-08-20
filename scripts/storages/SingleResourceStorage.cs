@@ -16,14 +16,21 @@ namespace SacaSimulationGame.scripts.buildings.storages
         [Export] public float MaxCapacity { get; set; }
         [Export] public ResourceType StorableResources { get; set; } = ResourceType.AllResources;
         public bool HasResourcesToPickup { get; set; } = false;
-        public ResourceType CurrentResourceStored { get; protected set; } = 0;
-        public override ResourceType InputResourceTypes { get; }
 
-        public override ResourceType OutputResourceTypes { get; }
+        private ResourceType _currentResourceStored = 0;
+        public ResourceType CurrentResourceStored { 
+            get => _currentResourceStored; 
+            protected set {
+                _currentResourceStored = value;
+            } 
+        }
 
-        
+        public override ResourceType InputResourceTypes => CurrentResourceStored == 0 ? StorableResources : CurrentResourceStored;
 
-        public override float AddResource(ResourceType resourceType, float amount)
+        public override ResourceType OutputResourceTypes => CurrentResourceStored;
+
+
+    public override float AddResource(ResourceType resourceType, float amount)
         {
             HasResourcesToPickup = true;
 
