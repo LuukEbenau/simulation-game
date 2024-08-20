@@ -12,6 +12,7 @@
   <ItemGroup>
     <Folder Include="assets\" />
     <Folder Include="assets\buildings\" />
+    <Folder Include="scripts\gui\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

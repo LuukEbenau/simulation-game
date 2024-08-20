@@ -184,9 +184,10 @@ namespace SacaSimulationGame.scripts.managers
         }
 
 
+
         private void HandleHoverBehaviour(double delta)
         {
-            if (selectedBuilding != null)
+            if (selectedBuilding != null && !GuiIsHovered)
             {
                 timeElapsedSinceLastHoverUpdate += delta;
                 if (timeElapsedSinceLastHoverUpdate > hoverIndicatorUpdateInterval)

@@ -25,12 +25,17 @@ namespace SacaSimulationGame.scripts.managers
 
         private readonly float _buildingHeight = 0.25f;
 
+        private bool GuiIsHovered => BottomMenu.IsHovered;
+
+        [Export]
+        public BottomMenu BottomMenu { get; set; }
+
         public struct BuildingTypeIdPair(int id, BuildingType type, BuildingBase building)
         {
             public int Id = id;
             public BuildingType Type = type;
             public BuildingBase Building = building;
-            public bool BuildingCompleted => Building == null ? false : Building.BuildingCompleted;
+            public readonly bool BuildingCompleted => Building != null && Building.BuildingCompleted;
         }
 
         private readonly Vector2I _defaultVec = new(int.MinValue, int.MinValue);
@@ -90,8 +95,76 @@ namespace SacaSimulationGame.scripts.managers
             buildingData.Add(dummyPlayer, []);
 
             OccupiedCells = new BuildingTypeIdPair[MapManager.MapWidth, MapManager.MapHeight];
+
+            BottomMenu.MenuSelectionChanged += BottomMenu_MenuSelectionChanged;
         }
 
+        private void BottomMenu_MenuSelectionChanged(BuildingType buildingType)
+        {
+            if (buildingType == BuildingType.House)
+            {
+                ChangeBuildingSelection(new HouseBlueprint());
+            }
+            else if (buildingType == BuildingType.Road)
+            {
+                ChangeBuildingSelection(new RoadBlueprint());
+            }
+            else if (buildingType == BuildingType.FishingPost)
+            {
+                ChangeBuildingSelection(new FishingPostBlueprint());
+            }
+            else if (buildingType == BuildingType.Stockpile)
+            {
+                ChangeBuildingSelection(new StockpileBlueprint());
+            }
+            else if (buildingType == BuildingType.Lumberjack)
+            {
+                ChangeBuildingSelection(new LumberjackBlueprint());
+            }
+            else if (buildingType == BuildingType.Bridge)
+            {
+                ChangeBuildingSelection(new BridgeBlueprint());
+            }
+            else if (buildingType == BuildingType.None)
+            {
+                GD.Print("no buildingtype selected");
+                selectedBuilding = null;
+                ClearHoverIndicator();
+            }
+            else
+            {
+                GD.Print($"unknown building type: {buildingType}");
+            }
+            //if (@event.IsActionPressed("Action Slot 1"))
+            //{
+            //    ChangeBuildingSelection(new HouseBlueprint());
+            //}
+            //else if (@event.IsActionPressed("Action Slot 2"))
+            //{
+            //    ChangeBuildingSelection(new RoadBlueprint());
+            //}
+            //else if (@event.IsActionPressed("Action Slot 3"))
+            //{
+            //    ChangeBuildingSelection(new FishingPostBlueprint());
+            //}
+            //else if (@event.IsActionPressed("Action Slot 4"))
+            //{
+            //    ChangeBuildingSelection(new StockpileBlueprint());
+            //}
+            //else if (@event.IsActionPressed("Action Slot 5"))
+            //{
+            //    ChangeBuildingSelection(new LumberjackBlueprint());
+            //}
+            //else if (@event.IsActionPressed("Action Slot 6"))
+            //{
+            //    ChangeBuildingSelection(new BridgeBlueprint());
+            //}
+            //else if (@event.IsActionPressed("Cancel Selection"))
+            //{
+            //    selectedBuilding = null;
+            //    ClearHoverIndicator();
+            //}
+        }
 
         public override void _Process(double delta)
         {
@@ -196,36 +269,6 @@ namespace SacaSimulationGame.scripts.managers
 
         public override void _Input(InputEvent @event)
         {
-            if (@event.IsActionPressed("Action Slot 1"))
-            {
-                ChangeBuildingSelection(new HouseBlueprint());
-            }
-            else if (@event.IsActionPressed("Action Slot 2"))
-            {
-                ChangeBuildingSelection(new RoadBlueprint());
-            }
-            else if (@event.IsActionPressed("Action Slot 3"))
-            {
-                ChangeBuildingSelection(new FishingPostBlueprint());
-            }
-            else if (@event.IsActionPressed("Action Slot 4"))
-            {
-                ChangeBuildingSelection(new StockpileBlueprint());
-            }
-            else if (@event.IsActionPressed("Action Slot 5"))
-            {
-                ChangeBuildingSelection(new LumberjackBlueprint());
-            }
-            else if (@event.IsActionPressed("Action Slot 6"))
-            {
-                ChangeBuildingSelection(new BridgeBlueprint());
-            }
-            else if (@event.IsActionPressed("Cancel Selection"))
-            {
-                selectedBuilding = null;
-                ClearHoverIndicator();
-            }
-
             if (@event.IsActionPressed("Rotate Building"))
             {
 
@@ -238,7 +281,7 @@ namespace SacaSimulationGame.scripts.managers
             }
 
             // For path/area selection
-            if (@event.IsActionReleased("Build") && selectedBuilding != null && SelectionPathStart != Vector2I.MaxValue)
+            if (!GuiIsHovered && @event.IsActionReleased("Build") && selectedBuilding != null && SelectionPathStart != Vector2I.MaxValue)
             {
                 if ((SelectionMode.Path|SelectionMode.Line).HasFlag(selectedBuilding.SelectionMode))
                 {
