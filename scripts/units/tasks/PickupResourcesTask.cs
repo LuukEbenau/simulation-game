@@ -8,8 +8,12 @@ using SacaSimulationGame.scripts.buildings.DO;
 
 namespace SacaSimulationGame.scripts.units.tasks
 {
-    public class PickupResourcesTask(BuildingDataObject building) : UnitTask
+    public class PickupResourcesTask : UnitTask
     {
+        public PickupResourcesTask(BuildingDataObject building)
+        {
+            this.Building = building;
+        }
         public bool _isFinished = false;
         public void Finish()
         {
@@ -17,7 +21,7 @@ namespace SacaSimulationGame.scripts.units.tasks
         }
         public override bool IsFinished => _isFinished;
         public override Vector3 TaskPosition => Building.Instance.GlobalPosition;
-        public BuildingDataObject Building { get; } = building;
+        public BuildingDataObject Building { get; }
 
 
 

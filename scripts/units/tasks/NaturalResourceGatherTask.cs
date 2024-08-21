@@ -9,10 +9,14 @@ using SacaSimulationGame.scripts.naturalResources;
 
 namespace SacaSimulationGame.scripts.units.tasks
 {
-    public class NaturalResourceGatherTask(NaturalResource naturalResource) : UnitTask
+    public class NaturalResourceGatherTask : UnitTask
     {
+        public NaturalResourceGatherTask(NaturalResource naturalResource)
+        {
+            this.Resource = naturalResource;
+        }
         public override bool IsFinished => !Resource.IsInsideTree() || this.Resource.GetNrOfResourcesLeft() == 0;
-        public NaturalResource Resource { get; private set; } = naturalResource;
+        public NaturalResource Resource { get; private set; }
 
         public override Vector3 TaskPosition
         {

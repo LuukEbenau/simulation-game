@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Godot;
 using SacaSimulationGame.scripts.naturalResources;
-using Windows.Services.Maps;
 
 namespace SacaSimulationGame.scripts.managers
 {
@@ -13,7 +12,7 @@ namespace SacaSimulationGame.scripts.managers
     {
         [Export] public PackedScene TreeModel { get; set; }
 
-        public List<NaturalResource> NaturalResources { get; set; } = [];
+        public List<NaturalResource> NaturalResources { get; set; } = new List<NaturalResource> { };
 
         public GameManager GameManager { get; set; }
 

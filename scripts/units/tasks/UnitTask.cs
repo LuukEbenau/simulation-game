@@ -24,7 +24,7 @@ namespace SacaSimulationGame.scripts.units.tasks
         // Deliver resources to building?
         // IDEA: make everything a tasks, so we can chain tasks together. Some tasks have as prerequirement other tasks, and create new tasks afterwards.
         public abstract bool IsFinished { get; }
-        public List<UnitTask> FollowUpTasks { get; set; } = [];
+        public List<UnitTask> FollowUpTasks { get; set; } = new();
 
         public abstract Vector3 TaskPosition { get; }
 

@@ -8,10 +8,15 @@ using Godot;
 
 namespace SacaSimulationGame.scripts.pathfinding
 {
-    public readonly struct PathfindingNodeGrid(Vector2I cell, float speedMultiplier)
+    public readonly struct PathfindingNodeGrid
     {
-        public Vector2I Cell { get; } = cell;
-        public float SpeedMultiplier { get; } = speedMultiplier;
+        public PathfindingNodeGrid(Vector2I cell, float speedMultiplier)
+        {
+            this.Cell = cell;
+            this.SpeedMultiplier = speedMultiplier;
+        }
+        public Vector2I Cell { get; }
+        public float SpeedMultiplier { get; }
         public override readonly bool Equals([NotNullWhen(true)] object obj)
         {
             if (obj is PathfindingNodeGrid n)

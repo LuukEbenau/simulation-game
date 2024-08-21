@@ -13,9 +13,9 @@ namespace SacaSimulationGame.scripts.map
         private string MAPDATA_FILE;
         private float raycastStartHeight = 150.0f;
         private float raycastLength = 200.0f;
-        public Vector2I[] directions = [
-            new(1, 0), new(-1, 0), new(0, 1), new(0, -1)
-        ];
+        public Vector2I[] directions = new Vector2I[]{ 
+            new Vector2I (1, 0), new Vector2I(-1, 0), new Vector2I(0, 1), new Vector2I(0, -1)
+        };
 
         private WorldMapManager MapManager;
         public override void _Ready()

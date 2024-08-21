@@ -12,7 +12,6 @@ using SacaSimulationGame.scripts.naturalResources;
 using SacaSimulationGame.scripts.pathfinding;
 using SacaSimulationGame.scripts.units.professions.misc;
 using SacaSimulationGame.scripts.units.tasks;
-using Windows.Services.Maps;
 
 namespace SacaSimulationGame.scripts.units.professions
 {

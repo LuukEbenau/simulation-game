@@ -48,7 +48,6 @@ pause_menu_packed = ExtResource("5_86gef")
 [node name="LevelLoader" type="Node" parent="." node_paths=PackedStringArray("level_container")]
 script = ExtResource("6_y03ga")
 level_container = NodePath("../ViewportContainer/ConfigurableSubViewport")
-files = Array[String](["res://scenes/GameScene/Levels/Level1.tscn"])
 directory = "res://scenes/GameScene/Levels"
 
 [node name="BackgroundMusicPlayer" parent="." instance=ExtResource("7_aibl4")]

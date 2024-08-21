@@ -29,7 +29,7 @@ namespace SacaSimulationGame.scripts.buildings
         public delegate void OnBuildingCompletedEventHandler();
 
         public readonly int MaxNumberOfEmployees = 1;
-        public List<Unit> WorkingEmployees { get; set; } = [];
+        public List<Unit> WorkingEmployees { get; set; } = new();
         public bool AddEmployee(Unit employee)
         {
             if (WorkingEmployees.Count < MaxNumberOfEmployees)

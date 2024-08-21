@@ -6,7 +6,6 @@ using SacaSimulationGame.scripts.pathfinding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SacaSimulationGame.scripts.managers
 {
@@ -25,7 +24,7 @@ namespace SacaSimulationGame.scripts.managers
                 //Find path with astar from start to destination, in found use this path to visualise
                 if (SelectionPathStart == lastHoveredCell)
                 {
-                    SelectionPath = [new PathfindingNodeGrid(lastHoveredCell, 1.0f)]; // also allow for just building a single cell
+                    SelectionPath = new() { new PathfindingNodeGrid(lastHoveredCell, 1.0f) }; // also allow for just building a single cell
                 }
                 else
                 {
@@ -82,7 +81,7 @@ namespace SacaSimulationGame.scripts.managers
                 //Find path with astar from start to destination, in found use this path to visualise
                 if (SelectionPathStart == lastHoveredCell)
                 {
-                    SelectionPath = [new PathfindingNodeGrid(lastHoveredCell, 1.0f)]; // also allow for just building a single cell
+                    SelectionPath = new() { new PathfindingNodeGrid(lastHoveredCell, 1.0f) }; // also allow for just building a single cell
                 }
                 else
                 {
@@ -249,7 +248,7 @@ namespace SacaSimulationGame.scripts.managers
             int shapeWidth = blueprint.CellConstraints.GetLength(0);
             int shapeLength = blueprint.CellConstraints.GetLength(1);
 
-            List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)> celldata = [];
+            List<(Vector2I cell, MapDataItem cellData, BuildabilityStatus isBuildable)> celldata = new();
 
             MapDataItem baseCellData = null;
             for (int x = 0; x < shapeWidth; x++)
@@ -379,7 +378,7 @@ namespace SacaSimulationGame.scripts.managers
         }
 
         #region visualisation of hover
-        private readonly List<MeshInstance3D> hoverVisualiseMesh = [];
+        private readonly List<MeshInstance3D> hoverVisualiseMesh = new();
         private MeshInstance3D GetHoverIndicator(int indicatorIndex, Vector3I cellSize)
         {
             if (indicatorIndex < this.hoverVisualiseMesh.Count)

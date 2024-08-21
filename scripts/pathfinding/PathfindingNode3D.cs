@@ -8,10 +8,15 @@ using Godot;
 
 namespace SacaSimulationGame.scripts.pathfinding
 {
-    public struct PathfindingNode3D(Vector3 position, float speedMultiplier)
+    public struct PathfindingNode3D
     {
-        public Vector3 Position { get; } = position;
-        public float SpeedMultiplier { get; } = speedMultiplier;
+        public PathfindingNode3D(Vector3 position, float speedMultiplier)
+        {
+            this.Position = position;
+            this.SpeedMultiplier = speedMultiplier;
+        }
+        public Vector3 Position { get; }
+        public float SpeedMultiplier { get; } 
 
         public override readonly string ToString()
         {

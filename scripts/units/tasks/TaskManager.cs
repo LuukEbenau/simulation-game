@@ -9,7 +9,7 @@ namespace SacaSimulationGame.scripts.units.tasks
 {
     public partial class TaskManager : Node3D, ITaskManager
     {
-        private List<UnitTask> UnitTaskQueue { get; set; } = [];
+        private List<UnitTask> UnitTaskQueue { get; set; } = new List<UnitTask> { };
 
         public IEnumerable<UnitTask> GetTasks() => GetUnitTasksResursive(UnitTaskQueue.ToList());
 

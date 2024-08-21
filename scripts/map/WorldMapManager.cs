@@ -5,7 +5,7 @@ using SacaSimulationGame.scripts.pathfinding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Windows.Services.Maps;
+
 namespace SacaSimulationGame.scripts.managers
 {
 

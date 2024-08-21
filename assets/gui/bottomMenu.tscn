@@ -8,29 +8,37 @@
 [ext_resource type="Texture2D" uid="uid://fwbhuf3qhnf2" path="res://assets/buildings/models/building/lumberjack/icon.png" id="4_vd1f8"]
 [ext_resource type="Texture2D" uid="uid://c4d8t2u7ifhco" path="res://assets/buildings/models/building/bridge/icon.png" id="6_tbika"]
 
-[node name="BottomMenu" type="CanvasLayer"]
-follow_viewport_enabled = true
+[node name="BottomMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 0
 script = ExtResource("1_1vshc")
 
 [node name="MenuItems" type="ItemList" parent="."]
-offset_top = 545.0
+layout_mode = 0
+offset_top = 604.0
 offset_right = 1280.0
 offset_bottom = 720.0
 mouse_force_pass_scroll_events = false
+max_text_lines = 2
+auto_height = true
 item_count = 6
-max_columns = 4
+max_columns = 14
 same_column_width = true
 icon_mode = 0
 icon_scale = 0.1
 fixed_icon_size = Vector2i(480, 480)
 item_0/text = "House"
 item_0/icon = ExtResource("1_3nvf2")
+item_0/disabled = true
 item_1/text = "Road"
 item_1/icon = ExtResource("2_e26dq")
+item_1/disabled = true
 item_2/text = "Fishing Post"
 item_2/icon = ExtResource("3_d6upg")
+item_2/disabled = true
 item_3/text = "Stockpile"
 item_3/icon = ExtResource("4_tv1w2")
+item_3/disabled = true
 item_4/text = "Lumberjack"
 item_4/icon = ExtResource("4_vd1f8")
 item_5/text = "Bridge"

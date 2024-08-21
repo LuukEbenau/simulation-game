@@ -97,10 +97,11 @@ namespace SacaSimulationGame.scripts.managers
             BuildingManager.BuildBuilding(spawnCell + new Vector2I(2, 1), roadBlueprint, true, true, default);
             BuildingManager.BuildBuilding(spawnCell + new Vector2I(2, 2), roadBlueprint, true, true, default);
 
-            (UnitDataObject unit, Vector2I offset)[] unitsToSpawn = [
-                (new UnitDataObject(UnitGender.FEMALE, ProfessionType.Builder), new Vector2I(2,-2)),
-                (new UnitDataObject(UnitGender.MALE,   ProfessionType.Worker ), new Vector2I(2,-3))
-            ];
+            (UnitDataObject unit, Vector2I offset)[] unitsToSpawn = new (UnitDataObject unit, Vector2I offset)[]
+            {
+                (new UnitDataObject(UnitGender.FEMALE, ProfessionType.Builder), new Vector2I(2, -2)),
+                (new UnitDataObject(UnitGender.MALE, ProfessionType.Worker), new Vector2I(2, -3))
+            };
             foreach (var (unit, offset) in unitsToSpawn)
             {
                 spawnSucces = false;

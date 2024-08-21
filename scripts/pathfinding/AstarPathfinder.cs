@@ -11,15 +11,19 @@ using SacaSimulationGame.scripts.map;
 namespace SacaSimulationGame.scripts.pathfinding
 {
 
-    public class AstarPathfinder(GameManager gameManager)
+    public class AstarPathfinder
     {
+        public AstarPathfinder(GameManager gameManager)
+        {
+            this.GameManager = gameManager;
+        }
         private readonly float roadSpeedMultiplier = 0.5f;
         private const float obstructedTerrainMultiplier = 1.5f;
 
         private readonly float heuristicCoefficient = 0.5f;
         private readonly float pathScoreCoefficient = 1f;
 
-        private GameManager GameManager { get; } = gameManager;
+        private GameManager GameManager { get; }
 
         private float GetSpeedAtCell(BuildingManager.BuildingTypeIdPair buildingType)
         {
@@ -49,7 +53,7 @@ namespace SacaSimulationGame.scripts.pathfinding
         /// <returns></returns>
         public List<PathfindingNodeGrid> FindPath(Vector2I start, Vector2I goal, CellType traversableTerrainType = CellType.GROUND, BuildingType obstacleBuildings = BuildingType.ObstacleBuildings, int maxIterationCount = 1000)
         {
-            var startCellObstacle = gameManager.BuildingManager.OccupiedCells[start.X, start.Y];
+            var startCellObstacle = GameManager.BuildingManager.OccupiedCells[start.X, start.Y];
             var startCellSpeed = GetSpeedAtCell(startCellObstacle);
             var startNode = new PathfindingNodeGrid(start, startCellSpeed);
 
@@ -68,7 +72,7 @@ namespace SacaSimulationGame.scripts.pathfinding
                 iCount++;
                 if(iCount>= maxIterationCount)
                 {
-                    return [];
+                    return new();
                 }
                 var current = openSet.Min.node;
                 if (current.Cell == goal)
@@ -77,11 +81,11 @@ namespace SacaSimulationGame.scripts.pathfinding
                 openSet.Remove(openSet.Min);
                 foreach (var neighbor in GetNeighbors(current.Cell))
                 {
-                    var cellExists = gameManager.MapManager.TryGetCell(neighbor, out var neighborData);
+                    var cellExists = GameManager.MapManager.TryGetCell(neighbor, out var neighborData);
                     if (!cellExists) continue;
                     
 
-                    var obstacleAtCell = gameManager.BuildingManager.OccupiedCells[neighbor.X, neighbor.Y];
+                    var obstacleAtCell = GameManager.BuildingManager.OccupiedCells[neighbor.X, neighbor.Y];
 
                     // if neighbor is the destination, we can exit
                     if (neighbor == goal)
@@ -131,7 +135,7 @@ namespace SacaSimulationGame.scripts.pathfinding
                 }
             }
 
-            return []; // Return empty list if no path found
+            return new(); // Return empty list if no path found
         }
 
         private List<PathfindingNodeGrid> ReconstructPath(Dictionary<PathfindingNodeGrid, PathfindingNodeGrid> cameFrom, PathfindingNodeGrid current)
@@ -158,12 +162,12 @@ namespace SacaSimulationGame.scripts.pathfinding
 
         private IEnumerable<Vector2I> GetNeighbors(Vector2I node)
         {
-            return[
+            return new List<Vector2I> {
                 new(node.X + 1, node.Y),
                 new(node.X - 1, node.Y),
                 new(node.X, node.Y + 1),
                 new(node.X, node.Y - 1)
-            ];
+            };
         }
 
         private class NodeComparer : IComparer<(float cost, PathfindingNodeGrid node)>

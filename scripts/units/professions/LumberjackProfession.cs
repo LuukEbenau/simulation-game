@@ -12,13 +12,14 @@ using SacaSimulationGame.scripts.managers;
 using SacaSimulationGame.scripts.naturalResources;
 using SacaSimulationGame.scripts.units.professions.misc;
 using SacaSimulationGame.scripts.units.tasks;
-using Windows.Services.Maps;
-using Windows.Web.Http.Headers;
+
 
 namespace SacaSimulationGame.scripts.units.professions
 {
-    public class LumberjackProfession(Unit unit) : Profession(unit)
+    public class LumberjackProfession : Profession
     {
+        public LumberjackProfession(Unit unit) : base(unit) { }
+
         private const float collectionRadius = 12.5f;
         protected const float treePlantingDuration = 7f;
 

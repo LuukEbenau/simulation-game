@@ -15,12 +15,13 @@ using SacaSimulationGame.scripts.naturalResources;
 using SacaSimulationGame.scripts.helpers;
 using SacaSimulationGame.scripts.units.tasks;
 using System.Diagnostics;
-using Windows.Security.Cryptography.Core;
+
 
 namespace SacaSimulationGame.scripts.units.professions
 {
-    public class WorkerProfession(Unit unit) : Profession(unit)
+    public class WorkerProfession : Profession
     {
+        public WorkerProfession(Unit unit) : base(unit) { }
         protected override BuildingType ProfessionBuildingType => BuildingType.None;
 
         private readonly Random _rnd = new();
@@ -68,7 +69,7 @@ namespace SacaSimulationGame.scripts.units.professions
 
         private BehaviourStatus InitiateTaskSelector(UnitBTContext context)
         {
-            context.TasksToChooseFrom = [];
+            context.TasksToChooseFrom = new();
             return BehaviourStatus.Succeeded;
         }
 

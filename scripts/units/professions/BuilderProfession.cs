@@ -12,12 +12,12 @@ using SacaSimulationGame.scripts.buildings.DO;
 using SacaSimulationGame.scripts.managers;
 using SacaSimulationGame.scripts.units.professions.misc;
 using SacaSimulationGame.scripts.units.tasks;
-using Windows.Services.Maps;
 
 namespace SacaSimulationGame.scripts.units.professions
 {
-    public class BuilderProfession(Unit unit) : Profession(unit)
+    public class BuilderProfession : Profession
     {
+        public BuilderProfession(Unit unit) : base(unit) { }
         protected override BuildingType ProfessionBuildingType => BuildingType.None;
         protected override float ActivitySpeedBaseline => 3;
 

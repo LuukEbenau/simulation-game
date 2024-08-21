@@ -14,9 +14,14 @@ namespace SacaSimulationGame.scripts.units.dataObjects
         MALE = 1,
         FEMALE = 2
     }
-    public class UnitDataObject(UnitGender gender,  ProfessionType profession)
+    public class UnitDataObject
     {
-        public ProfessionType Profession { get; } = profession;
-        public UnitGender Gender { get; } = gender;
+        public UnitDataObject(UnitGender gender, ProfessionType profession)
+        {
+            this.Gender = gender;
+            this.Profession = profession;
+        }
+        public ProfessionType Profession { get; }
+        public UnitGender Gender { get; }
     }
 }

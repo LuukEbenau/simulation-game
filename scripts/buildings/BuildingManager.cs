@@ -30,11 +30,17 @@ namespace SacaSimulationGame.scripts.managers
         [Export]
         public BottomMenu BottomMenu { get; set; }
 
-        public struct BuildingTypeIdPair(int id, BuildingType type, BuildingBase building)
+        public struct BuildingTypeIdPair
         {
-            public int Id = id;
-            public BuildingType Type = type;
-            public BuildingBase Building = building;
+            public BuildingTypeIdPair(int id, BuildingType type, BuildingBase building)
+            {
+                this.Id = id;
+                this.Building = building;
+                this.Type = type;
+            }
+            public int Id;
+            public BuildingType Type ;
+            public BuildingBase Building;
             public readonly bool BuildingCompleted => Building != null && Building.BuildingCompleted;
         }
 
@@ -51,7 +57,7 @@ namespace SacaSimulationGame.scripts.managers
         /// <summary>
         /// Contains all buildings for each player
         /// </summary>
-        private Dictionary<Player, List<BuildingDataObject>> buildingData = [];
+        private Dictionary<Player, List<BuildingDataObject>> buildingData = new();
         public List<BuildingDataObject> GetBuildings()
         {
             return buildingData.GetValueOrDefault(dummyPlayer);
@@ -92,7 +98,7 @@ namespace SacaSimulationGame.scripts.managers
             this.Camera = GetViewport().GetCamera3D();
 
             dummyPlayer = new Player();
-            buildingData.Add(dummyPlayer, []);
+            buildingData.Add(dummyPlayer, new());
 
             OccupiedCells = new BuildingTypeIdPair[MapManager.MapWidth, MapManager.MapHeight];
 
@@ -194,7 +200,7 @@ namespace SacaSimulationGame.scripts.managers
             else if (SelectionPath != null && SelectionPath.Count >= 1)
             {
                 bool isPathBuildable = true;
-                List<PathfindingNodeGrid> pathToBuild = [];
+                List<PathfindingNodeGrid> pathToBuild = new();
                 for(int i = 0; i< SelectionPath.Count; i++)
                 //foreach (var pathCell in SelectionPath)
                 {
@@ -294,10 +300,11 @@ namespace SacaSimulationGame.scripts.managers
                 ClearHoverIndicator();
             }
 
+            
 
             if (selectedBuilding != null && lastHoveredCell != default)
             {
-                if (@event.IsActionPressed("Build"))
+                if (!GuiIsHovered && @event.IsActionPressed("Build"))
                 {
                     if (CheckBuildingBuildable(lastHoveredCell, selectedBuilding, visualiseHover:false).All(b => b.isBuildable != BuildabilityStatus.BLOCKED))
                     {
@@ -460,7 +467,7 @@ namespace SacaSimulationGame.scripts.managers
                 if (resourcesToRemoveBeforeBuilding.Count > 0)
                 {
                     var preTasks = resourcesToRemoveBeforeBuilding.Select(t => t as UnitTask).ToList();
-                    taskToExecute = new CollectionTask(preTasks) { FollowUpTasks = [buildBuildingTask] };
+                    taskToExecute = new CollectionTask(preTasks) { FollowUpTasks = new List<UnitTask>{ buildBuildingTask } };
                 }
                 else
                 {
