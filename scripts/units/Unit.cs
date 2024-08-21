@@ -27,7 +27,7 @@ public partial class Unit : Node3D
     [Export]
     public PackedScene WorkerModel { get; set; }
     [Export] PackedScene LumberjackModel { get; set; }
-
+    [Export] PackedScene StoneMinerModel { get; set; }
     public Profession Profession { get; private set; }
     public UnitStats Stats { get; private set; } = new UnitStats { Speed = 5 };
     public StorageBase Inventory { get; private set; }
@@ -74,6 +74,10 @@ public partial class Unit : Node3D
             this.Profession = new LumberjackProfession(this);
             this.VisualModel = LumberjackModel.Instantiate<Node3D>();
             UnitName = $"Lumberjack {UnitIdx}";
+        }
+        else if (professionType == ProfessionType.StoneMiner) {
+            this.Profession = new StoneMinerProfession(this);
+            this.VisualModel = StoneMinerModel.Instantiate<Node3D>(); //TODO: make stoneminer model
         }
         else
         {

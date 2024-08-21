@@ -46,7 +46,7 @@ script = ExtResource("20_evoit")
 mode = 0
 textures = [[ExtResource("21_p1xbd"), ExtResource("22_b4nx6"), ExtResource("23_ii7ca")], [ExtResource("24_lxnfo"), ExtResource("25_phxqj"), ExtResource("26_yx6nf")]]
 
-[sub_resource type="Resource" id="Resource_i488d"]
+[sub_resource type="Resource" id="Resource_pxx6b"]
 script = ExtResource("29_gp8l2")
 MatShaderType = 1
 mat_albedo_color_first = Color(0, 0.15, 0, 0)
@@ -74,7 +74,7 @@ mat_edge_fade = 0.25
 LodLod0Distance = 50.0
 _selectedShader = 1
 
-[sub_resource type="Curve3D" id="Curve3D_dkfma"]
+[sub_resource type="Curve3D" id="Curve3D_obido"]
 resource_local_to_scene = true
 bake_interval = 0.05
 _data = {
@@ -208,9 +208,9 @@ transform = Transform3D(1, 0, 0, 0, 0.173648, 0.984808, 0, -0.984808, 0.173648, 
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133.349, -0.5, -256.646)
 visible = false
 script = ExtResource("27_t3wvm")
-ShaderSettings = SubResource("Resource_i488d")
+ShaderSettings = SubResource("Resource_pxx6b")
 PointWidths = [1.0, 11.1529, 9.89946, 12.6499, 12.9542, 12.5382, 10.2224, 13.528, 18.2722, 13.807, 17.5397, 22.8556, 13.1956, 18.1966, 15.4319, 14.9793, 21.8071, 19.0437, 20.3709, 17.991, 15.3338, 15.8683, 15.8851, 14.1605, 17.1658, 11.7789, 11.5452, 13.9985, 13.8821, 14.9215]
-Curve = SubResource("Curve3D_dkfma")
+Curve = SubResource("Curve3D_obido")
 
 [node name="RiverManagerMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133.349, -0.5, -256.646)
@@ -237,3 +237,4 @@ current = true
 
 [node name="BackgroundMusicPlayer" parent="." instance=ExtResource("32_k2wjg")]
 stream = SubResource("AudioStreamPlaylist_ruodm")
+volume_db = 1.891

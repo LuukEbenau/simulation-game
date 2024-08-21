@@ -28,12 +28,13 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
             var l2Con = new BuildingContraints { CellTypes = CellType.GROUND, ElevationConstraint = (float bh, float ch) => sizeConstraint(bh, ch, 0.66f), CalculateHeight = ch };
             var l3Con = new BuildingContraints { CellTypes = CellType.GROUND, ElevationConstraint = (float bh, float ch) => sizeConstraint(bh, ch, 1f),    CalculateHeight = ch };
 
-            CellConstraints = new BuildingContraints[4, 2]
+            CellConstraints = new BuildingContraints[5, 3]
             {
-                { baseCon, baseCon},
-                { l1Con,   l1Con},
-                { l2Con,   l2Con},
-                { l2Con,   l2Con}
+                { baseCon, baseCon, baseCon},
+                { baseCon, baseCon, baseCon},
+                { l1Con,   l1Con, l1Con},
+                { l2Con,   l2Con, l2Con},
+                { l3Con,   l3Con, l3Con}
             };
         }
     }

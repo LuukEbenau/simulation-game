@@ -10,6 +10,7 @@ namespace SacaSimulationGame.scripts.units.professions.misc
     {
         Worker = 0,
         Builder = 1,
-        Lumberjack = 4
+        Lumberjack = 4,
+        StoneMiner = 8
     }
 }

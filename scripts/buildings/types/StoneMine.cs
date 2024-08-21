@@ -25,7 +25,7 @@ namespace SacaSimulationGame.scripts.buildings
 
         private void House_OnBuildingCompleted()
         {
-            GameManager.UnitManager.SpawnUnit(GlobalPosition, new UnitDataObject(UnitGender.MALE, ProfessionType.Lumberjack));
+            GameManager.UnitManager.SpawnUnit(GlobalPosition, new UnitDataObject(UnitGender.MALE, ProfessionType.StoneMiner));
         }
 
 
