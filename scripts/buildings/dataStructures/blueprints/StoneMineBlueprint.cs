@@ -10,33 +10,30 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
 {
     public class StoneMineBlueprint : BuildingBlueprintBase
     {
-        public override BuildingType Type => BuildingType.Stockpile;
+        public override BuildingType Type => BuildingType.StoneMine;
         public override BuildingContraints[,] CellConstraints { get; }
         public override SelectionMode SelectionMode => SelectionMode.Single;
         public StoneMineBlueprint()
         {
-            const float elevationHeight = 5f; //TODO: find the right number
+            const float elevationHeight = 1.5f; //TODO: find the right number
 
-            static bool halfSizeConstraint(float buildingBaseHeight, float cellHeight)
+            static bool sizeConstraint(float buildingBaseHeight, float cellHeight, float percent)
             {
-                return (buildingBaseHeight - cellHeight) >= elevationHeight / 2f;
-            }
-            static bool fullSizeConstraint(float buildingBaseHeight, float cellHeight)
-            {
-                return (buildingBaseHeight - cellHeight) >= elevationHeight;
+                return cellHeight - buildingBaseHeight  >= elevationHeight * percent;
             }
 
             CalculateCellHeightDelegate ch = (float cellHeight, float baseHeight) => cellHeight;
             var baseCon = new BuildingContraints { CellTypes = CellType.GROUND, MaxSlope = 15f, CalculateHeight = ch };
-            var l1Con = new BuildingContraints { CellTypes = CellType.GROUND, ElevationConstraint = halfSizeConstraint, CalculateHeight = ch };
-            var l2Con = new BuildingContraints { CellTypes = CellType.GROUND, ElevationConstraint = fullSizeConstraint, CalculateHeight = ch };
+            var l1Con = new BuildingContraints { CellTypes = CellType.GROUND, ElevationConstraint = (float bh, float ch) => sizeConstraint(bh,ch, 0.33f),  CalculateHeight = ch };
+            var l2Con = new BuildingContraints { CellTypes = CellType.GROUND, ElevationConstraint = (float bh, float ch) => sizeConstraint(bh, ch, 0.66f), CalculateHeight = ch };
+            var l3Con = new BuildingContraints { CellTypes = CellType.GROUND, ElevationConstraint = (float bh, float ch) => sizeConstraint(bh, ch, 1f),    CalculateHeight = ch };
 
             CellConstraints = new BuildingContraints[4, 2]
             {
                 { baseCon, baseCon},
-                { l1Con, l1Con},
-                { l2Con,l2Con},
-                { l2Con, l2Con}
+                { l1Con,   l1Con},
+                { l2Con,   l2Con},
+                { l2Con,   l2Con}
             };
         }
     }

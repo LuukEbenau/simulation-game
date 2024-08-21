@@ -22,6 +22,7 @@ namespace SacaSimulationGame.scripts.managers
         [Export] public PackedScene StockpileBuilding { get; set; }
         [Export] public PackedScene LumberjackBuilding { get; set; }
         [Export] public PackedScene BridgeBuilding { get; set; }
+        [Export] public PackedScene StoneMineBuilding { get; set; }
 
         private readonly float _buildingHeight = 0.25f;
 
@@ -130,6 +131,10 @@ namespace SacaSimulationGame.scripts.managers
             else if (buildingType == BuildingType.Bridge)
             {
                 ChangeBuildingSelection(new BridgeBlueprint());
+            }
+            else if(buildingType == BuildingType.StoneMine)
+            {
+                ChangeBuildingSelection(new StoneMineBlueprint());
             }
             else if (buildingType == BuildingType.None)
             {
@@ -353,6 +358,10 @@ namespace SacaSimulationGame.scripts.managers
             else if (buildingBlueprint is BridgeBlueprint)
             {
                 scene = this.BridgeBuilding;
+            }
+            else if(buildingBlueprint is StoneMineBlueprint)
+            {
+                scene = this.StoneMineBuilding;
             }
             else
             {

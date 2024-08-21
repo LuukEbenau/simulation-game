@@ -1,4 +1,4 @@
-[gd_scene load_steps=47 format=4 uid="uid://1pdv76fc2dve"]
+[gd_scene load_steps=48 format=4 uid="uid://1pdv76fc2dve"]
 
 [ext_resource type="PackedScene" uid="uid://csxde7bp54hno" path="res://assets/gui/bottomMenu.tscn" id="1_g7vb7"]
 [ext_resource type="Script" path="res://scripts/GameManager.cs" id="2_rtkar"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://bhiw5grenhi2c" path="res://assets/buildings/Stockpile.tscn" id="10_nqhhe"]
 [ext_resource type="PackedScene" uid="uid://wgp8mplor3b4" path="res://assets/buildings/lumberjack.tscn" id="11_daynp"]
 [ext_resource type="PackedScene" uid="uid://cd3rfbinjwfrd" path="res://assets/buildings/bridge.tscn" id="12_oov7e"]
+[ext_resource type="PackedScene" uid="uid://ddseo2tg1gut3" path="res://assets/buildings/stonemine.tscn" id="12_xs6mb"]
 [ext_resource type="Script" path="res://scripts/units/UnitManager.cs" id="13_frfiu"]
 [ext_resource type="PackedScene" uid="uid://cqnighva7bclx" path="res://assets/units/unit.tscn" id="14_64lah"]
 [ext_resource type="Script" path="res://scripts/naturalResources/NaturalResourceManager.cs" id="15_aa4gb"]
@@ -45,7 +46,7 @@ script = ExtResource("20_evoit")
 mode = 0
 textures = [[ExtResource("21_p1xbd"), ExtResource("22_b4nx6"), ExtResource("23_ii7ca")], [ExtResource("24_lxnfo"), ExtResource("25_phxqj"), ExtResource("26_yx6nf")]]
 
-[sub_resource type="Resource" id="Resource_kgwc6"]
+[sub_resource type="Resource" id="Resource_i488d"]
 script = ExtResource("29_gp8l2")
 MatShaderType = 1
 mat_albedo_color_first = Color(0, 0.15, 0, 0)
@@ -73,7 +74,7 @@ mat_edge_fade = 0.25
 LodLod0Distance = 50.0
 _selectedShader = 1
 
-[sub_resource type="Curve3D" id="Curve3D_1m8b1"]
+[sub_resource type="Curve3D" id="Curve3D_dkfma"]
 resource_local_to_scene = true
 bake_interval = 0.05
 _data = {
@@ -146,7 +147,7 @@ stream_6 = ExtResource("39_otrp3")
 script = ExtResource("2_rtkar")
 
 [node name="SpawnLocation" type="Node3D" parent="GameManager"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -68, 0, 36)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105.951, 0, 36)
 
 [node name="MapManager" type="Node3D" parent="GameManager"]
 script = ExtResource("3_4ett8")
@@ -167,6 +168,7 @@ FishingpostBuilding = ExtResource("9_vwl6h")
 StockpileBuilding = ExtResource("10_nqhhe")
 LumberjackBuilding = ExtResource("11_daynp")
 BridgeBuilding = ExtResource("12_oov7e")
+StoneMineBuilding = ExtResource("12_xs6mb")
 BottomMenu = NodePath("../../BottomMenu")
 
 [node name="UnitManager" type="Node3D" parent="GameManager"]
@@ -206,9 +208,9 @@ transform = Transform3D(1, 0, 0, 0, 0.173648, 0.984808, 0, -0.984808, 0.173648, 
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133.349, -0.5, -256.646)
 visible = false
 script = ExtResource("27_t3wvm")
-ShaderSettings = SubResource("Resource_kgwc6")
+ShaderSettings = SubResource("Resource_i488d")
 PointWidths = [1.0, 11.1529, 9.89946, 12.6499, 12.9542, 12.5382, 10.2224, 13.528, 18.2722, 13.807, 17.5397, 22.8556, 13.1956, 18.1966, 15.4319, 14.9793, 21.8071, 19.0437, 20.3709, 17.991, 15.3338, 15.8683, 15.8851, 14.1605, 17.1658, 11.7789, 11.5452, 13.9985, 13.8821, 14.9215]
-Curve = SubResource("Curve3D_1m8b1")
+Curve = SubResource("Curve3D_dkfma")
 
 [node name="RiverManagerMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133.349, -0.5, -256.646)

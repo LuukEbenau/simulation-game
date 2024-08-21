@@ -4,6 +4,7 @@ using SacaSimulationGame.scripts.buildings;
 using SacaSimulationGame.scripts.buildings.dataStructures.blueprints;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 public class BuildingMenuItem
@@ -11,6 +12,7 @@ public class BuildingMenuItem
     public string Name { get; set; }
     public Texture2D Icon { get; set; }
     public string Keybinding { get; set; }
+    public string ActionName { get; set; }
     public BuildingType Type { get; set; }
 }
 public partial class BottomMenu : Control
@@ -53,6 +55,7 @@ public partial class BottomMenu : Control
             new BuildingMenuItem{
                 Name = "House",
                 Icon = (Texture2D) ResourceLoader.Load("res://assets/buildings/models/building/house/icon.png"),
+                ActionName = "Build House",
                 Keybinding = GetKeybindingsOfAction("Build House"),
                 Type = BuildingType.House
             },
@@ -60,6 +63,7 @@ public partial class BottomMenu : Control
             {
                 Name = "Road",
                 Icon = (Texture2D)ResourceLoader.Load("res://assets/buildings/models/building/road/icon.png"),
+                ActionName = "Build Road",
                 Keybinding = GetKeybindingsOfAction("Build Road"),
                 Type = BuildingType.Road
             },
@@ -67,6 +71,7 @@ public partial class BottomMenu : Control
             {
                 Name = "Lumberjack",
                 Icon = (Texture2D)ResourceLoader.Load("res://assets/buildings/models/building/lumberjack/icon.png"),
+                ActionName = "Build Lumberjack",
                 Keybinding = GetKeybindingsOfAction("Build Lumberjack"),
                 Type = BuildingType.Lumberjack
             },
@@ -74,6 +79,7 @@ public partial class BottomMenu : Control
             {
                 Name = "Stockpile",
                 Icon = (Texture2D)ResourceLoader.Load("res://assets/buildings/models/building/stockpile/icon.png"),
+                ActionName = "Build Stockpile",
                 Keybinding = GetKeybindingsOfAction("Build Stockpile"),
                 Type = BuildingType.Stockpile
             },
@@ -81,6 +87,7 @@ public partial class BottomMenu : Control
             {
                 Name = "Fishing Post",
                 Icon = (Texture2D)ResourceLoader.Load("res://assets/buildings/models/building/fishingpost/icon.png"),
+                ActionName = "Build Fishing Post",
                 Keybinding = GetKeybindingsOfAction("Build Fishing Post"),
                 Type = BuildingType.FishingPost
             },
@@ -88,18 +95,28 @@ public partial class BottomMenu : Control
             {
                 Name = "Bridge",
                 Icon = (Texture2D)ResourceLoader.Load("res://assets/buildings/models/building/bridge/icon.png"),
+                ActionName = "Build Bridge",
                 Keybinding = GetKeybindingsOfAction("Build Bridge"),
                 Type = BuildingType.Bridge
+            },
+            new BuildingMenuItem
+            {
+                Name = "Stone Mine",
+                Icon = (Texture2D)ResourceLoader.Load("res://assets/buildings/models/building/stonemine/icon.png"),
+                ActionName = "Build Stone Mine",
+                Keybinding = GetKeybindingsOfAction("Build Stone Mine"),
+                Type = BuildingType.StoneMine
             }
         };
 
-        GD.Print("Generating menu items completed");
         return availableItems;
     }
 
     private string GetKeybindingsOfAction(string action)
     {
         var events = InputMap.ActionGetEvents(action);
+
+        
 
         var eventText = "";
         if (events != null)
@@ -113,27 +130,6 @@ public partial class BottomMenu : Control
 
         return eventText;
     }
-
-    //private void AddKeybindingsToTitles()
-    //{
-    //    for (int i = 0; i < MenuItems.ItemCount; i++)
-    //    {
-    //        var currentText = MenuItems.GetItemText(i);
-    //        var events = InputMap.ActionGetEvents($"Build {currentText}");
-
-    //        var eventText = "";
-    //        if (events != null)
-    //        {
-    //            foreach (var e in events)
-    //            {
-    //                eventText += $"{e.AsText()}, ";
-    //            }
-    //            eventText = eventText.Trim(',', ' ');
-    //        }
-
-    //        MenuItems.SetItemText(i, currentText + $"\n{eventText}");
-    //    }
-    //}
 
     private void MenuItems_ItemSelected(long index)
     {
@@ -151,17 +147,7 @@ public partial class BottomMenu : Control
         }
         else IsHovered = false;
     }
-    //public override void _UnhandledInput(InputEvent @event)
-    //{
-    //    // If the mouse is over any GUI element, return early and do not process 3D input
-    //    if (((object)GetViewport().GuiGetDragData()) != null || )
-    //    {
-    //        // This ensures no input events propagate to the 3D world while GUI is interacted with
-    //        GD.Print($"capturing event bc of hover over gui");
-    //        return;
-    //    }
 
-    //}
     private void ChangeSelection(int index)
     {
         if (index == -1)
@@ -174,17 +160,6 @@ public partial class BottomMenu : Control
 
 
             BuildingType bt = this.AvailableItems[index].Type;
-            //BuildingType bt = name switch
-            //{
-            //    "House" => BuildingType.House,
-            //    "Road" => BuildingType.Road,
-            //    "Lumberjack" => BuildingType.Lumberjack,
-            //    "Stockpile" => BuildingType.Stockpile,
-            //    "Fishing Post" => BuildingType.FishingPost,
-            //    "Bridge" => BuildingType.Bridge,
-            //    "Stone Mine" => BuildingType.StoneMine,
-            //    _ => throw new ArgumentOutOfRangeException(nameof(name), $"not implemented value {name} in menuitems")
-            //};
 
             this.EmitSignal(SignalName.MenuSelectionChanged, (int)bt);
         }
@@ -192,37 +167,16 @@ public partial class BottomMenu : Control
 
     public override void _Input(InputEvent @event)
     {
-        if (@event.IsActionPressed("Action Slot 1"))
-        {
-            MenuItems.Select(0);
-            ChangeSelection(0);
+        for (int i = 0; i < this.AvailableItems.Count; i++) {
+            var itemData = this.AvailableItems[i];
+            if(@event.IsActionPressed(itemData.ActionName))
+            {
+                MenuItems.Select(i);
+                ChangeSelection(i);
+            }
         }
-        else if (@event.IsActionPressed("Action Slot 2"))
-        {
-            MenuItems.Select(1);
-            ChangeSelection(1);
-        }
-        else if (@event.IsActionPressed("Action Slot 3"))
-        {
-            MenuItems.Select(2);
-            ChangeSelection(2);
-        }
-        else if (@event.IsActionPressed("Action Slot 4"))
-        {
-            MenuItems.Select(3);
-            ChangeSelection(3);
-        }
-        else if (@event.IsActionPressed("Action Slot 5"))
-        {
-            MenuItems.Select(4);
-            ChangeSelection(4);
-        }
-        else if (@event.IsActionPressed("Action Slot 6"))
-        {
-            MenuItems.Select(5);
-            ChangeSelection(5);
-        }
-        else if (@event.IsActionPressed("Cancel Selection"))
+
+        if (@event.IsActionPressed("Cancel Selection"))
         {
             MenuItems.DeselectAll();
             ChangeSelection(-1);
