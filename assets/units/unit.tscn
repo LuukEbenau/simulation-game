@@ -1,9 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://cqnighva7bclx"]
+[gd_scene load_steps=8 format=3 uid="uid://cqnighva7bclx"]
 
 [ext_resource type="Script" path="res://scripts/units/Unit.cs" id="1_vum1f"]
 [ext_resource type="PackedScene" uid="uid://d3w18mflpbsr4" path="res://assets/units/models/builder/builder.blend" id="2_4gngw"]
 [ext_resource type="PackedScene" uid="uid://byltkfnh41o3r" path="res://assets/units/models/worker/worker.blend" id="3_8df1w"]
-[ext_resource type="PackedScene" uid="uid://cj6t83fnxvash" path="res://assets/units/models/lumberjack/lumberjack.blend" id="4_7as5k"]
 [ext_resource type="Script" path="res://scripts/storages/GeneralStorage.cs" id="5_0rr13"]
 [ext_resource type="PackedScene" uid="uid://xsy5g1dm82qa" path="res://assets/buildings/models/singleunit/wood.blend" id="5_e7ie5"]
 [ext_resource type="PackedScene" uid="uid://b7wv6uwbnghli" path="res://assets/units/models/stoneminer/stoneminer.blend" id="5_xgtca"]
@@ -13,7 +12,6 @@
 script = ExtResource("1_vum1f")
 BuilderModel = ExtResource("2_4gngw")
 WorkerModel = ExtResource("3_8df1w")
-LumberjackModel = ExtResource("4_7as5k")
 StoneMinerModel = ExtResource("5_xgtca")
 
 [node name="Inventory" type="Node3D" parent="."]

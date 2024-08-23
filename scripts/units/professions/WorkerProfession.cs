@@ -37,12 +37,12 @@ namespace SacaSimulationGame.scripts.units.professions
             //else: pick up resources
             return FluentBuilder.Create<UnitBTContext>()
                 .Selector("Behaviour selector")
-                    .Sequence("")
-                        .Condition("Check if unit carries resources", UnitCarriesResources)
-                        //IF task is found with the workers resource
-                        .Subtree(DropOfResourcesSubtree)
-                    .End()
-                    
+                    //.Sequence("")
+                    //    .Condition("Check if unit carries resources", UnitCarriesResources)
+                    //    //IF task is found with the workers resource
+                    //    .Subtree(DropOfResourcesSubtree)
+                    //.End()
+
                     .Subtree(TaskExecutionSubtree)
                     //.Subtree(DeliverResourcesToBuildingSubtree)
                     .Subtree(IdleBehaviourTree)
@@ -118,20 +118,56 @@ namespace SacaSimulationGame.scripts.units.professions
             }
             return BehaviourStatus.Succeeded;
         }
-        private BehaviourStatus IncludeTransportResourcesToStorageTasks(UnitBTContext context)
-        {
 
+        private bool _validResourceBuildingCondition(StorageBuildingBase b)
+        {
+            if (b.StorageStrategy != StorageStrategyEnum.KeepResourcesUntilNeeded) return false;
+
+            //conditions: either the stored resource type is None but it allows for the
+            var overlappingResourceType = b.StoredResources.InputResourceTypes & Unit.Inventory.TypesOfResourcesStored;
+            if (overlappingResourceType == 0)
+            {
+                return false;
+            }
+
+            if (b.StoredResources.GetStorageCapacityLeft(overlappingResourceType) == 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private BehaviourStatus IncludeDropOffResourcesTasks(UnitBTContext context)
+        {
+            // DropOffResources
+            if (Unit.Inventory.CurrentCapacity > 0)
+            {
+                var storagebuildings = from b in Unit.BuildingManager.GetBuildings()
+                                       where b.Instance.BuildingCompleted && b.Instance.IsResourceStorage
+                                       select b.Instance as StorageBuildingBase;
+
+                var sortedStoragebuildings = from b in storagebuildings
+                                             where _validResourceBuildingCondition(b)
+                                             //orderby _getWeightedResourceDropoffPointValue(b, Unit) descending                                     
+                                             select b;
+
+
+                // Can be optimised later by only including a subset, and the ones which have space, etc.
+                var dropOffResourcesTasks = sortedStoragebuildings.Select(b => new DropOffResourcesAtDepositTask(this.Unit, b));
+
+                context.TasksToChooseFrom.AddRange(dropOffResourcesTasks);
+            }
             return BehaviourStatus.Succeeded;
         }
         private IBehaviour<UnitBTContext> TaskExecutionSubtree => FluentBuilder.Create<UnitBTContext>()
             .Sequence("Perform task")
                 .Do("", InitiateTaskSelector)
                 .Do("", IncludeTaskManagerTasks)
-                .Do("", IncludeTransportResourcesToStorageTasks)
+                .Do("", IncludeDropOffResourcesTasks)
                 //TODO: exclude finished tasks? or is it already happening?
                 
-                .Do("Select Best Task", SelectBestTask) // right now this will make it fail
-
+                .Do("Select Best Task", SelectBestTask)
+                //TODO: prioritize tasks which have the resources the unit is already carrying
                 .Selector("Task selector")
                     .Sequence("TASK VALIDATION: Deliver Resources To building")
                         .Condition("", c => c.AssignedTask is DeliverBuildingResourcesToBuildingTask)
@@ -145,24 +181,13 @@ namespace SacaSimulationGame.scripts.units.professions
                         .Condition("", c => c.AssignedTask is PickupResourcesTask)
                         .Subtree(RemoveResourcesFromResourceBuilding)
                     .End()
+                    .Sequence("TASK VALIDATION: drop off resources")
+                        .Condition("", c => c.AssignedTask is DropOffResourcesAtDepositTask)
+                        .Subtree(DropOfResourcesSubtree)
+                    .End()
                 .End()
             .End()
         .Build();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns>Failed if task is finished, otherwise succeeded</returns>
-        //private BehaviourStatus FinishTaskIfFinished(UnitBTContext context) {
-        //    if (context.AssignedTask.IsFinished)
-        //    {
-        //        Unit.GameManager.TaskManager.FinishTask(context.AssignedTask); //TODO: will this not give reference issues? since finishtask might alter the UnitTaskQueue
-        //        return BehaviourStatus.Failed;
-        //    }
-
-        //    return BehaviourStatus.Succeeded;
-        //}
 
         /// <summary>
         /// Grades a task on its value, higher value is better
@@ -193,6 +218,10 @@ namespace SacaSimulationGame.scripts.units.professions
             else if( task is PickupResourcesTask pt)
             {
                 value = GetResourceCollectionBuildingGrading(Unit, pt.Building);
+            }
+            else if(task is DropOffResourcesAtDepositTask dt)
+            {
+                value = _getWeightedResourceDropoffPointValue(dt.Building, Unit, maxTaskValue);
             }
 
             var distance = Unit.GlobalPosition.DistanceTo(task.TaskPosition);
@@ -362,8 +391,7 @@ namespace SacaSimulationGame.scripts.units.professions
         #region resource pickup and dropoff
         private IBehaviour<UnitBTContext> DropOfResourcesSubtree => FluentBuilder.Create<UnitBTContext>()
             .Sequence("Drop of resources")
-                
-                .Do("FindResourceDropoffPoint", FindResourceDropoffPoint)
+                //.Do("FindResourceDropoffPoint", FindResourceDropoffPoint)
                 .Do("find path", FindPathToDestination)
                 .Do("Follow path", FollowPath)
                 .Do("DropOfResource", DepositResourcesAtResourceStore)
@@ -495,57 +523,57 @@ namespace SacaSimulationGame.scripts.units.professions
             }
         }
 
-        public BehaviourStatus FindResourceDropoffPoint(UnitBTContext context)
-        {
-            var storagebuildings = from b in Unit.BuildingManager.GetBuildings()
-                                   where b.Instance.BuildingCompleted && b.Instance.IsResourceStorage 
+        //public BehaviourStatus FindResourceDropoffPoint(UnitBTContext context)
+        //{
+        //    var storagebuildings = from b in Unit.BuildingManager.GetBuildings()
+        //                           where b.Instance.BuildingCompleted && b.Instance.IsResourceStorage 
 
-                                   //orderby b.IsUnreachableCounter, b.GetNrOfAssignedUnits descending
-                                   select b.Instance as StorageBuildingBase;
-
-
-            bool validResourceBuildingCondition(StorageBuildingBase b)
-            {
-                if (b.StorageStrategy != StorageStrategyEnum.KeepResourcesUntilNeeded) return false;
-
-                //conditions: either the stored resource type is None but it allows for the
-                var overlappingResourceType = b.StoredResources.InputResourceTypes & Unit.Inventory.TypesOfResourcesStored;
-                if (overlappingResourceType == 0)
-                {
-                    return false;
-                }
-
-                if(b.StoredResources.GetStorageCapacityLeft(overlappingResourceType) == 0)
-                {
-                    return false;
-                }         
-
-                return true;
-            }
+        //                           //orderby b.IsUnreachableCounter, b.GetNrOfAssignedUnits descending
+        //                           select b.Instance as StorageBuildingBase;
 
 
-            var sortedStoragebuildings = from b in storagebuildings
-                    where validResourceBuildingCondition(b)
-                    orderby _getWeightedResourceDropoffPointValue(b, Unit) descending
-                    select b;
+        //    bool validResourceBuildingCondition(StorageBuildingBase b)
+        //    {
+        //        if (b.StorageStrategy != StorageStrategyEnum.KeepResourcesUntilNeeded) return false;
+
+        //        //conditions: either the stored resource type is None but it allows for the
+        //        var overlappingResourceType = b.StoredResources.InputResourceTypes & Unit.Inventory.TypesOfResourcesStored;
+        //        if (overlappingResourceType == 0)
+        //        {
+        //            return false;
+        //        }
+
+        //        if(b.StoredResources.GetStorageCapacityLeft(overlappingResourceType) == 0)
+        //        {
+        //            return false;
+        //        }         
+
+        //        return true;
+        //    }
 
 
-            var targetBuilding = sortedStoragebuildings.FirstOrDefault();
-            //TODO: What if we don't have this resource in the entire kingdom, wanted behaviour would be is th
+        //    var sortedStoragebuildings = from b in storagebuildings
+        //            where validResourceBuildingCondition(b)
+        //            orderby _getWeightedResourceDropoffPointValue(b, Unit) descending
+        //            select b;
 
 
-            if (targetBuilding == null)
-            {
-                return BehaviourStatus.Failed;
-            }
+        //    var targetBuilding = sortedStoragebuildings.FirstOrDefault();
+        //    //TODO: What if we don't have this resource in the entire kingdom, wanted behaviour would be is th
 
-            context.ResourceStorageBuilding = targetBuilding;
-            context.Destination = Unit.MapManager.CellToWorld(context.ResourceStorageBuilding.Cell, centered: true);
 
-            return BehaviourStatus.Succeeded;
-        }
+        //    if (targetBuilding == null)
+        //    {
+        //        return BehaviourStatus.Failed;
+        //    }
 
-        private static float _getWeightedResourceDropoffPointValue(StorageBuildingBase storageBuilding, Unit unit)
+        //    context.ResourceStorageBuilding = targetBuilding;
+        //    context.Destination = Unit.MapManager.CellToWorld(context.ResourceStorageBuilding.Cell, centered: true);
+
+        //    return BehaviourStatus.Succeeded;
+        //}
+
+        private static float _getWeightedResourceDropoffPointValue(StorageBuildingBase storageBuilding, Unit unit, float maxTaskValue)
         {
             var overlappingResourceTypes = storageBuilding.StoredResources.InputResourceTypes & unit.Inventory.TypesOfResourcesStored;
 
@@ -554,14 +582,20 @@ namespace SacaSimulationGame.scripts.units.professions
 
             var storageEfficientyValue = MathF.Min(spaceLeft / amountNeededToStore, 1);
 
-            var distance = unit.GlobalPosition.DistanceSquaredTo(storageBuilding.GlobalPosition);
 
-            return storageEfficientyValue / distance;
+            var maxCapa = amountNeededToStore + unit.Inventory.GetStorageCapacityLeft(overlappingResourceTypes);
+            var percentFull = amountNeededToStore / maxCapa; // the fuller, the more urgent it becomes
+
+            var value = maxTaskValue * storageEfficientyValue * percentFull;
+            //TODO problem: what if inventory is totally full but no stockpile nearby, how do we force it to drop of resources? But, only if it cannot use these resources for something else instead
+
+            return value;
         }
 
         public BehaviourStatus DepositResourcesAtResourceStore(UnitBTContext context)
         {
-            var building = context.ResourceStorageBuilding;
+            var task = context.AssignedTask as DropOffResourcesAtDepositTask;
+            var building = task.Building;
 
             foreach (var resourceType in Unit.Inventory.TypesOfResourcesStored.GetActiveFlags())
             {
