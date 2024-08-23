@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://cssdvmvl1sjog"]
+
+[ext_resource type="Script" path="res://scripts/naturalResources/instances/RockResource.cs" id="1_wyg1f"]
+[ext_resource type="Script" path="res://scripts/storages/ResourceDeposit.cs" id="3_gooyc"]
+
+[node name="RockResource" type="Node3D"]
+script = ExtResource("1_wyg1f")
+
+[node name="VisualWrap" type="Node3D" parent="."]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
+
+[node name="ResourceStorage" type="Node3D" parent="."]
+script = ExtResource("3_gooyc")
+MaxCapacity = 100.0
+StorableResources = 2

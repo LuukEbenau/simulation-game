@@ -5,7 +5,7 @@
     },
     "Start in Godot": {
       "commandName": "Executable",
-      "executablePath": "D:\\Software\\godot4_2\\Godot.exe",
+      "executablePath": "D:\\Software\\godot4_3\\Godot.exe",
       "commandLineArgs": "--path . --verbose",
       "workingDirectory": "."
     }

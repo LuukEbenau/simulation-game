@@ -15,10 +15,10 @@ namespace SacaSimulationGame.scripts.units.tasks
         {
             this.Building = building;
         }
-        public bool _isFinished = false;
-        public override bool IsFinished => _isFinished;
+        //public bool _isFinished = false;
+        public override bool IsFinished => !this.Building.Instance.BuildingResources.RequiresResources;//.PercentageResourcesAquired < 1;
 
-        public void Finish() { _isFinished = true; }
+        //public void Finish() { _isFinished = true; }
 
         public override Vector3 TaskPosition => Building.Instance.GlobalPosition;
         public BuildingDataObject Building { get; }

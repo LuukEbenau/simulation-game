@@ -8,6 +8,7 @@ using SacaSimulationGame.scripts.naturalResources;
 using SacaSimulationGame.scripts.pathfinding;
 using SacaSimulationGame.scripts.units.tasks;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -101,7 +102,7 @@ namespace SacaSimulationGame.scripts.managers
             dummyPlayer = new Player();
             buildingData.Add(dummyPlayer, new());
 
-            OccupiedCells = new BuildingTypeIdPair[MapManager.MapWidth, MapManager.MapHeight];
+            OccupiedCells = new BuildingTypeIdPair[MapManager.MapWidth, MapManager.MapLength];
 
             BottomMenu.MenuSelectionChanged += BottomMenu_MenuSelectionChanged;
         }
@@ -373,14 +374,8 @@ namespace SacaSimulationGame.scripts.managers
 
         public bool BuildBuilding(Vector2I cell, BuildingBlueprintBase buildingBlueprint, bool isBase = true, bool isDestination = true, float baseHeight = default)
         {
-            if (MapManager.GetCell(cell).CellType != CellType.GROUND)
-            {
-                GD.Print("Tried to place building on terrain different than ground, should this be allowed? for now do nothing");
-                //return false;
-            }
             // Instantiate the scene
             PackedScene scene = GetSceneFromBlueprint(buildingBlueprint);
-
             BuildingBase buildingInstance = scene.Instantiate<BuildingBase>();
 
             if (buildingInstance == null)
@@ -389,7 +384,7 @@ namespace SacaSimulationGame.scripts.managers
                 return false;
             }
 
-            //bool isBase = false, isDestination = false;
+            // BEGIN calculate contraints
             var constraints = buildingBlueprint.GetConstraints(0, 0, isBase, isDestination);
             var cellHeight = MapManager.GetCell(cell).Height;
             if (baseHeight == default)
@@ -397,11 +392,8 @@ namespace SacaSimulationGame.scripts.managers
                 baseHeight = cellHeight;
             }
             var buildingHeight = constraints.CalculateHeight(cellHeight, baseHeight);
+            // END calculate constraints
 
-            buildingInstance.Cell = cell;
-            buildingInstance.Blueprint = buildingBlueprint;
-            buildingInstance.GameManager = GameManager;
-            Vector3 worldPosition = MapManager.CellToWorld(cell, height: buildingHeight + _buildingHeight, centered: false);
 
             var buildingDataObject = new BuildingDataObject(dummyPlayer, buildingInstance);
 
@@ -419,7 +411,7 @@ namespace SacaSimulationGame.scripts.managers
                     var resource = GameManager.NaturalResourceManager
                         .GetResourcesAtCell(buildabilitypair.cell)
                         .FirstOrDefault();
-                    //NOTE: if we want to support multiple resources at the same cell, we need to not do firstOrDefault
+
                     if(resource != default)
                     {
                         resourcesToRemoveBeforeBuilding.Add(new NaturalResourceGatherTask(resource));
@@ -435,14 +427,26 @@ namespace SacaSimulationGame.scripts.managers
                 this.OccupiedCells[occupiedCell.X, occupiedCell.Y] = new BuildingTypeIdPair(buildingDataObject.Id, buildingBlueprint.Type, buildingInstance);
             }
 
+            // keep track of the building instance
             this.buildingData[dummyPlayer]
                 .Add(buildingDataObject);
+
+
+            // initialize instance and its properties
+            buildingInstance.Cell = cell;
+            buildingInstance.Blueprint = buildingBlueprint;
+            buildingInstance.GameManager = GameManager;
 
             // Add the building to the scene
             AddChild(buildingInstance);
 
+            Vector3 worldPosition = MapManager.CellToWorld(cell, height: buildingHeight + _buildingHeight, centered: false);
             buildingInstance.GlobalPosition = worldPosition;
             buildingInstance.Scale = MapManager.CellSize;
+            buildingInstance.RotateBuilding(buildingBlueprint.Rotation);
+
+
+            // any postprocessing on the instance
 
             if (buildingBlueprint is StockpileBlueprint sb)
             {
@@ -459,9 +463,6 @@ namespace SacaSimulationGame.scripts.managers
                     }
                 }
             }
-
-            buildingInstance.RotateBuilding(buildingBlueprint.Rotation);
-
             if (!buildingBlueprint.RequiresBuilding)
             {
                 buildingDataObject.Instance.CompleteBuilding();
@@ -470,24 +471,22 @@ namespace SacaSimulationGame.scripts.managers
             else
             {
                 //enqueue a task for workers
-                var buildBuildingTask = new BuildBuildingTask(buildingDataObject);
 
-                UnitTask taskToExecute;
+                var buildBuildingTask = new BuildBuildingTask(buildingDataObject);
+                var resourceDeliverTask = new DeliverBuildingResourcesToBuildingTask(buildingDataObject);
+                CollectionTask taskToExecute = new CollectionTask(new List<UnitTask> { resourceDeliverTask, buildBuildingTask });
+
                 if (resourcesToRemoveBeforeBuilding.Count > 0)
                 {
                     var preTasks = resourcesToRemoveBeforeBuilding.Select(t => t as UnitTask).ToList();
-                    taskToExecute = new CollectionTask(preTasks) { FollowUpTasks = new List<UnitTask>{ buildBuildingTask } };
-                }
-                else
-                {
-                    taskToExecute = buildBuildingTask;
-                    
+                    taskToExecute = new CollectionTask(preTasks) { FollowUpTasks =  taskToExecute.Tasks };
                 }
 
                 GameManager.TaskManager.EnqueueTask(taskToExecute);
             }
 
             GD.Print($"Building building at coordinate {worldPosition}. Total building count: {this.buildingData[dummyPlayer].Count}");
+
             return true;
         }
 

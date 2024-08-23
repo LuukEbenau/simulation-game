@@ -51,7 +51,7 @@ namespace SacaSimulationGame.scripts.managers
         public int MaxX { get; private set; }
         public int MaxY { get; private set; }
         public int MapWidth { get; private set; }
-        public int MapHeight { get; private set; }
+        public int MapLength { get; private set; }
         //private Dictionary<Vector2I, MapDataItem> MapData2 { get; set; }
         private MapDataItem[,] MapData { get; set; }
 
@@ -101,7 +101,7 @@ namespace SacaSimulationGame.scripts.managers
         }
         public bool CellInsideBounds(Vector2I cell)
         {
-            if (cell.X < 0 || cell.Y < 0 || cell.X >= MapWidth || cell.Y >= MapHeight)
+            if (cell.X < 0 || cell.Y < 0 || cell.X >= MapWidth || cell.Y >= MapLength)
             {
                 return false;
             }
@@ -134,11 +134,19 @@ namespace SacaSimulationGame.scripts.managers
         /// <returns></returns>
         public CellOccupationData GetCellOccupation(Vector2I cell)
         {
-            return new CellOccupationData
+            try
             {
-                Building = this.GameManager.BuildingManager.OccupiedCells[cell.X, cell.Y].Type != BuildingType.None,
-                NaturalResource = this.GameManager.NaturalResourceManager.OccupiedCells[cell.X, cell.Y]
-            };
+                return new CellOccupationData
+                {
+                    Building = this.GameManager.BuildingManager.OccupiedCells[cell.X, cell.Y].Type != BuildingType.None,
+                    NaturalResource = this.GameManager.NaturalResourceManager.OccupiedCells[cell.X, cell.Y]
+                };
+            }
+            catch(Exception ex)
+            {
+                GD.PrintErr($"The cell Index was out of range, cell: {cell}, mapdimensions:(w:{GameManager.MapManager.MapWidth}, l:{GameManager.MapManager.MapLength})", ex);
+                throw;
+            }
         }
 
 
@@ -230,7 +238,7 @@ namespace SacaSimulationGame.scripts.managers
 
         private MapDataItem[,] TransformMapdataToArray(Dictionary<Vector2I, MapDataItem> mapData)
         {
-            MapDataItem[,] mapArray = new MapDataItem[MapWidth, MapHeight];
+            MapDataItem[,] mapArray = new MapDataItem[MapWidth, MapLength];
 
             foreach (var kvp in mapData)
             {
@@ -253,7 +261,7 @@ namespace SacaSimulationGame.scripts.managers
         {
             (this.MinX, this.MinY, this.MaxX, this.MaxY) = GetMapDimensions(mapData);
             this.MapWidth = this.MaxX - this.MinX + 1;
-            this.MapHeight = this.MaxY - this.MinY + 1;
+            this.MapLength = this.MaxY - this.MinY + 1;
 
             this.MapData = this.TransformMapdataToArray(mapData);
         }

@@ -15,6 +15,8 @@ using SacaSimulationGame.scripts.naturalResources;
 using SacaSimulationGame.scripts.helpers;
 using SacaSimulationGame.scripts.units.tasks;
 using System.Diagnostics;
+using SacaSimulationGame.scripts.naturalResources.instances;
+using SacaSimulationGame.scripts.buildings.storages;
 
 
 namespace SacaSimulationGame.scripts.units.professions
@@ -49,21 +51,22 @@ namespace SacaSimulationGame.scripts.units.professions
         }
         #region executing tasks
 
-        private float _getWeightedBuildingToBuildValue(Unit unit, BuildBuildingTask task)
+        private float _getWeightedBuildingToBuildValue(Unit unit, DeliverBuildingResourcesToBuildingTask task, float maxTaskValue)
         {
-            const float assignedUnitCoefficient = 3;
-            const float prioritizeBuildingsWhichWaitForResourcesCoefficient = 2;
-            var nrOfAssignedUnitsValue = task.Building.GetNrOfAssignedUnits * assignedUnitCoefficient;
+            float assignedUnitCoefficient = maxTaskValue * 0.5f;
+            float prioritizeBuildingsWhichWaitForResourcesCoefficient = maxTaskValue * 0.5f;
+
+            var nrOfAssignedUnitsValue = task.Building.GetNrOfAssignedUnits > 0 ? assignedUnitCoefficient : 0;
 
             // between 0 and 1
             float percentDiff = task.Building.Instance.BuildingResources.PercentageResourcesAquired - task.Building.Instance.BuildingPercentageComplete; // big is bad
             float amountOfResourcesStillRequiredValue = prioritizeBuildingsWhichWaitForResourcesCoefficient - (percentDiff * prioritizeBuildingsWhichWaitForResourcesCoefficient);
 
-            float distance = unit.GlobalPosition.DistanceTo(task.TaskPosition);
+            //float distance = unit.GlobalPosition.DistanceTo(task.TaskPosition);
 
-            float value = (nrOfAssignedUnitsValue + amountOfResourcesStillRequiredValue) / distance;
+            float value = (nrOfAssignedUnitsValue + amountOfResourcesStillRequiredValue);
 
-            return 1f / value;
+            return value;
         }
 
 
@@ -75,77 +78,143 @@ namespace SacaSimulationGame.scripts.units.professions
 
         private BehaviourStatus IncludeTaskManagerTasks(UnitBTContext context)
         {
-            context.TasksToChooseFrom.AddRange(this.Unit.GameManager.TaskManager.GetTasks());
+            bool getAllTasksWithoutEncounteringUnfinishedOnes(List<UnitTask> inputTasks, out List<UnitTask> outputTasks)
+            {
+                outputTasks = new List<UnitTask>();
+
+                foreach (var task in inputTasks)
+                {
+                    if (task.IsFinished)
+                    {
+                        this.Unit.GameManager.TaskManager.FinishTask(task);
+                        // since its finished now, we have to retry the task selection
+                        outputTasks = null;
+                        return false;
+                    }
+                    outputTasks.Add(task);
+                }
+
+                return true;
+            }
+
+            try
+            {
+                List<UnitTask> tasksToAdd;
+                int timeoutCount = 0;
+
+                while (!getAllTasksWithoutEncounteringUnfinishedOnes(Unit.GameManager.TaskManager.GetTasks().ToList(), out tasksToAdd)) {
+                    timeoutCount++;
+                    if (timeoutCount > 100)
+                    {
+                        return BehaviourStatus.Failed; // just to prevent infinite loops in edge cases
+                    }
+                }
+
+                context.TasksToChooseFrom.AddRange(tasksToAdd);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
             return BehaviourStatus.Succeeded;
         }
+        private BehaviourStatus IncludeTransportResourcesToStorageTasks(UnitBTContext context)
+        {
 
+            return BehaviourStatus.Succeeded;
+        }
         private IBehaviour<UnitBTContext> TaskExecutionSubtree => FluentBuilder.Create<UnitBTContext>()
             .Sequence("Perform task")
-                .Do("",InitiateTaskSelector).Do("",IncludeTaskManagerTasks)
-                .RandomSelector("Task selector")
-                    .Sequence("TASK VALIDATION: Remove resources from resource building")
-                        .Subtree(RemoveResourcesFromResourceBuildings)
-                    .End()
+                .Do("", InitiateTaskSelector)
+                .Do("", IncludeTaskManagerTasks)
+                .Do("", IncludeTransportResourcesToStorageTasks)
+                //TODO: exclude finished tasks? or is it already happening?
+                
+                .Do("Select Best Task", SelectBestTask) // right now this will make it fail
+
+                .Selector("Task selector")
                     .Sequence("TASK VALIDATION: Deliver Resources To building")
-                        .Do("FindTask", c => FindTask<BuildBuildingTask>(c, 
-                            (t) => {
-                                return t.Building.Instance.BuildingResources.PercentageResourcesAquired < 1;
-                            },
-                            (items) => {
-                                return items.OrderBy(t => _getWeightedBuildingToBuildValue(Unit, t));
-                            }
-                        ))
+                        .Condition("", c => c.AssignedTask is DeliverBuildingResourcesToBuildingTask)
                         .Subtree(DeliverResourcesToBuildingSubtree) 
                     .End()
                     .Sequence("TASK VALIDATION: Natural Resource collection")
-                        .Do("FindTask", c => FindTask<NaturalResourceGatherTask>(c, 
-                            (t) => !t.IsFinished,
-                            null
-                            )
-                        )
+                        .Condition("", c => c.AssignedTask is NaturalResourceGatherTask)
                         .Subtree(NaturalResourceGatherSubtree)
                     .End()
-
-
-                // Any other types of tasks
+                    .Sequence("TASK VALIDATION: Remove resources from resource building")
+                        .Condition("", c => c.AssignedTask is PickupResourcesTask)
+                        .Subtree(RemoveResourcesFromResourceBuilding)
+                    .End()
                 .End()
             .End()
         .Build();
 
-        public BehaviourStatus FindTask<T>(UnitBTContext context, Func<T, bool> condition, Func<IEnumerable<T>, IOrderedEnumerable<T>> orderCriteria) where T : UnitTask
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns>Failed if task is finished, otherwise succeeded</returns>
+        //private BehaviourStatus FinishTaskIfFinished(UnitBTContext context) {
+        //    if (context.AssignedTask.IsFinished)
+        //    {
+        //        Unit.GameManager.TaskManager.FinishTask(context.AssignedTask); //TODO: will this not give reference issues? since finishtask might alter the UnitTaskQueue
+        //        return BehaviourStatus.Failed;
+        //    }
+
+        //    return BehaviourStatus.Succeeded;
+        //}
+
+        /// <summary>
+        /// Grades a task on its value, higher value is better
+        /// </summary>
+        /// <param name="task"></param>
+        /// <returns></returns>
+        private float GradeTaskValue(UnitTask task, Unit unit)
         {
-            var type = typeof(T);
-            var availableTasks = context.TasksToChooseFrom
-                .Where(ut => type.Equals(ut.GetType()))
-                .Select(t=> (T)t)
-                .Where(t=> condition(t))
-                .ToList();
+            var maxTaskValue = 10;
+
+            float value = float.MinValue;
+            if(task is DeliverBuildingResourcesToBuildingTask bt)
+            {
+                value = _getWeightedBuildingToBuildValue(Unit, bt, maxTaskValue);
+            }
+            else if(task is NaturalResourceGatherTask rt)
+            {
+                // Its more important if 
+                var percentLeft = rt.Resource.ResourceStorage.CurrentCapacity / rt.Resource.ResourceStorage.MaxCapacity;
+                var multiplier = 0.5f + (percentLeft * 0.5f);
+
+                if(task.ParentTask != null)
+                {
+                    multiplier = Mathf.Min(percentLeft + 0.3f, 1.0f); // give an bonus
+                }
+                value = maxTaskValue * multiplier;
+            }
+            else if( task is PickupResourcesTask pt)
+            {
+                value = GetResourceCollectionBuildingGrading(Unit, pt.Building);
+            }
+
+            var distance = Unit.GlobalPosition.DistanceTo(task.TaskPosition);
+
+            return value / distance;
+        }
+
+
+
+        public BehaviourStatus SelectBestTask(UnitBTContext context)
+        {
+            var availableTasks = context.TasksToChooseFrom.ToList();
 
             if (availableTasks.Count == 0)
             {
                 return BehaviourStatus.Failed;
             }
 
-            IOrderedEnumerable<T> availableTasksOrdered;
-
-            if(orderCriteria == null)
-            {
-                availableTasksOrdered = availableTasks
-                    .OrderBy(ut => ut.TaskPosition.DistanceTo(Unit.GlobalPosition));
-            }
-            else
-            {
-                availableTasksOrdered = orderCriteria(availableTasks)
-                    .ThenBy(ut => ut.TaskPosition.DistanceTo(Unit.GlobalPosition));
-            }
+            var availableTasksOrdered = availableTasks
+                .OrderBy(t => GradeTaskValue(t, Unit));
 
             var availableTask = availableTasks.First();
-
-            if (availableTask.IsFinished) //NOTE: not sure if i should do this here, but might be good safety check to not get stuck on a orphan task
-            {
-                this.Unit.GameManager.TaskManager.FinishTask(availableTask);
-                return BehaviourStatus.Failed;
-            }
 
             context.AssignedTask = availableTask;
             context.Destination = availableTask.TaskPosition;
@@ -165,9 +234,8 @@ namespace SacaSimulationGame.scripts.units.professions
         /// <summary>
         /// 1. Find building which needs to be emptied 
         /// </summary>
-        private IBehaviour<UnitBTContext> RemoveResourcesFromResourceBuildings => FluentBuilder.Create<UnitBTContext>()
+        private IBehaviour<UnitBTContext> RemoveResourcesFromResourceBuilding => FluentBuilder.Create<UnitBTContext>()
             .Sequence("Remove Resources from Resource Buildings")
-                .Do("Find resource building to empty", FindResourceCollectingBuildingToEmpty)
                 .Do("Find Path", FindPathToDestination)
                 .Do("follow path", FollowPath)
                 .Do("Pick up resource", PickUpResources)
@@ -177,7 +245,7 @@ namespace SacaSimulationGame.scripts.units.professions
         public BehaviourStatus PickUpResources(UnitBTContext context)
         {
             var task = context.AssignedTask as PickupResourcesTask;
-            var building = task.Building.Instance as StorageBuildingBase;
+            var building = task.Building;
 
             bool succeed = false;
             foreach (var resourceType in building.StoredResources.OutputResourceTypes.GetActiveFlags())
@@ -190,7 +258,6 @@ namespace SacaSimulationGame.scripts.units.professions
                     Unit.Inventory.AddResource(resourceType, amountTaken);
                 }
             }
-
 
             if (succeed)
             {
@@ -213,9 +280,9 @@ namespace SacaSimulationGame.scripts.units.professions
         /// <param name="building"></param>
         /// <param name="resourcesAvailable"></param>
         /// <returns></returns>
-        private float GetResourceCollectionBuildingGrading(Unit unit, BuildingDataObject building)
+        private float GetResourceCollectionBuildingGrading(Unit unit, StorageBuildingBase building)
         {
-            var storedResources = ((StorageBuildingBase)building.Instance).StoredResources;
+            var storedResources = ((StorageBuildingBase)building).StoredResources;
 
             var spaceLeft = storedResources.GetStorageCapacityLeft(storedResources.OutputResourceTypes);
             var currentStorageAmount = storedResources.GetResourcesOfType(storedResources.OutputResourceTypes);
@@ -223,45 +290,43 @@ namespace SacaSimulationGame.scripts.units.professions
             var storedResourcesValue = Mathf.Sqrt(currentStorageAmount+1) - 1;
             var storageAlmostFullValue = Mathf.Clamp(( 5f / Mathf.Sqrt(spaceLeft+1)) - 1, 0, 1);
 
-            float distance = unit.GlobalPosition.DistanceTo(building.Instance.GlobalPosition);
+            float distance = unit.GlobalPosition.DistanceTo(building.GlobalPosition);
 
             float value = (storedResourcesValue + storageAlmostFullValue) / distance;
 
             return value;
         }
 
-        private BehaviourStatus FindResourceCollectingBuildingToEmpty(UnitBTContext context)
-        {
-            var buildingsOrdered = Unit.BuildingManager.GetBuildings()
-                .Where(b => b.Instance.BuildingCompleted && b.Instance.IsResourceStorage)
-                .Select(b => (
-                    b,
-                    (StorageBuildingBase)b.Instance)
-                )
-                .Where(pair => {
-                    //GD.Print($"storage strategy is: {pair.Item2.StorageStrategy}");
-                    var ra = pair.Item2.StoredResources.GetResourcesOfType(pair.Item2.StoredResources.OutputResourceTypes);
-                    //GD.Print($"Amount of resources: {ra}");
-                    return pair.Item2.StorageStrategy == StorageStrategyEnum.EmptyAllResources && ra > 0;
-                }
-                )
-                .OrderByDescending(pair => GetResourceCollectionBuildingGrading(Unit, pair.b))
-                .ToList();
+        //private BehaviourStatus FindResourceCollectingBuildingToEmpty(UnitBTContext context)
+        //{
+        //    var buildingsOrdered = Unit.BuildingManager.GetBuildings()
+        //        .Where(b => b.Instance.BuildingCompleted && b.Instance.IsResourceStorage)
+        //        .Select(b => (
+        //            b,
+        //            (StorageBuildingBase)b.Instance)
+        //        )
+        //        .Where(pair => {
+        //            var ra = pair.Item2.StoredResources.GetResourcesOfType(pair.Item2.StoredResources.OutputResourceTypes);
+        //            return pair.Item2.StorageStrategy == StorageStrategyEnum.EmptyAllResources && ra > 0;
+        //        }
+        //        )
+        //        .OrderByDescending(pair => GetResourceCollectionBuildingGrading(Unit, pair.b))
+        //        .ToList();
                 
-            if(buildingsOrdered.Count == 0)
-            {
-                GD.Print($" No resource pickup building found");
-                return BehaviourStatus.Failed;
-            }
+        //    if(buildingsOrdered.Count == 0)
+        //    {
+        //        GD.Print($" No resource pickup building found");
+        //        return BehaviourStatus.Failed;
+        //    }
 
-            var buildingPair = buildingsOrdered.First();
+        //    var buildingPair = buildingsOrdered.First();
 
-            // add it to task
-            context.AssignedTask = new PickupResourcesTask(buildingPair.b);
-            context.Destination = context.AssignedTask.TaskPosition;
+        //    // add it to task
+        //    context.AssignedTask = new PickupResourcesTask(buildingPair.b.Instance);
+        //    context.Destination = context.AssignedTask.TaskPosition;
 
-            return BehaviourStatus.Succeeded;
-        }
+        //    return BehaviourStatus.Succeeded;
+        //}
 
         #endregion
 
@@ -282,8 +347,13 @@ namespace SacaSimulationGame.scripts.units.professions
             {
                 return ChopTree(context);
             }
+            if(resourceGatherTask.Resource is RockResource rockResource)
+            {
+                return GatherRock(context);
+            }
 
             Debug.Print($"No gathering behaviour implemented for worker and resource {resourceGatherTask.GetType()}");
+
             return BehaviourStatus.Failed;
         }
        
@@ -311,7 +381,7 @@ namespace SacaSimulationGame.scripts.units.professions
 
         public BehaviourStatus FindResourcePickupPoint(UnitBTContext context)
         {
-            var task = context.AssignedTask as BuildBuildingTask;
+            var task = context.AssignedTask as DeliverBuildingResourcesToBuildingTask;
             // Higher is better
             float buildingWithBestResourcesConstraint(StorageBuildingBase storageBuilding)
             {
@@ -381,9 +451,26 @@ namespace SacaSimulationGame.scripts.units.professions
         public BehaviourStatus PickUpResourcesFromBuilding(UnitBTContext context)
         {
             //TODO: this is only when building a building right now, it would be better to make it generic by keeping track of an instance of what the unit is picking up, and how much
-            var buildingStoredResourceType = context.ResourceStorageBuilding.StoredResources.TypesOfResourcesStored;
+            var sb = context.ResourceStorageBuilding;
+            
+            StorageBase sr;
+            try
+            { 
+                sr = sb.StoredResources;
+            }
+            catch(Exception ex)
+            {
+                GD.PushWarning($"{Unit.UnitName}: Null error occured in {sb.Type}, with resourcestore ({sb?.StoredResources?.InputResourceTypes}, {sb?.StoredResources?.OutputResourceTypes}), and ex {ex.Message}");
+                throw;
+            }
+            var buildingStoredResourceType = sr.TypesOfResourcesStored; //TODO: FIXME, this currently can be None (undefiend) making it crash
 
-            var task = context.AssignedTask as BuildBuildingTask;
+            if(buildingStoredResourceType == 0)
+            {
+                return BehaviourStatus.Failed; // TODO: can we chat this during the walking already ,so that it happens during the follow path when the task is already completed / resource deposit is empty??
+            }
+
+            var task = context.AssignedTask as DeliverBuildingResourcesToBuildingTask;
 
             var requiredResourcesForBuilding = task.Building.Instance.BuildingResources.TypesOfResourcesRequired;
 
@@ -540,7 +627,7 @@ namespace SacaSimulationGame.scripts.units.professions
 
         public bool UnitHasResourcesForBuilding(UnitBTContext context)
         {
-            var t = context.AssignedTask as BuildBuildingTask;
+            var t = context.AssignedTask as DeliverBuildingResourcesToBuildingTask;
 
             ResourceType unitHasResourcesForBuilding = (t.Building.Instance.BuildingResources.TypesOfResourcesRequired & Unit.Inventory.TypesOfResourcesStored);
             if (unitHasResourcesForBuilding > 0)
@@ -554,7 +641,7 @@ namespace SacaSimulationGame.scripts.units.professions
 
         public BehaviourStatus DeliverBuildingResources(UnitBTContext context)
         {
-            var task = (BuildBuildingTask)context.AssignedTask;
+            var task = (DeliverBuildingResourcesToBuildingTask)context.AssignedTask;
             var building = task.Building.Instance;
 
             foreach (var resourceType in Unit.Inventory.TypesOfResourcesStored.GetActiveFlags())
@@ -577,5 +664,47 @@ namespace SacaSimulationGame.scripts.units.professions
             return BehaviourStatus.Succeeded;
         }
         #endregion
+
+
+        protected BehaviourStatus GatherRock(UnitBTContext context)
+        {
+
+            var resourcesToTake = (float)context.Delta * GetActivitySpeedCoefficient();
+
+
+            var t = context.AssignedTask as NaturalResourceGatherTask;
+
+            var (resourcesTaken, resourceType) = t.Resource.CollectResource(resourcesToTake);
+
+            if (resourcesTaken == 0 || resourceType == default)
+            {
+                //resource has disappeared while we were moving to its location
+                //TODO: should we detect it disappearing already while it is walking?
+                GD.Print($"'{Unit.UnitName}': no resource could be found");
+                return BehaviourStatus.Succeeded; // finished chopping
+            }
+
+            Unit.Inventory.AddResource(resourceType, resourcesTaken);
+
+            context.WaitingTime += context.Delta;
+            var timeoutTime = 30;
+
+            //failsafe:
+            if (context.WaitingTime > timeoutTime)
+            {
+                return BehaviourStatus.Failed;
+            }
+
+            if (t.Resource.GetNrOfResourcesLeft() == 0)
+            {
+                return BehaviourStatus.Succeeded;
+            }
+            if (Unit.Inventory.GetStorageCapacityLeft(resourceType) == 0)
+            {
+                return BehaviourStatus.Succeeded;
+            }
+
+            return BehaviourStatus.Running;
+        }
     }
 }

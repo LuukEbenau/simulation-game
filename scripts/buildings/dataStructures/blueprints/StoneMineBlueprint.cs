@@ -10,9 +10,12 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
 {
     public class StoneMineBlueprint : BuildingBlueprintBase
     {
-        public override BuildingType Type => BuildingType.StoneMine;
+        public override BuildingType Type { get; } = BuildingType.StoneMine;
         public override BuildingContraints[,] CellConstraints { get; }
-        public override SelectionMode SelectionMode => SelectionMode.Single;
+        public override SelectionMode SelectionMode { get; } = SelectionMode.Single;
+
+        public override Vector2I EntranceCell { get; } = new Vector2I(0, 1);
+
         public StoneMineBlueprint()
         {
             const float elevationHeight = 1.5f; //TODO: find the right number

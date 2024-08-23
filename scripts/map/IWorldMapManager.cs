@@ -10,7 +10,7 @@ namespace SacaSimulationGame.scripts.map
         int CellCount { get; }
         Vector3I CellSize { get; set; }
         GameManager GameManager { get; }
-        int MapHeight { get; }
+        int MapLength { get; }
         int MapWidth { get; }
         int MaxX { get; }
         int MaxY { get; }

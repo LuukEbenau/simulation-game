@@ -9,12 +9,6 @@ using SacaSimulationGame.scripts.naturalResources;
 
 namespace SacaSimulationGame.scripts.units.tasks
 {
-    //public enum UnitTaskType
-    //{
-    //    NaturalResourceGather = 1,
-    //    BuildBuidling
-    //}
-
     /// <summary>
     /// A unit task is a scheduled task to be picked up by a unit
     /// </summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Godot;
 using SacaSimulationGame.scripts.map;
 
 namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
@@ -12,6 +13,8 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
         public override BuildingType Type => BuildingType.Bridge;
         public override BuildingContraints[,] CellConstraints { get; }
         public override SelectionMode SelectionMode => SelectionMode.Line;
+
+        public override Vector2I EntranceCell { get; } = new Vector2I(0,0);
 
         public BridgeBlueprint()
         {

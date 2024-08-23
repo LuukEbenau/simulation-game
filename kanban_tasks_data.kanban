@@ -15,7 +15,10 @@
 				"2e08afcf-6cdf-4a15-aec8-f464682cf304",
 				"94a45b5c-9754-48b1-97b4-9b37cc5a956a",
 				"2592ec88-4a32-46be-987e-4ceea3b425c2",
-				"2d8f441c-89b8-49fc-823d-da2491311bbc"
+				"2d8f441c-89b8-49fc-823d-da2491311bbc",
+				"521193bb-a984-4b68-8d19-f4ddf6c0caae",
+				"50153401-51cc-4ed5-97ff-ce1094b98939",
+				"a20b19cc-63db-4909-988d-4db993838137"
 			]
 		},
 		{
@@ -79,6 +82,27 @@
 		{
 			"uuid": "2d8f441c-89b8-49fc-823d-da2491311bbc",
 			"title": "Allow dropoff of resources at a resourcestore without predefined resource type",
+			"description": "",
+			"category": "c8ab7dbe-066e-4d6d-b8b6-d9ec63a05133",
+			"steps": []
+		},
+		{
+			"uuid": "521193bb-a984-4b68-8d19-f4ddf6c0caae",
+			"title": "Unit insights, click unit to see what its doing",
+			"description": "",
+			"category": "c8ab7dbe-066e-4d6d-b8b6-d9ec63a05133",
+			"steps": []
+		},
+		{
+			"uuid": "50153401-51cc-4ed5-97ff-ce1094b98939",
+			"title": "building insights, click building",
+			"description": "",
+			"category": "c8ab7dbe-066e-4d6d-b8b6-d9ec63a05133",
+			"steps": []
+		},
+		{
+			"uuid": "a20b19cc-63db-4909-988d-4db993838137",
+			"title": "centralized controls managing class",
 			"description": "",
 			"category": "c8ab7dbe-066e-4d6d-b8b6-d9ec63a05133",
 			"steps": []

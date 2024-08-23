@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using SacaSimulationGame.scripts.naturalResources;
 using SacaSimulationGame.scripts.units.dataObjects;
 using SacaSimulationGame.scripts.units.professions.misc;
+using SacaSimulationGame.scripts.units.tasks;
 
 namespace SacaSimulationGame.scripts.buildings
 {
@@ -20,7 +21,22 @@ namespace SacaSimulationGame.scripts.buildings
         {
             base._Ready();
             OnBuildingCompleted += House_OnBuildingCompleted;
+            StoredResources.StoredResourcesChanged += StoredResources_StoredResourcesChanged;
         }
+
+        private void StoredResources_StoredResourcesChanged()
+        {
+            if (StoredResources.CurrentCapacity > 0)
+            {
+                var currentTask = GameManager.TaskManager.GetTasks().Where(t => t is PickupResourcesTask pt && pt.Building == this).FirstOrDefault();
+                if (currentTask == null)
+                {
+                    var task = new PickupResourcesTask(this);
+                    GameManager.TaskManager.EnqueueTask(task);
+                }
+            }
+        }
+
 
 
         private void House_OnBuildingCompleted()

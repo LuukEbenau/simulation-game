@@ -9,6 +9,7 @@ using SacaSimulationGame.scripts.units.dataObjects;
 using SacaSimulationGame.scripts.units.professions.misc;
 using SacaSimulationGame.scripts.units.tasks;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 
@@ -32,6 +33,7 @@ namespace SacaSimulationGame.scripts.managers
             NaturalResourceManager = GetNode<NaturalResourceManager>("NaturalResourceManager");
             this.SpawnLocation = GetNode<Node3D>("SpawnLocation");
             SpawnInitialVillage();
+            SpawnRandomlyDistributedNaturalResources();
         }
 
         private Vector2I FindSuitableStartLocation()
@@ -120,6 +122,54 @@ namespace SacaSimulationGame.scripts.managers
 
             GD.Print($"initial village spawned");
         }
+
+        private void SpawnRandomlyDistributedNaturalResources()
+        {
+            const float cellOccupationPercentage = 0.15f;
+            var rand = new Random();
+
+            var numberOfCellsToFill = MapManager.MapWidth * MapManager.MapLength * cellOccupationPercentage;
+
+            bool[,] checkedCells = new bool[MapManager.MapWidth, MapManager.MapLength];
+
+            GD.Print($"number of cells to fill: {numberOfCellsToFill}, based on width: {MapManager.MapWidth} and length {MapManager.MapLength}");
+
+            int i = 0;
+            while(i < numberOfCellsToFill)
+            {
+                var vec = new Vector2I(rand.Next(0, MapManager.MapWidth-1), rand.Next(0, MapManager.MapLength-1 )); //TODO: this -1 shouldnt be here, just temp to test
+
+                if (checkedCells[vec.X, vec.Y]) continue;
+                checkedCells[vec.X, vec.Y] = true;
+
+                var occupation = MapManager.GetCellOccupation(vec);
+                if (occupation.IsOccupied) continue;
+
+
+                var randomInterpolatedX = (float)rand.NextDouble() * 0.5f + 0.25f;
+                var randomInterpolatedY = (float)rand.NextDouble() * 0.5f + 0.25f;
+
+                var mapdata = MapManager.GetCell(vec);
+
+                if (mapdata.Slope > 15) continue;
+                if ((mapdata.CellType & (CellType.WATER | CellType.HILL)) > 0) continue;
+
+                var interpolatedCell = MapManager.CellToWorldInterpolated(new Vector2(vec.X + randomInterpolatedX, vec.Y + randomInterpolatedY), height: mapdata.Height);
+
+                var resourcetype = i % 2 == 0 ? NaturalResourceType.Tree : NaturalResourceType.Stone;
+
+                if (NaturalResourceManager.AddResource(interpolatedCell, resourcetype))
+                {
+                    i++;
+                }
+                else
+                {
+                    GD.PushWarning("Could not place resource, why? any reasons?");
+                }
+            }
+
+        }
+
 
         // Called every frame. 'delta' is the elapsed time since the previous frame.
         public override void _Process(double delta)

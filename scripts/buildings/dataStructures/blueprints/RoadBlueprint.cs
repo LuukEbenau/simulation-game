@@ -13,6 +13,7 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
         public override BuildingType Type => BuildingType.Road;
         public override BuildingContraints[,] CellConstraints { get; }
         public override SelectionMode SelectionMode => SelectionMode.Path;
+        public override Vector2I EntranceCell { get; } = new Vector2I(0, 0);
         public RoadBlueprint()
         {
             CalculateCellHeightDelegate ch = (float cellHeight, float baseHeight) => cellHeight;

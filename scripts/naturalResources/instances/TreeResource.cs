@@ -21,6 +21,20 @@ namespace SacaSimulationGame.scripts.naturalResources
         {
             base._Ready();
 
+            var rand = new Random();
+            var resourceAmount = rand.Next(3, 11) * 10;
+            this.ResourceStorage.MaxCapacity = resourceAmount;
+            this.ResourceStorage.AddResource(ResourceType.Wood, resourceAmount);
+            //this.ResourceStorage.CurrentCapacity = resourceAmount;
+
+            //Scale *= 0.3f; // to make default size a bit smaller
+            TreeModel = ResourceLoader.Load<PackedScene>("res://assets/naturalResources/models/tree/tree.blend");
+            Scale *= resourceAmount / 100f;
+
+            // random rotation
+            float rotation = rand.Next(0, 360);
+            this.RotationDegrees += new Vector3(0, rotation, 0);
+
             this.ResourceStorage.StoredResourcesChanged += UpdateResourceVisual;
             UpdateResourceVisual();
         }

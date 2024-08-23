@@ -5,19 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using Godot;
 using SacaSimulationGame.scripts.naturalResources;
+using SacaSimulationGame.scripts.naturalResources.instances;
 
 namespace SacaSimulationGame.scripts.managers
 {
     public partial class NaturalResourceManager : Node3D, INaturalResourceManager
     {
         [Export] public PackedScene TreeModel { get; set; }
-
+        [Export] public PackedScene RockModel { get; set; }
         public List<NaturalResource> NaturalResources { get; set; } = new List<NaturalResource> { };
 
         public GameManager GameManager { get; set; }
 
         private bool[,] _occupiedCells;
-        public bool[,] OccupiedCells => _occupiedCells ??= new bool[GameManager.MapManager.MapWidth, GameManager.MapManager.MapHeight];
+        public bool[,] OccupiedCells => _occupiedCells ??= new bool[GameManager.MapManager.MapWidth, GameManager.MapManager.MapLength];
 
         public override void _Ready()
         {
@@ -58,24 +59,28 @@ namespace SacaSimulationGame.scripts.managers
                 return false;
             }
 
+            NaturalResource instance;
             if (type == NaturalResourceType.Tree)
             {
-                var instance = TreeModel.Instantiate<TreeResource>();
-
-                AddChild(instance);
-                NaturalResources.Add(instance);
-
-                instance.GlobalPosition = position;
-                instance.Cell = cell;
-                instance.NaturalResourceManager = this;
-
-                OccupiedCells[cell.X, cell.Y] = true;
-                return true;
+                instance = TreeModel.Instantiate<TreeResource>();
+            }
+            else if(type == NaturalResourceType.Stone)
+            {
+                instance = RockModel.Instantiate<RockResource>();
             }
             else
             {
                 throw new Exception($"Resource type {type} not implemented");
             }
+            AddChild(instance);
+            NaturalResources.Add(instance);
+
+            instance.GlobalPosition = position;
+            instance.Cell = cell;
+            instance.NaturalResourceManager = this;
+
+            OccupiedCells[cell.X, cell.Y] = true;
+            return true;
         }
     }
 }

@@ -13,6 +13,7 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
         public override BuildingType Type => BuildingType.House;
         public override BuildingContraints[,] CellConstraints { get; }
         //public override float MaxSlopeAngle { get; }
+        public override Vector2I EntranceCell { get; } = new Vector2I(0, 0);
         public override SelectionMode SelectionMode => SelectionMode.Single;
         public HouseBlueprint()
         {

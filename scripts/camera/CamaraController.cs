@@ -97,7 +97,7 @@ public partial class CamaraController : Node3D
             {
                 var borderBoundarySize = 5;
                 var minCell = new Vector2I(borderBoundarySize, borderBoundarySize);
-                var maxCell = new Vector2I(this.GameManager.MapManager.MapWidth - borderBoundarySize, GameManager.MapManager.MapHeight - borderBoundarySize);
+                var maxCell = new Vector2I(this.GameManager.MapManager.MapWidth - borderBoundarySize, GameManager.MapManager.MapLength - borderBoundarySize);
                 _minWorldCoord = this.GameManager.MapManager.CellToWorld(minCell);
                 _maxWorldCoord = this.GameManager.MapManager.CellToWorld(maxCell);
             }

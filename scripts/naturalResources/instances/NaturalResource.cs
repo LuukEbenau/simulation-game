@@ -12,7 +12,7 @@ namespace SacaSimulationGame.scripts.naturalResources
 {
     public partial class NaturalResource : Node3D, INaturalResource
     {
-        protected StorageBase ResourceStorage { get; set; }
+        public ResourceDeposit ResourceStorage { get; set; }
         protected Node3D VisualWrap { get; set; }
 
         public Vector2I Cell { get; set; }
@@ -20,7 +20,7 @@ namespace SacaSimulationGame.scripts.naturalResources
         public override void _Ready()
         {
             base._Ready();
-            ResourceStorage = GetNode<StorageBase>("ResourceStorage");
+            ResourceStorage = GetNode<ResourceDeposit>("ResourceStorage");
             VisualWrap = GetNode<Node3D>("VisualWrap");
         }
 

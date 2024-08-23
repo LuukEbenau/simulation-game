@@ -14,7 +14,7 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
         public override BuildingType Type => BuildingType.Stockpile;
         public override BuildingContraints[,] CellConstraints { get; }
         public override SelectionMode SelectionMode => SelectionMode.Single;
-
+        public override Vector2I EntranceCell { get; } = new Vector2I(0, 0);
         public float InitialResourceAmount { get; set; } = 0;
         public ResourceType InitialResourceStored { get; set; } = 0;
         public StockpileBlueprint()

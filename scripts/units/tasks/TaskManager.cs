@@ -17,11 +17,11 @@ namespace SacaSimulationGame.scripts.units.tasks
         {
             foreach (var task in tasks)
             {
-                if (task.IsFinished)
-                {
-                    FinishTask(task); //TODO: will this not give reference issues? since finishtask might alter the UnitTaskQueue
-                    continue;
-                }
+                //if (task.IsFinished)
+                //{
+                //    FinishTask(task); //TODO: will this not give reference issues? since finishtask might alter the UnitTaskQueue
+                //    continue;
+                //}
                 if (task is CollectionTask ct)
                 {
                     foreach (var subtask in GetUnitTasksResursive(ct.Tasks))
@@ -79,7 +79,7 @@ namespace SacaSimulationGame.scripts.units.tasks
             else
             {
                 // its a subtask probably
-                foreach (var t2 in UnitTaskQueue)
+                foreach (var t2 in taskList)
                 {
                     if (t2 is CollectionTask ct)
                     {

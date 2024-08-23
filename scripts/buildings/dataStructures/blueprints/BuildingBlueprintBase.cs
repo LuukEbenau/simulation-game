@@ -19,7 +19,7 @@ namespace SacaSimulationGame.scripts.buildings.dataStructures.blueprints
         public abstract SelectionMode SelectionMode { get; }
         public BuildingContraints BaseCellConstraintOverride { get; set; }
         public BuildingContraints DestinationCellConstraintOverride { get; set; }
-
+        public abstract Vector2I EntranceCell { get; }
         /// <summary>
         /// Supplies a convenient way to get constraints which automatically merges overrides
         /// </summary>
